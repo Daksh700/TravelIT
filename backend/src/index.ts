@@ -2,6 +2,7 @@ import express, {Request, Response} from "express";
 import dotenv from "dotenv"
 import cors from "cors"
 import connectDB from "./config/db";
+import { errorHandler } from "./middlewares/errorMiddleware";
 
 dotenv.config();
 
@@ -20,6 +21,8 @@ app.get('/', (req: Request, res: Response) => {
         style: "Cyber-Brutalist",
     })
 })
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`)
