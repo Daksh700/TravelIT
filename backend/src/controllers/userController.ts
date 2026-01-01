@@ -13,6 +13,14 @@ export const syncUser = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(401, "Unauthorized: userId is missing");
     }
 
+    const existingUser = await User.findOne({clerkId: userId});
+
+    if(existingUser) {
+        return res.status(200).json(
+            new ApiResponse(200, existingUser, "User already synced")
+        )
+    }
+
     const clerkUser = await clerkClient.users.getUser(userId);
     const email = clerkUser.emailAddresses[0]?.emailAddress;
 
@@ -20,28 +28,14 @@ export const syncUser = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(400, "Clerk user has no email");
     }
 
-    const userData = {
+    const user = await User.create({
         clerkId: userId,
         email: email,
         firstName: clerkUser.firstName || "",
         lastName: clerkUser.lastName || "",
         username: clerkUser.username || email.split("@")[0],
         avatar: clerkUser.imageUrl || "",
-    }
-
-    let user = await User.findOneAndUpdate(
-        {clerkId: userId},
-        userData,
-        {new: true}
-    )
-
-    if(user) {
-        return res.status(200).json(
-            new ApiResponse(200, user, "User updated successfully")
-        )
-    }
-
-    user = await User.create(userData);
+    })
 
     return res.status(201).json(
         new ApiResponse(201, user, "User created successfully")
