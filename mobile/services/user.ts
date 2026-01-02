@@ -54,7 +54,7 @@ export const getUser = async(token: string) => {
 
 export const updateUserProfile = async(
     token: string,
-    firstName: string,
+    firstName?: string,
     lastName?: string,
     username?: string,
     avatar?: string,
