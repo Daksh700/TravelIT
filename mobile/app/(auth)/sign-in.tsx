@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSocialAuth } from "@/hooks/useSocialAuth";
+import { useRouter } from "expo-router";
 
 export default function SignIn() {
   const { isLoading, handleSocialAuth } = useSocialAuth();
+  const router = useRouter();
 
   return (
     <View className="flex-1 bg-black px-8 justify-center">
@@ -86,6 +88,7 @@ export default function SignIn() {
       {/* Email CTA (UI only) */}
       <Pressable
         className="bg-[#00dc82] py-4"
+        onPress={() => router.push("/(auth)/email-sign-in")}
       >
         <Text className="text-black font-bold uppercase tracking-widest text-center">
           Sign in with Email
@@ -94,6 +97,7 @@ export default function SignIn() {
 
       <Pressable
         className="mt-3 border border-zinc-800 py-4"
+        onPress={() => router.push("/(auth)/sign-up")}
       >
         <Text className="text-white font-bold uppercase tracking-widest text-center">
           Create Account
