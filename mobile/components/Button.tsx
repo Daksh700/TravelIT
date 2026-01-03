@@ -1,53 +1,91 @@
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, StyleProp, Text, TouchableOpacity, ViewStyle } from "react-native";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 interface ButtonProps {
-    title?: string;
-    onPress: () => void;
-    variant?: "primary" | "outline" | "ghost";
-    isLoading?: boolean;
-    children?: React.ReactNode;
-    className?: string; // Custom styles override karne ke liye
-    disabled?: boolean;
+  title?: string;
+  onPress: () => void;
+  variant?: "primary" | "outline" | "ghost";
+  isLoading?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>; 
 }
 
-export const Button = ({ title, onPress, variant = "primary", isLoading, children, className, disabled } : ButtonProps) => {
-    let containerStyle = "p-4 flex-row items-center justify-center";
-    let textStyle = "font-bold text-base";
+export const Button = ({
+  title,
+  onPress,
+  variant = "primary",
+  isLoading = false,
+  children,
+  disabled,
+  style
+}: ButtonProps) => {
+  const { colors } = useThemeColors();
 
-    if(variant === "primary") {
-        containerStyle += " bg-primary";
-        textStyle += " text-black";
-    }
-    else if(variant === "outline") {
-        containerStyle += " border border-zinc-700 bg-transparent";
-        textStyle += " text-white";
-    }
-    else if(variant === "ghost") {
-        containerStyle += " bg-transparent";
-        textStyle += " text-zinc-400";
-    }
+  const isDisabled = disabled || isLoading;
 
-    const opacity = (disabled || isLoading) ? "opacity-50" : "opacity-100";
+  /* ---------- CONTAINER STYLE ---------- */
+  let backgroundColor = "transparent";
+  let borderColor = "transparent";
 
-    return (
-        <TouchableOpacity
-            onPress={onPress}
-            activeOpacity={0.8}
-            disabled={disabled || isLoading}
-            className={`${containerStyle} ${opacity} ${className}`}
+  if (variant === "primary") {
+    backgroundColor = colors.primary;
+  }
+
+  if (variant === "outline") {
+    borderColor = colors.border;
+  }
+
+  /* ---------- TEXT COLOR ---------- */
+  let textColor = colors.text;
+
+  if (variant === "primary") {
+    textColor = colors.primaryText;
+  }
+
+  if (variant === "ghost") {
+    textColor = colors.textMuted;
+  }
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      disabled={isDisabled}
+      style={[
+        {
+          padding: 16,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+
+          backgroundColor,
+          borderWidth: variant === "outline" ? 1 : 0,
+          borderColor,
+
+          opacity: isDisabled ? 0.5 : 1,
+        },
+        style,
+      ]}
+    >
+      {isLoading ? (
+        <ActivityIndicator
+          color={variant === "primary" ? colors.primaryText : colors.text}
+        />
+      ) : children ? (
+        children
+      ) : (
+        <Text
+          style={{
+            color: textColor,
+            fontWeight: "bold",
+            fontSize: 16,
+          }}
         >
-            {
-                isLoading ? (
-                    <ActivityIndicator color={variant === "primary" ? "black" : "white"}/>
-                ) : (
-                    <>
-                        {
-                            children ? children : <Text className={textStyle}>{title}</Text>
-                        }
-                    </>
-                )
-            }
-        </TouchableOpacity>
-    )
-
-}
+          {title}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+};

@@ -5,94 +5,97 @@ import { Home, Compass, Plus, Map, User } from "lucide-react-native";
 import { useEffect } from "react";
 import { View } from "react-native";
 
-export default function TabsLayout()  {
+import { useThemeColors } from "@/hooks/useThemeColors";
 
-    const { isSignedIn } = useAuth();
-    const {handleAuthSync} = useAuthSync();
+export default function TabsLayout() {
+  const { isSignedIn } = useAuth();
+  const { handleAuthSync } = useAuthSync();
+  const { colors } = useThemeColors();
 
-    useEffect(() => {
-        if(isSignedIn) {
-            handleAuthSync();
-        }
-    }, [isSignedIn]);
+  useEffect(() => {
+    if (isSignedIn) {
+      handleAuthSync();
+    }
+  }, [isSignedIn]);
 
-    if(!isSignedIn) return <Redirect href="/(auth)/sign-in" />  
-    
-    return (
-        <Tabs
-        screenOptions={{
-            headerShown: false,
-            tabBarStyle: {
-                backgroundColor: "#050505", 
-                borderTopWidth: 1,
-                borderTopColor: "#27272a", 
-                height: 70, 
-                paddingTop: 10,
-                paddingBottom: 10,
-            },
-            tabBarActiveTintColor: "#00dc82", 
-            tabBarInactiveTintColor: "#71717a", 
-            tabBarLabelStyle: {
-                fontSize: 10,
-                marginTop: 4,
-                fontFamily: "System", 
-            }
-        }}>
-            <Tabs.Screen 
-                name="index"
-                options={{
-                    title: "Home",
-                    tabBarIcon: ({ color }) => (
-                        <Home 
-                            size={24} 
-                            color={color}
-                        />
-                    )
-                }}
-            />
+  if (!isSignedIn) return <Redirect href="/(auth)/sign-in" />;
 
-            <Tabs.Screen 
-                name="explore"
-                options={{
-                    tabBarIcon: ({color}) => (
-                        <Compass 
-                            size={24}
-                            color={color}
-                        />
-                    )
-                }}
-            />
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
 
-            <Tabs.Screen 
-                name="plan"
-                options={{
-                    tabBarIcon: ({color, focused}) => (
-                        <View className={`p-2 rounded-full ${focused ? 'bg-primary/20' : ''}`}>
-                            <Plus size={24} color={color} strokeWidth={2.5}/>
-                        </View>
-                    )
-                }}
-            />
+        // 🎨 TAB BAR THEME (single source of truth)
+        tabBarStyle: {
+          backgroundColor: colors.tabBarBg,
+          borderTopWidth: 1,
+          borderTopColor: colors.tabBarBorder,
+          height: 70,
+          paddingTop: 10,
+          paddingBottom: 10,
+        },
 
-            <Tabs.Screen 
-                name="trips"
-                options={{
-                    title: "Trips",
-                    tabBarIcon: ({color}) => (
-                        <Map size={24} color={color}/>
-                    )
-                }}
-            />
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
 
-            <Tabs.Screen 
-                name="profile"
-                options={{
-                    title: "Profile",
-                    tabBarIcon: ({color}) => (
-                        <User size={24} color={color}/>
-                    )
-                }}
-            />
-        </Tabs>
-    )
+        tabBarLabelStyle: {
+          fontSize: 10,
+          marginTop: 4,
+          fontFamily: "System",
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="plan"
+        options={{
+          title: "Plan",
+          tabBarIcon: ({ color, focused }) => (
+            <View
+              style={{
+                backgroundColor: focused
+                  ? `${colors.primary}33` // primary with opacity
+                  : "transparent",
+                padding: 8,
+                borderRadius: 999,
+              }}
+            >
+              <Plus size={24} color={color} strokeWidth={2.5} />
+            </View>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="trips"
+        options={{
+          title: "Trips",
+          tabBarIcon: ({ color }) => <Map size={24} color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => <User size={24} color={color} />,
+        }}
+      />
+    </Tabs>
+  );
 }

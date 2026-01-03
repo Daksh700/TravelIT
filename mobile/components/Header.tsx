@@ -1,26 +1,29 @@
 import { View, Text } from "react-native";
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withRepeat, 
-  withTiming, 
-  withSequence 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
 } from "react-native-reanimated";
 import { useEffect } from "react";
 
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 export const Header = () => {
-  // Animation Logic for Pulsing Dot
+  const { colors } = useThemeColors();
+
+  // 🔹 Pulsing animation
   const opacity = useSharedValue(1);
 
   useEffect(() => {
-    // Infinite Pulse Effect
     opacity.value = withRepeat(
       withSequence(
-        withTiming(0.3, { duration: 1000 }), // Dim
-        withTiming(1, { duration: 1000 })    // Bright
+        withTiming(0.3, { duration: 1000 }),
+        withTiming(1, { duration: 1000 })
       ),
-      -1, // -1 matlab Infinite loop
-      true // Reverse (Smooth wapis aayega)
+      -1,
+      true
     );
   }, []);
 
@@ -29,17 +32,39 @@ export const Header = () => {
   }));
 
   return (
-    <View className="flex-row items-center justify-between px-6 py-4 border-b border-border bg-background">
+    <View
+      style={{
+        backgroundColor: colors.background,
+        borderBottomColor: colors.border,
+      }}
+      className="flex-row items-center justify-between px-6 py-4 border-b"
+    >
+      {/* Logo + Title */}
       <View className="flex-row items-center gap-2">
-        <View className="w-3 h-3 bg-primary" />
-        <Text className="text-xl font-bold tracking-tighter text-white">
+        <View
+          style={{ backgroundColor: colors.primary }}
+          className="w-3 h-3"
+        />
+
+        <Text
+          style={{ color: colors.text }}
+          className="text-xl font-bold tracking-tighter"
+        >
           TRAVELIT
         </Text>
       </View>
 
-      <Animated.View 
-        style={[animatedStyle]} 
-        className="w-2 h-2 rounded-full bg-secondary"
+      {/* Pulsing Status Dot */}
+      <Animated.View
+        style={[
+          animatedStyle,
+          {
+            width: 8,
+            height: 8,
+            borderRadius: 999,
+            backgroundColor: colors.secondary ?? colors.primary,
+          },
+        ]}
       />
     </View>
   );

@@ -8,46 +8,74 @@ import {
 } from "react-native";
 import { useSocialAuth } from "@/hooks/useSocialAuth";
 import { useRouter } from "expo-router";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export default function SignIn() {
   const { isLoading, handleSocialAuth } = useSocialAuth();
   const router = useRouter();
+  const { colors } = useThemeColors();
 
   return (
-    <View className="flex-1 bg-black px-8 justify-center">
-
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingHorizontal: 32,
+        justifyContent: "center",
+      }}
+    >
       {/* 🔐 Logo */}
-      <View className="w-12 h-12 bg-[#00dc82] self-center mb-6 items-center justify-center">
-        <Text className="text-black font-bold text-xl">✓</Text>
+      <View
+        style={{ backgroundColor: colors.primary }}
+        className="w-12 h-12 self-center mb-6 items-center justify-center"
+      >
+        <Text
+          style={{ color: colors.primaryText }}
+          className="font-bold text-xl"
+        >
+          ✓
+        </Text>
       </View>
 
       {/* 🏷 Brand */}
-      <Text className="text-white text-4xl font-bold tracking-tight uppercase italic text-center">
+      <Text
+        style={{ color: colors.text }}
+        className="text-4xl font-bold tracking-tight uppercase italic text-center"
+      >
         TravelIt
       </Text>
 
-      <Text className="text-zinc-500 text-xs uppercase tracking-widest font-bold text-center mt-2 mb-10">
+      <Text
+        style={{ color: colors.textMuted }}
+        className="text-xs uppercase tracking-widest font-bold text-center mt-2 mb-10"
+      >
         Your AI Journey Vault
       </Text>
 
       {/* 🔘 Buttons */}
       <View className="gap-3">
-
         {/* Google */}
         <Pressable
           onPress={() => handleSocialAuth("oauth_google")}
           disabled={isLoading}
-          className="w-full flex-row items-center justify-center gap-3 py-4 border border-zinc-800"
+          style={{
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+          className="w-full flex-row items-center justify-center gap-3 py-4 border"
         >
           {isLoading ? (
-            <ActivityIndicator color="#00dc82" />
+            <ActivityIndicator color={colors.primary} />
           ) : (
             <>
               <Image
                 source={require("../../assets/images/google.png")}
                 className="w-5 h-5"
               />
-              <Text className="text-xs font-bold uppercase tracking-widest text-white">
+              <Text
+                style={{ color: colors.text }}
+                className="text-xs font-bold uppercase tracking-widest"
+              >
                 Continue with Google
               </Text>
             </>
@@ -58,17 +86,24 @@ export default function SignIn() {
         <Pressable
           onPress={() => handleSocialAuth("oauth_apple")}
           disabled={isLoading}
-          className="w-full flex-row items-center justify-center gap-3 py-4 border border-zinc-800"
+          style={{
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+          className="w-full flex-row items-center justify-center gap-3 py-4 border"
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.primary} />
           ) : (
             <>
               <Image
                 source={require("../../assets/images/apple.png")}
                 className="w-5 h-5"
               />
-              <Text className="text-xs font-bold uppercase tracking-widest text-white">
+              <Text
+                style={{ color: colors.text }}
+                className="text-xs font-bold uppercase tracking-widest"
+              >
                 Continue with Apple
               </Text>
             </>
@@ -78,37 +113,60 @@ export default function SignIn() {
 
       {/* ─── OR ─── */}
       <View className="flex-row items-center my-8">
-        <View className="flex-1 h-[1px] bg-zinc-900" />
-        <Text className="mx-4 text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+        <View
+          style={{ backgroundColor: colors.border }}
+          className="flex-1 h-[1px]"
+        />
+        <Text
+          style={{ color: colors.textMuted }}
+          className="mx-4 text-[10px] font-bold uppercase tracking-widest"
+        >
           Or
         </Text>
-        <View className="flex-1 h-[1px] bg-zinc-900" />
+        <View
+          style={{ backgroundColor: colors.border }}
+          className="flex-1 h-[1px]"
+        />
       </View>
 
-      {/* Email CTA (UI only) */}
+      {/* Email CTA */}
       <Pressable
-        className="bg-[#00dc82] py-4"
+        style={{ backgroundColor: colors.primary }}
+        className="py-4"
         onPress={() => router.push("/(auth)/email-sign-in")}
       >
-        <Text className="text-black font-bold uppercase tracking-widest text-center">
+        <Text
+          style={{ color: colors.primaryText }}
+          className="font-bold uppercase tracking-widest text-center"
+        >
           Sign in with Email
         </Text>
       </Pressable>
 
+      {/* Create Account */}
       <Pressable
-        className="mt-3 border border-zinc-800 py-4"
+        style={{
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+        }}
+        className="mt-3 py-4 border"
         onPress={() => router.push("/(auth)/sign-up")}
       >
-        <Text className="text-white font-bold uppercase tracking-widest text-center">
+        <Text
+          style={{ color: colors.text }}
+          className="font-bold uppercase tracking-widest text-center"
+        >
           Create Account
         </Text>
       </Pressable>
 
       {/* 🔒 Footer */}
-      <Text className="text-[10px] text-zinc-700 font-bold uppercase tracking-[0.3em] text-center mt-12">
+      <Text
+        style={{ color: colors.textMuted }}
+        className="text-[10px] font-bold uppercase tracking-[0.3em] text-center mt-12"
+      >
         Securely Encrypted // TravelIt v2.5
       </Text>
-
     </View>
   );
 }

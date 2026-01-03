@@ -5,6 +5,7 @@ export default function ProfileStackLayout() {
         <Stack screenOptions={{headerShown: false}}>
             <Stack.Screen name="index"/>
             <Stack.Screen name="editProfile"/>
+            <Stack.Screen name="appSettings"/>
         </Stack>
     )
 }

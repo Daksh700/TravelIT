@@ -1,18 +1,37 @@
 import { TextInput, View, Text, TextInputProps } from "react-native";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 interface InputProps extends TextInputProps {
   label?: string;
-  className?: string;
+  className?: string; // optional, but styles ab mostly JS se aayengi
 }
 
 export const Input = ({ label, className, ...props }: InputProps) => {
+  const { colors } = useThemeColors();
+
   return (
-    <View className="space-y-2 w-full">
-      {label && <Text className="text-xs font-bold uppercase text-zinc-500 tracking-widest">{label}</Text>}
+    <View style={{ width: "100%", marginBottom: 12 }}>
+      {label && (
+        <Text
+          style={{ color: colors.textMuted }}
+          className="text-xs font-bold uppercase tracking-widest mb-2"
+        >
+          {label}
+        </Text>
+      )}
+
       <TextInput
-        placeholderTextColor="#71717a"
-        className={`bg-surface border border-border text-white px-4 py-3 text-base w-full ${className}`}
         {...props}
+        placeholderTextColor={colors.placeholder}
+        style={{
+          backgroundColor: colors.inputBg,
+          color: colors.text,
+          borderColor: colors.border,
+        }}
+        className={`
+          px-4 py-3 text-base w-full rounded-md border
+          ${className ?? ""}
+        `}
       />
     </View>
   );
