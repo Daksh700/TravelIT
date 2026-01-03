@@ -12,18 +12,21 @@ const SettingToggle = ({
   description,
   value,
   onToggle,
+  disabled
 }: any) => {
   const { colors } = useThemeColors();
 
   return (
     <Pressable
       onPress={onToggle}
+      disabled={disabled}
       style={{
         backgroundColor: colors.surface,
         borderBottomColor: colors.border,
+        opacity: disabled ? 0.5: 1,
       }}
       className="flex-row items-center justify-between p-4 border-b"
-    >
+    > 
       <View className="flex-row items-center gap-4">
         <View
           style={{ backgroundColor: colors.inputBg }}
@@ -53,6 +56,7 @@ const SettingToggle = ({
         onValueChange={onToggle}
         trackColor={{ false: colors.switchOff, true: colors.primary }}
         thumbColor={colors.switchThumb}
+        disabled={disabled}
       />
     </Pressable>
   );
@@ -121,6 +125,7 @@ export default function AppSettingsScreen() {
             description={darkMode ? "Eyes protected" : "Daylight mode active"}
             value={darkMode}
             onToggle={toggleDarkMode}
+            disabled={systemTheme}
           />
 
           <SettingToggle
