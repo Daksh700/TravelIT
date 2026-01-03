@@ -9,11 +9,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { View } from 'react-native';
 
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useSystemThemeSync } from '@/hooks/useSystemThemeSync';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { colors, isDark } = useThemeColors();
+  useSystemThemeSync();
 
   return (
     <QueryClientProvider client={queryClient}>
