@@ -11,6 +11,8 @@ type AppSettingsState = {
     toggleDarkMode: () => void;
     toggleSystemTheme: () => void;
     toggleHaptics: () => void;
+
+    setDarkMode: (val: boolean) => void;
 }
 
 export const useAppSettings = create<AppSettingsState>() (
@@ -28,6 +30,9 @@ export const useAppSettings = create<AppSettingsState>() (
 
             toggleHaptics: () => 
                 set((state) => ({haptics: !state.haptics})),
+
+            setDarkMode: (val: boolean) => 
+                set({darkMode: val}),
         }),
         {
             name: "app_settings",
