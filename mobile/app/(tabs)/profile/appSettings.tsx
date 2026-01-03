@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 
 import { useAppSettings } from "@/store/useAppSettings";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 const SettingToggle = ({
   icon: Icon,
@@ -65,6 +66,7 @@ const SettingToggle = ({
 export default function AppSettingsScreen() {
   const router = useRouter();
   const { colors } = useThemeColors();
+  const {handleImpact} = useHaptics();
 
   const {
     darkMode,
@@ -86,7 +88,10 @@ export default function AppSettingsScreen() {
         style={{ borderBottomColor: colors.border }}
         className="flex-row items-center gap-4 px-6 py-4 border-b"
       >
-        <Pressable onPress={router.back}>
+        <Pressable onPress={() => {
+            handleImpact("light");
+            router.back()
+          }}>
           <ArrowLeft size={22} color={colors.textMuted} />
         </Pressable>
 
@@ -124,7 +129,10 @@ export default function AppSettingsScreen() {
             label="Dark Mode"
             description={darkMode ? "Eyes protected" : "Daylight mode active"}
             value={darkMode}
-            onToggle={toggleDarkMode}
+            onToggle={() => {
+              handleImpact("light");
+              toggleDarkMode();
+            }}
             disabled={systemTheme}
           />
 
@@ -133,7 +141,10 @@ export default function AppSettingsScreen() {
             label="System Theme"
             description="Sync with device OS"
             value={systemTheme}
-            onToggle={toggleSystemTheme}
+            onToggle={() => {
+              handleImpact("light");
+              toggleSystemTheme();
+            }}
           />
         </View>
 
@@ -154,7 +165,10 @@ export default function AppSettingsScreen() {
             label="Haptic Feedback"
             description="Tactile interface response"
             value={haptics}
-            onToggle={toggleHaptics}
+            onToggle={() => {
+              handleImpact("light");
+              toggleHaptics();
+            }}
           />
         </View>
       </ScrollView>

@@ -6,8 +6,10 @@ import { useEffect } from "react";
 import { View } from "react-native";
 
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function TabsLayout() {
+  const {handleImpact} = useHaptics();
   const { isSignedIn } = useAuth();
   const { handleAuthSync } = useAuthSync();
   const { colors } = useThemeColors();
@@ -50,6 +52,11 @@ export default function TabsLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            handleImpact("soft")
+          }
         }}
       />
 
@@ -94,6 +101,11 @@ export default function TabsLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => <User size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            handleImpact("soft")
+          }
         }}
       />
     </Tabs>

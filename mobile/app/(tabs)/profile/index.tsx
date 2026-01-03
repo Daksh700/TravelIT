@@ -24,8 +24,10 @@ import { Header } from "@/components/Header";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { SignOutButton } from "@/components/SignOutButton";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function ProfileScreen() {
+  const {handleImpact} = useHaptics();
   const [notifications, setNotifications] = useState(true);
   const { data: user, isLoading } = useUserProfile();
   const router = useRouter();
@@ -138,7 +140,10 @@ export default function ProfileScreen() {
             style={{ borderColor: colors.border }}
             className="rounded-lg overflow-hidden border mb-8"
           >
-            <Pressable onPress={() => router.push("/profile/editProfile")}>
+            <Pressable onPress={() => {
+              handleImpact("soft")
+              router.push("/profile/editProfile");
+            }}>
               <MenuItem icon={User} label="Edit Profile" />
             </Pressable>
 

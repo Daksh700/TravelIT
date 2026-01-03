@@ -5,8 +5,10 @@ import { LogOut } from "lucide-react-native";
 
 import { Button } from "./Button";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export const SignOutButton = () => {
+  const {handleImpact} = useHaptics()
   const { signOut } = useClerk();
   const router = useRouter();
   const { colors } = useThemeColors();
@@ -24,7 +26,10 @@ export const SignOutButton = () => {
     <View className="px-6 mb-10">
       <Button
         variant="outline"
-        onPress={handleSignOut}
+        onPress={() => {
+          handleImpact("medium")
+          handleSignOut()
+        }}
         style={{
           borderColor: colors.danger,
           backgroundColor: "transparent",

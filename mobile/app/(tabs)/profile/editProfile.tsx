@@ -9,8 +9,10 @@ import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { useUpdateUserProfile } from "@/hooks/useUpdateUserProfile";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function EditProfileScreen() {
+  const {handleImpact} = useHaptics()
   const router = useRouter();
   const { mutate: updateProfile, isPending } = useUpdateUserProfile();
   const { colors } = useThemeColors();
@@ -52,7 +54,10 @@ export default function EditProfileScreen() {
         style={{ borderBottomColor: colors.border }}
         className="flex-row items-center px-6 py-4 border-b"
       >
-        <Pressable onPress={router.back} className="mr-4">
+        <Pressable onPress={() => {
+          handleImpact("soft")
+          router.back()
+        }} className="mr-4">
           <ArrowLeft size={22} color={colors.textMuted} />
         </Pressable>
 
@@ -142,6 +147,7 @@ export default function EditProfileScreen() {
           <Button
             disabled={isPending}
             onPress={() => {
+              handleImpact("soft")
               const payload: any = {};
 
               if (updatedUser.firstName.trim())
@@ -165,7 +171,10 @@ export default function EditProfileScreen() {
             </Text>
           </Button>
 
-          <Button variant="ghost" onPress={router.back}>
+          <Button variant="ghost" onPress={() => {
+            handleImpact("medium")
+            router.back()
+          }}>
             <Text
               style={{ color: colors.textMuted }}
               className="uppercase tracking-widest text-xs"
