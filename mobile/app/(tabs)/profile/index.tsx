@@ -165,11 +165,19 @@ export default function ProfileScreen() {
           >
             <MenuItem icon={Bell} label="Notifications" isSwitch />
 
-            <Pressable onPress={() => router.push("/(tabs)/profile/appSettings")}>
+            <Pressable onPress={() => {
+              handleImpact("soft");
+              router.push("/(tabs)/profile/appSettings")
+            }}>
               <MenuItem icon={Settings} label="App Settings" />
             </Pressable>
 
-            <MenuItem icon={HelpCircle} label="Help & Support" />
+            <Pressable onPress={() => {
+              handleImpact("soft");
+              router.push("/(tabs)/profile/help")
+            }}>
+              <MenuItem icon={HelpCircle} label="Help & Support" />
+            </Pressable>
           </View>
         </View>
 
