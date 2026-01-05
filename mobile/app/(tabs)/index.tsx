@@ -38,14 +38,14 @@ export default function HomeScreen() {
 
           <Text
             style={{ color: colors.textMuted }}
-            className="text-lg"
+            className="text-lg mb-4"
           >
             AI-powered itineraries for the modern traveler.
           </Text>
 
           <Button
             onPress={() => router.push("..")}
-            className="mt-4 flex-row gap-2"
+            className="flex-row gap-2"
           >
             <Text
               style={{ color: colors.primaryText }}
