@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import cors from "cors"
 import connectDB from "./config/db";
 import userRoutes from "./routes/userRoutes"
+import itineraryRoutes from "./routes/itineraryRoutes"
 import { errorHandler } from "./middlewares/errorMiddleware";
 import { clerkMiddleware } from "@clerk/express";
 
@@ -25,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/itinerary", itineraryRoutes);
 
 app.use(errorHandler);
 
