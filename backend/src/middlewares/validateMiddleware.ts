@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError, ZodType } from "zod";
-import { ApiError } from "../utils/ApiError";
+import { ApiError } from "../utils/ApiError.js";
 
 
 export const validate = (schema: ZodType<any>) => (req: Request, res: Response, next: NextFunction) => {

@@ -1,8 +1,8 @@
 import express from "express";
-import { validate } from "../middlewares/validateMiddleware";
-import { updateUserSchema } from "../validators/userValidator";
-import { getCurrentUser, syncUser, updateUserProfile } from "../controllers/userController";
-import { protectRoute } from "../middlewares/authMiddleware";
+import { validate } from "../middlewares/validateMiddleware.js";
+import { updateUserSchema } from "../validators/userValidator.js";
+import { getCurrentUser, syncUser, updateUserProfile } from "../controllers/userController.js";
+import { protectRoute } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 

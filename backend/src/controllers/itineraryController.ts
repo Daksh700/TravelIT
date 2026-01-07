@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { Itinerary } from "../models/Itinerary";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { Itinerary } from "../models/Itinerary.js";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;

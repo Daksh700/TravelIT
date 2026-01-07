@@ -1,10 +1,10 @@
 import express, {Request, Response} from "express";
 import dotenv from "dotenv"
 import cors from "cors"
-import connectDB from "./config/db";
-import userRoutes from "./routes/userRoutes"
-import itineraryRoutes from "./routes/itineraryRoutes"
-import { errorHandler } from "./middlewares/errorMiddleware";
+import connectDB from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js"
+import itineraryRoutes from "./routes/itineraryRoutes.js"
+import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { clerkMiddleware } from "@clerk/express";
 
 dotenv.config();

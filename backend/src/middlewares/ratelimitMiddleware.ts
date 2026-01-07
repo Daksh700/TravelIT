@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiError } from "../utils/ApiError";
-import { aj } from "../config/arcjet";
+import { ApiError } from "../utils/ApiError.js";
+import { aj } from "../config/arcjet.js";
 
 
 export const rateLimiter = async(req: Request, res: Response, next: NextFunction) => {

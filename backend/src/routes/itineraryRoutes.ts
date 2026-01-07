@@ -1,10 +1,10 @@
 import express from "express"
-import { rateLimiter } from "../middlewares/ratelimitMiddleware";
-import { validate } from "../middlewares/validateMiddleware";
-import { generateItinerary } from "../controllers/aiController";
-import { generateItinerarySchema, saveItinerarySchema } from "../validators/itineraryValidator";
-import { protectRoute } from "../middlewares/authMiddleware";
-import { createItinerary, getUserItineraries } from "../controllers/itineraryController";
+import { rateLimiter } from "../middlewares/ratelimitMiddleware.js";
+import { validate } from "../middlewares/validateMiddleware.js";
+import { generateItinerary } from "../controllers/aiController.js";
+import { generateItinerarySchema, saveItinerarySchema } from "../validators/itineraryValidator.js";
+import { protectRoute } from "../middlewares/authMiddleware.js";
+import { createItinerary, getUserItineraries } from "../controllers/itineraryController.js";
 
 const router = express.Router();
 

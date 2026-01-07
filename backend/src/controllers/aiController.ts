@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ApiError } from "../utils/ApiError";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { ApiResponse } from "../utils/ApiResponse";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
   const {
