@@ -32,22 +32,23 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
   const prompt = `
 You are a professional travel planner.
 
-Create a realistic ${duration}-day trip:
+Create a realistic ${duration}-day itinerary:
 - Source city: ${source}
 - Destination: ${destination}
 - Budget tier: ${budgetTier}
 - Maximum total budget: ${budget} ${currency}
 
-IMPORTANT RULES:
-- Stay within the given budget.
-- Costs must be realistic and consistent.
-- All prices must be in ${currency}.
-- Do NOT repeat activities across days.
-- Every activity MUST include an estimatedCost (number).
-- Return ONLY valid JSON. No markdown, no explanations.
+Rules:
+- Stay within the budget.
+- Include daily meals: breakfast, lunch, snack, dinner.
+- Include local transportation costs.
+- If major city has metro/travel pass (e.g. JR/Metro), include it.
+- If flight + stay realistically fit inside budget, include them in Day 1 or summary note.
+- Prefer hostels for low-budget tiers.
+- Avoid duplicated activities.
+- Return ONLY valid JSON.
 
-JSON STRUCTURE (must match exactly):
-
+JSON FORMAT (MUST MATCH, NO markdown):
 {
   "tripTitle": "string",
   "tripDescription": "string",
