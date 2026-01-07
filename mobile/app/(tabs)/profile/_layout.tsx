@@ -6,6 +6,7 @@ export default function ProfileStackLayout() {
             <Stack.Screen name="index"/>
             <Stack.Screen name="editProfile"/>
             <Stack.Screen name="appSettings"/>
+            <Stack.Screen name="help"/>
         </Stack>
     )
 }
