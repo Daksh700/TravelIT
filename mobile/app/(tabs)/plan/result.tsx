@@ -73,11 +73,22 @@ export default function ResultScreen() {
           </View>
 
           <TouchableOpacity
+            disabled={isPending}
             onPress={handleSave}
-            style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              opacity: isPending ? 0.5 : 1,
+            }}
             className="p-3 border rounded-md"
           >
-            <Save size={20} color={colors.text} />
+            {isPending ? (
+              <Text style={{ color: colors.text }} className="text-[11px] font-bold">
+                Saving...
+              </Text>
+            ) : (
+              <Save size={20} color={colors.text} />
+            )}
           </TouchableOpacity>
         </View>
 
