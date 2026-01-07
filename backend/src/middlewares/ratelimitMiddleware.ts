@@ -5,8 +5,7 @@ import { aj } from "../config/arcjet";
 
 export const rateLimiter = async(req: Request, res: Response, next: NextFunction) => {
     try {
-        const arcjetInstance = await aj;
-        const decision = await arcjetInstance.protect(req, {
+        const decision = await aj.protect(req, {
             requested: 1,
         })
 
