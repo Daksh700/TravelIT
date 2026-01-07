@@ -1,0 +1,82 @@
+import { Request, Response } from "express";
+import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
+import { Itinerary } from "../models/Itinerary";
+
+export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    throw new ApiError(401, "User not authenticated");
+  }
+
+  const {
+    source,
+    destination,
+    sourceMeta,
+    duration,
+    budgetTier,
+    budget,
+    currency,
+    interests,
+    tripTitle,
+    tripDescription,
+    tripDetails,
+  } = req.body;
+
+  if (
+    !source ||
+    !destination ||
+    !sourceMeta?.city ||
+    sourceMeta.autoDetected === undefined ||
+    !duration ||
+    !budgetTier ||
+    !budget ||
+    !currency ||
+    !tripTitle ||
+    !tripDescription ||
+    !tripDetails
+  ) {
+    throw new ApiError(400, "All required fields are missing");
+  }
+
+  const newItinerary = new Itinerary({
+    userId: user._id,
+    source,
+    destination,
+    sourceMeta: {
+      city: sourceMeta.city,
+      autoDetected: sourceMeta.autoDetected,
+    },
+    duration,
+    budgetTier,
+    budget,
+    currency,
+    interests: interests || [],
+    tripTitle,
+    tripDescription,
+    tripDetails,
+    status: "draft",
+  });
+
+  const savedItinerary = await newItinerary.save();
+
+  return res.status(201).json(
+    new ApiResponse(201, savedItinerary, "Trip saved successfully!")
+  );
+});
+
+export const getUserItineraries = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+
+    if(!user) {
+        throw new ApiError(401, "User not authenticated");
+    }
+
+    const trips = await Itinerary.find({userId: user._id}).sort({createdAt: -1});
+
+    return res.status(200).json(
+        new ApiResponse(200, trips, "Trips fetched successfully")
+    )
+})
