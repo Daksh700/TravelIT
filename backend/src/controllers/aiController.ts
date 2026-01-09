@@ -13,6 +13,9 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
     budgetTier,
     currency = "USD",
     interests = [],
+    travelers = 1,
+    ageGroup = "adults",
+    safeMode = false
   } = req.body;
 
   if (!source || !destination || !duration || !budget || !budgetTier) {
@@ -29,6 +32,26 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
         )}. Prioritize activities related to these interests.`
       : "Cover the most popular and top-rated tourist attractions.";
 
+  const peoplePrompt = `Group size: ${travelers} traveler(s).`;
+
+  const agePromptMap = {
+    young: "Target 18-25—nightlife, local youth hotspots, unique modern experiences.",
+    adults: "Target 25-45—balanced activities, food, culture, exploration.",
+    family: "Family friendly—no risky locations, kid-safe attractions, theme parks, zoos.",
+    seniors: "Senior-friendly—no steep climbs, minimize long walks, quieter places."
+  } as const;
+
+  const agePrompt = agePromptMap[ageGroup as keyof typeof agePromptMap] ?? agePromptMap.adults;
+
+  const safeModePrompt = safeMode
+    ? `SAFETY MODE ON:
+- Avoid unsafe neighborhoods entirely.
+- Prefer daytime activities.
+- Recommend well-lit public places.
+- Prefer guided group tours or busy tourist spots.
+- Add a daily safety note if relevant.`
+    : "Safety: standard assumptions.";
+
   const prompt = `
 You are a professional travel planner.
 
@@ -37,6 +60,9 @@ Create a realistic ${duration}-day itinerary:
 - Destination: ${destination}
 - Budget tier: ${budgetTier}
 - Maximum total budget: ${budget} ${currency}
+- ${peoplePrompt}
+- Age group: ${ageGroup}
+- Safety consideration: ${safeMode ? "HIGH" : "normal"}
 
 Rules:
 - Stay within the budget.
@@ -46,6 +72,8 @@ Rules:
 - If flight + stay realistically fit inside budget, include them in Day 1 and summary note.
 - Prefer hostels for low-budget tiers.
 - Avoid duplicated activities.
+- ${agePrompt}
+- ${safeModePrompt}
 - Return ONLY valid JSON.
 - Make NO MISTAKES !!!
 
