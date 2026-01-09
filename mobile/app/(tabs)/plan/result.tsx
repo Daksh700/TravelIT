@@ -14,6 +14,13 @@ export default function ResultScreen() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const {mutate: save, isPending } = useSaveItinerary();
+  
+  const symbols: Record<string, string> = {
+    USD: "$",
+    EUR: "€",
+    INR: "₹",
+    GBP: "£"
+  }
 
   // Fetch the cached data
   const itinerary = queryClient.getQueryData(["latestItinerary"]) as any;
@@ -22,6 +29,8 @@ export default function ResultScreen() {
     router.replace("/(tabs)/plan");
     return null;
   }
+
+  const currencySymbol = symbols[itinerary.currency] ?? ""
 
   const handleSave = () => {
     // TODO: call save itinerary mutation here
@@ -156,7 +165,7 @@ export default function ResultScreen() {
                     </Text>
 
                     <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">
-                      Est. Cost: ${act.estimatedCost}
+                      Est. Cost: {currencySymbol}{act.estimatedCost}
                     </Text>
                   </Card>
                 ))}
