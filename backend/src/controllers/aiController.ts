@@ -64,6 +64,18 @@ Create a realistic ${duration}-day itinerary:
 - Age group: ${ageGroup}
 - Safety consideration: ${safeMode ? "HIGH" : "normal"}
 
+IMPORTANT TIME RULE:
+- DO NOT use exact times like "7:00 AM - 10:00 AM" or "2:45 PM".
+- Instead use broad time slots ONLY from this list:
+  - "Early Morning"
+  - "Morning"
+  - "Late Morning"
+  - "Afternoon"
+  - "Late Afternoon"
+  - "Evening"
+  - "Night"
+  - "Late Night"
+  
 Rules:
 - Stay within the budget.
 - Include daily meals: breakfast, lunch, snack, dinner.
