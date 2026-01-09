@@ -75,7 +75,7 @@ IMPORTANT TIME RULE:
   - "Evening"
   - "Night"
   - "Late Night"
-  
+
 Rules:
 - Stay within the budget.
 - Include daily meals: breakfast, lunch, snack, dinner.
@@ -133,3 +133,40 @@ ${interestPrompt}
     );
   }
 });
+
+export const exploreLocation = asyncHandler(async (req: Request, res: Response) => {
+  const {query} = req.body;
+
+  if(!query) {
+    throw new ApiError(400, "Query is required");
+  }
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    tools: [{googleSearchRetrieval: {}}]
+  })
+
+  const prompt = `Answer this query concisely: ${query}`;
+
+  const result = await model.generateContent(prompt);
+
+  const response = await result.response;
+
+  const text = response.text();
+
+  const links = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => {
+    if(chunk.web) {
+      return {
+        title: chunk.web.title,
+        url: chunk.web.uri
+      }
+    }
+    return null;
+  }).filter((link: any) => link !== null) || [];
+
+  return res.status(200).json(
+    new ApiResponse(200, {text, links}, "Search results fetched")
+  )
+})
