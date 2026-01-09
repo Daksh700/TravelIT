@@ -43,7 +43,7 @@ Rules:
 - Include daily meals: breakfast, lunch, snack, dinner.
 - Include local transportation costs.
 - If major city has metro/travel pass (e.g. JR/Metro), include it.
-- If flight + stay realistically fit inside budget, include them in Day 1 or summary note.
+- If flight + stay realistically fit inside budget, include them in Day 1 and summary note.
 - Prefer hostels for low-budget tiers.
 - Avoid duplicated activities.
 - Return ONLY valid JSON.
