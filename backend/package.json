@@ -16,7 +16,7 @@
   "dependencies": {
     "@arcjet/node": "^1.0.0-beta.15",
     "@clerk/express": "^1.7.60",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.35.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",

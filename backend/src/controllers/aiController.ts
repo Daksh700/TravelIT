@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
@@ -22,8 +22,7 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
     throw new ApiError(400, "All required fields must be provided");
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY as string});
 
   const interestPrompt =
     interests.length > 0
@@ -113,15 +112,21 @@ JSON FORMAT (MUST MATCH, NO markdown):
 ${interestPrompt}
 `;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  let text = response.text();
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  const response = await result.text;
 
   // Cleanup possible markdown wrappers
-  text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  const cleanText = response?.replace(/```json/g, "").replace(/```/g, "").trim();
 
   try {
-    const itineraryData = JSON.parse(text);
+    const itineraryData = JSON.parse(cleanText || "{}");
 
     return res.status(200).json(
       new ApiResponse(200, itineraryData, "Itinerary generated successfully")
@@ -135,38 +140,39 @@ ${interestPrompt}
 });
 
 export const exploreLocation = asyncHandler(async (req: Request, res: Response) => {
-  const {query} = req.body;
+    const { query } = req.body;
 
-  if(!query) {
-    throw new ApiError(400, "Query is required");
-  }
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    tools: [{googleSearchRetrieval: {}}]
-  })
-
-  const prompt = `Answer this query concisely: ${query}`;
-
-  const result = await model.generateContent(prompt);
-
-  const response = await result.response;
-
-  const text = response.text();
-
-  const links = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => {
-    if(chunk.web) {
-      return {
-        title: chunk.web.title,
-        url: chunk.web.uri
-      }
+    if(!query) {
+        throw new ApiError(400, "Query is required");
     }
-    return null;
-  }).filter((link: any) => link !== null) || [];
 
-  return res.status(200).json(
-    new ApiResponse(200, {text, links}, "Search results fetched")
-  )
+    const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY as string});
+
+    const prompt = `Answer this travel query concisely: ${query}`;
+
+    const model = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          tools: [{googleSearch: {}}]
+        }
+    });
+
+    const text = model.text;
+
+    const groundingMetadata = model.candidates?.[0]?.groundingMetadata;
+
+    const links = groundingMetadata?.groundingChunks?.map((chunk: any) => {
+        if(chunk.web) {
+            return {
+                title: chunk.web.title,
+                url: chunk.web.uri
+            };
+        }
+        return null;
+    }).filter((link: any) => link !== null) || [];
+
+    return res.status(200).json(
+        new ApiResponse(200, {text, links}, "Search results fetched")
+    );
 })
