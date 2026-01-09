@@ -40,7 +40,7 @@ export default function CreateTripScreen() {
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <Header />
 
-      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Title */}
         <View className="mb-8">
@@ -105,6 +105,36 @@ export default function CreateTripScreen() {
               onChangeText={(t) => setForm({ ...form, budget: Number(t) || 0 })}
               className="h-14 text-center"
             />
+          </View>
+        </View>
+
+        {/* Currency Picker */}
+        <View className="mb-6">
+          <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
+            Currency
+          </Text>
+
+          <View className="flex-row gap-2">
+            {["USD", "EUR", "INR", "GBP"].map((c) => (
+              <TouchableOpacity
+                key={c}
+                onPress={() => setForm({ ...form, currency: c })}
+                style={{
+                  backgroundColor: form.currency === c ? colors.primary : colors.card,
+                  borderColor: colors.border,
+                }}
+                className="flex-1 border h-14 items-center justify-center"
+              >
+                <Text
+                  style={{
+                    color: form.currency === c ? colors.primaryText : colors.textMuted,
+                  }}
+                  className="font-bold uppercase text-xs"
+                >
+                  {c}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
