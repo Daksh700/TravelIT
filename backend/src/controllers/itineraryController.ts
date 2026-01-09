@@ -23,6 +23,9 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     tripTitle,
     tripDescription,
     tripDetails,
+    travelers = 1,
+    ageGroup = "adults",
+    safeMode = false
   } = req.body;
 
   if (
@@ -58,6 +61,9 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     tripDescription,
     tripDetails,
     status: "draft",
+    travelers,
+    ageGroup,
+    safeMode
   });
 
   const savedItinerary = await newItinerary.save();
