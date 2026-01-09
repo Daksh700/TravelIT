@@ -17,6 +17,14 @@ export const generateItinerarySchema = z.object({
     .max(15, "Trip cannot exceed 15 days"),
 
   interests: z.array(z.string()).optional(),
+
+  travelers: z.number()
+    .min(1, "At least 1 traveler is required")
+    .default(1),
+
+  ageGroup: z.enum(["family", "young", "adults", "seniors"]).default("adults"),
+
+  safeMode: z.boolean().default(false),
 });
 
 export const saveItinerarySchema = z.object({
@@ -35,6 +43,10 @@ export const saveItinerarySchema = z.object({
   currency: z.string(),
 
   interests: z.array(z.string()).optional(),
+
+  travelers: z.number().min(1),
+  ageGroup: z.enum(["family", "young", "adults", "seniors"]),
+  safeMode: z.boolean(),
 
   tripTitle: z.string().min(3, "Title must be at least 3 chars"),
   tripDescription: z.string().min(10, "Description is too short"),
