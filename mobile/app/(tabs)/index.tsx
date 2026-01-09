@@ -7,10 +7,16 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Header } from "@/components/Header";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useUserItineraries } from "@/hooks/useUserItineraries";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useThemeColors();
+  const { data: trips } = useUserItineraries();
+
+  // 🟢 Stats
+  const plannedCount = trips?.length ?? 0;
+  const completedCount = trips?.filter((t: any) => t.status === "completed").length ?? 0;
 
   return (
     <SafeAreaView
@@ -43,14 +49,8 @@ export default function HomeScreen() {
             AI-powered itineraries for the modern traveler.
           </Text>
 
-          <Button
-            onPress={() => router.push("..")}
-            className="flex-row gap-2"
-          >
-            <Text
-              style={{ color: colors.primaryText }}
-              className="font-bold text-base"
-            >
+          <Button onPress={() => router.push("/(tabs)/plan")} className="flex-row gap-2">
+            <Text style={{ color: colors.primaryText }} className="font-bold text-base">
               Start Planning
             </Text>
             <ArrowRight size={20} color={colors.primaryText} />
@@ -168,29 +168,43 @@ export default function HomeScreen() {
           </Text>
 
           <View className="flex-row gap-4">
-            {["Trips Planned", "Trips Completed"].map((label) => (
-              <View
-                key={label}
-                style={{
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                }}
-                className="flex-1 p-4 border"
+            {/* Trips Planned */}
+            <View
+              style={{ backgroundColor: colors.card, borderColor: colors.border }}
+              className="flex-1 p-4 border"
+            >
+              <Text
+                style={{ color: colors.text }}
+                className="text-3xl font-bold"
               >
-                <Text
-                  style={{ color: colors.text }}
-                  className="text-3xl font-bold"
-                >
-                  0
-                </Text>
-                <Text
-                  style={{ color: colors.textMuted }}
-                  className="text-xs uppercase mt-1"
-                >
-                  {label}
-                </Text>
-              </View>
-            ))}
+                {plannedCount}
+              </Text>
+              <Text
+                style={{ color: colors.textMuted }}
+                className="text-xs uppercase mt-1"
+              >
+                Trips Planned
+              </Text>
+            </View>
+
+            {/* Trips Completed */}
+            <View
+              style={{ backgroundColor: colors.card, borderColor: colors.border }}
+              className="flex-1 p-4 border"
+            >
+              <Text
+                style={{ color: colors.text }}
+                className="text-3xl font-bold"
+              >
+                {completedCount}
+              </Text>
+              <Text
+                style={{ color: colors.textMuted }}
+                className="text-xs uppercase mt-1"
+              >
+                Trips Completed
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
