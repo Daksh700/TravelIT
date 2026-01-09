@@ -27,6 +27,9 @@ export interface IItinerary extends Document {
     budget: number;
     currency: string;
     interests?: string[];
+    travelers: number;
+    ageGroup: "family" | "young" | "adults" | "seniors";
+    safeMode: boolean;
     tripTitle: string;
     tripDescription: string;
     tripDetails: IDayPlan[];
@@ -75,6 +78,22 @@ const ItinerarySchema = new Schema<IItinerary>(
         interests: {
             type: [String],
             default: [],
+        },
+        travelers: {
+            type: Number,
+            default: 1,
+            min: 1,
+        },
+
+        ageGroup: {
+            type: String,
+            enum: ["family", "young", "adults", "seniors"],
+            default: "adults",
+        },
+
+        safeMode: {
+            type: Boolean,
+            default: false,
         },
         tripTitle: {
             type: String,
