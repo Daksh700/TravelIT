@@ -69,3 +69,7 @@ export const saveItinerarySchema = z.object({
 
   status: z.enum(["draft", "active", "completed"]).default("draft"),
 });
+
+export const exploreSchema = z.object({
+  query: z.string().min(3, "Query must be at least 3 characters long")
+})
