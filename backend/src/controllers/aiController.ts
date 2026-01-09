@@ -47,6 +47,7 @@ Rules:
 - Prefer hostels for low-budget tiers.
 - Avoid duplicated activities.
 - Return ONLY valid JSON.
+- Make NO MISTAKES !!!
 
 JSON FORMAT (MUST MATCH, NO markdown):
 {
