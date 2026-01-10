@@ -15,6 +15,9 @@ type SaveItineraryParams = {
   tripDescription: string,
   tripDetails: object[],
   status: string,
+  travelers: number,
+  ageGroup: string,
+  safeMode: boolean,
   interests?: string[]
 }
 
@@ -39,6 +42,9 @@ export const useSaveItinerary = () => {
         data.tripTitle,
         data.tripDescription,
         data.tripDetails,
+        data.travelers,
+        data.ageGroup,
+        data.safeMode,
         "draft",
         data.interests,
       );
