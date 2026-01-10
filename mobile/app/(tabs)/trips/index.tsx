@@ -13,7 +13,7 @@ export default function TripsScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center">
+      <SafeAreaView className="flex-1 items-center justify-center" style={{ backgroundColor: colors.background }}>
         <Text style={{ color: colors.text }}>Loading trips...</Text>
       </SafeAreaView>
     );
