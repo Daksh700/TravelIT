@@ -6,6 +6,9 @@ export const generateItinerary = async(
     budget: number,
     currency: string,
     duration: number,
+    travelers: number,
+    ageGroup: string,
+    safeMode: boolean,
     interests?: string[]
 ) => {
     try {
@@ -24,6 +27,9 @@ export const generateItinerary = async(
                 budget,
                 currency,
                 duration,
+                travelers,
+                ageGroup,
+                safeMode,
                 interests
             })
         })
@@ -55,6 +61,9 @@ export const saveItinerary = async(
     tripTitle: string,
     tripDescription: string,
     tripDetails: object[],
+    travelers: number,
+    ageGroup: string,
+    safeMode: boolean,
     status?: string,
     interests?: string[]
 ) => {
@@ -77,6 +86,9 @@ export const saveItinerary = async(
                 currency,
                 tripTitle,
                 tripDescription,
+                travelers,
+                ageGroup,
+                safeMode,
                 tripDetails,
                 status,
                 interests,
