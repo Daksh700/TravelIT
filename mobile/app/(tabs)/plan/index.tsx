@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator, Switch } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Header } from "@/components/Header";
 import { Input } from "@/components/Input";
@@ -20,6 +20,9 @@ export default function CreateTripScreen() {
     budget: 500,
     currency: "USD",
     interests: "",
+    travelers: 1,
+    ageGroup: "adults",
+    safeMode: false,
   });
 
   const handleGenerate = () => {
@@ -30,9 +33,13 @@ export default function CreateTripScreen() {
       budgetTier: form.budgetTier,
       budget: Number(form.budget),
       currency: form.currency,
-      interests: form.interests.length > 0
-        ? form.interests.split(",").map((i) => i.trim())
-        : [],
+      travelers: Number(form.travelers),
+      ageGroup: form.ageGroup,
+      safeMode: form.safeMode,
+      interests:
+        form.interests.length > 0
+          ? form.interests.split(",").map((i) => i.trim())
+          : [],
     });
   };
 
@@ -40,8 +47,11 @@ export default function CreateTripScreen() {
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <Header />
 
-      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        
+      <ScrollView
+        className="flex-1 px-6 pt-6"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         {/* Title */}
         <View className="mb-8">
           <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight mb-1">
@@ -80,7 +90,6 @@ export default function CreateTripScreen() {
 
         {/* Duration + Budget */}
         <View className="flex-row gap-4 mb-6">
-          {/* Duration */}
           <View className="flex-1">
             <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
               Days
@@ -93,7 +102,6 @@ export default function CreateTripScreen() {
             />
           </View>
 
-          {/* Budget numeric */}
           <View className="flex-1">
             <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
               Max Budget
@@ -101,7 +109,6 @@ export default function CreateTripScreen() {
             <Input
               keyboardType="numeric"
               value={String(form.budget)}
-              placeholder="500"
               onChangeText={(t) => setForm({ ...form, budget: Number(t) || 0 })}
               className="h-14 text-center"
             />
@@ -113,7 +120,6 @@ export default function CreateTripScreen() {
           <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
             Currency
           </Text>
-
           <View className="flex-row gap-2">
             {["USD", "EUR", "INR", "GBP"].map((c) => (
               <TouchableOpacity
@@ -138,12 +144,11 @@ export default function CreateTripScreen() {
           </View>
         </View>
 
-        {/* Budget Tier Picker */}
+        {/* Budget Tier */}
         <View className="mb-6">
           <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
             Budget Tier
           </Text>
-
           <View className="flex-row gap-2">
             {["low", "medium", "high"].map((opt) => (
               <TouchableOpacity
@@ -168,6 +173,90 @@ export default function CreateTripScreen() {
           </View>
         </View>
 
+        {/* Travelers */}
+        <View className="mb-6">
+          <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
+            Number of Travelers
+          </Text>
+          <Input
+            keyboardType="numeric"
+            value={String(form.travelers)}
+            onChangeText={(t) => setForm({ ...form, travelers: Number(t) || 1 })}
+            className="h-14 text-center"
+          />
+        </View>
+
+        {/* Age Group */}
+        <View className="mb-6">
+          <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
+            Age Category
+          </Text>
+          <View className="flex-row gap-2">
+            {[
+              ["young", "Young (18-25)"],
+              ["adults", "Adults (25-45)"],
+              ["family", "Family"],
+              ["seniors", "Seniors"],
+            ].map(([key, label]) => (
+              <TouchableOpacity
+                key={key}
+                onPress={() => setForm({ ...form, ageGroup: key })}
+                style={{
+                  backgroundColor: form.ageGroup === key ? colors.primary : colors.card,
+                  borderColor: colors.border,
+                }}
+                className="flex-1 border h-12 items-center justify-center px-1"
+              >
+                <Text
+                  style={{
+                    color: form.ageGroup === key ? colors.primaryText : colors.textMuted,
+                  }}
+                  className="font-bold text-[10px] uppercase text-center"
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Safe Mode */}
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          }}
+          className="flex-row items-center justify-between p-4 border rounded-md mb-8"
+        >
+          <View className="flex-row items-center gap-3">
+            <View
+              style={{ backgroundColor: colors.inputBg }}
+              className="p-2 rounded-md"
+            >
+              <Sparkles size={18} color={colors.textMuted} />
+            </View>
+
+            <View>
+              <Text style={{ color: colors.text }} className="font-bold">
+                Safety Mode
+              </Text>
+              <Text style={{ color: colors.textSecondary }} className="text-xs">
+                Safer picks for cautious / solo travelers
+              </Text>
+            </View>
+          </View>
+
+          <Switch
+            value={form.safeMode}
+            onValueChange={(v) => setForm({ ...form, safeMode: v })}
+            trackColor={{
+              false: colors.switchOff,
+              true: colors.switchOn,
+            }}
+            thumbColor={colors.switchThumb}
+          />
+        </View>
+
         {/* Interests */}
         <View className="mb-8">
           <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">
@@ -181,7 +270,7 @@ export default function CreateTripScreen() {
           />
         </View>
 
-        {/* Generate Button */}
+        {/* Generate */}
         <Button onPress={handleGenerate} disabled={isPending} className="h-14">
           {isPending ? (
             <View className="flex-row items-center gap-2">
@@ -199,7 +288,6 @@ export default function CreateTripScreen() {
             </View>
           )}
         </Button>
-
       </ScrollView>
     </SafeAreaView>
   );
