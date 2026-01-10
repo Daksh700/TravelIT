@@ -10,6 +10,9 @@ type GenerateItineraryParams = {
   budget: number,
   currency: string,
   duration: number,
+  travelers: number,
+  ageGroup: string,
+  safeMode: boolean,
   interests?: string[]
 }
 
@@ -31,6 +34,9 @@ export const useGenerateItinerary = () => {
         data.budget,
         data.currency,
         data.duration,
+        data.travelers,
+        data.ageGroup,
+        data.safeMode,
         data.interests
       );
     },
@@ -50,7 +56,10 @@ export const useGenerateItinerary = () => {
             city: variables.source,
             autoDetected: false,
           },
-          status: "draft"
+          status: "draft",
+          travelers: variables.travelers,
+          ageGroup: variables.ageGroup,
+          safeMode: variables.safeMode,
         }
         queryClient.setQueryData(["latestItinerary"], fullPayload);
         router.push("/(tabs)/plan/result")
