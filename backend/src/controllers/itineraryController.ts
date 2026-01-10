@@ -86,3 +86,32 @@ export const getUserItineraries = asyncHandler(async (req: Request, res: Respons
         new ApiResponse(200, trips, "Trips fetched successfully")
     )
 })
+
+export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if(!user) {
+    throw new ApiError(401, "User not authenticated");
+  }
+
+  const { status } = req.body;
+  const { id } = req.params;
+
+  if(!["draft", "active", "completed"].includes(status)) {
+    throw new ApiError(400, "Invalid status");
+  }
+
+  const updatedItinerary = await Itinerary.findOneAndUpdate(
+    {_id: id, userId: user._id},
+    { status },
+    { new: true }
+  )
+
+  if(!updatedItinerary) {
+    throw new ApiError(404, "Trip not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedItinerary, "Status updated")
+  )
+})
