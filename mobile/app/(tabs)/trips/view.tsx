@@ -17,8 +17,8 @@ export default function ViewTripScreen() {
     USD: "$",
     EUR: "€",
     INR: "₹",
-    GBP: "£"
-  }
+    GBP: "£",
+  };
 
   const trip = trips?.find((t: any) => t._id === id);
 
@@ -27,7 +27,7 @@ export default function ViewTripScreen() {
     return null;
   }
 
-  const currencySymbol = symbols[trip.currency] ?? ""
+  const currencySymbol = symbols[trip.currency] ?? "";
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
@@ -51,7 +51,6 @@ export default function ViewTripScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-
         {/* ---- HEADER ---- */}
         <View className="flex-row justify-between items-start mb-8">
           <View style={{ flex: 1 }}>
@@ -75,13 +74,23 @@ export default function ViewTripScreen() {
               </View>
             </View>
 
-            {/* NEW — STATUS */}
-            <Text
-              style={{ color: colors.textSecondary }}
-              className="text-xs font-bold mt-2"
-            >
+            {/* STATUS */}
+            <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">
               Status: {trip.status || "draft"}
             </Text>
+
+            {/* NEW — EXTRA META */}
+            <View className="mt-2 space-y-1">
+              <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+                Travelers: {trip.travelers}
+              </Text>
+              <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+                Age Group: {trip.ageGroup}
+              </Text>
+              <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+                Safety Mode: {trip.safeMode ? "ON" : "OFF"}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -121,13 +130,22 @@ export default function ViewTripScreen() {
                     style={{ borderColor: colors.border, backgroundColor: colors.surface }}
                     className="p-4 border"
                   >
+                    <View style={{ backgroundColor: colors.card }} className="px-2 py-1 rounded-sm mb-2">
+                      <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold uppercase">
+                        {act.time}
+                      </Text>
+                    </View>
+
                     <Text style={{ color: colors.text }} className="font-bold text-base mb-1">
                       {act.activity}
                     </Text>
 
-                    <Text style={{ color: colors.primary }} className="text-xs font-bold">
-                      {act.location}
-                    </Text>
+                    <View className="flex-row items-center gap-1 mb-2">
+                      <MapPin size={10} color={colors.primary} />
+                      <Text style={{ color: colors.primary }} className="text-xs font-bold">
+                        {act.location}
+                      </Text>
+                    </View>
 
                     <Text style={{ color: colors.textMuted }} className="text-sm">
                       {act.description}
