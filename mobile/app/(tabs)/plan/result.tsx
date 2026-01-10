@@ -13,16 +13,15 @@ export default function ResultScreen() {
   const { colors } = useThemeColors();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const {mutate: save, isPending } = useSaveItinerary();
-  
+  const { mutate: save, isPending } = useSaveItinerary();
+
   const symbols: Record<string, string> = {
     USD: "$",
     EUR: "€",
     INR: "₹",
-    GBP: "£"
-  }
+    GBP: "£",
+  };
 
-  // Fetch the cached data
   const itinerary = queryClient.getQueryData(["latestItinerary"]) as any;
 
   if (!itinerary) {
@@ -30,11 +29,9 @@ export default function ResultScreen() {
     return null;
   }
 
-  const currencySymbol = symbols[itinerary.currency] ?? ""
+  const currencySymbol = symbols[itinerary.currency] ?? "";
 
   const handleSave = () => {
-    // TODO: call save itinerary mutation here
-    console.log("Saving payload:", itinerary);
     save({
       source: itinerary.source,
       destination: itinerary.destination,
@@ -48,8 +45,10 @@ export default function ResultScreen() {
       tripDetails: itinerary.tripDetails,
       status: "draft",
       interests: itinerary.interests ?? [],
-    })
-    console.log("Saving soon…");
+      travelers: itinerary.travelers,
+      ageGroup: itinerary.ageGroup,
+      safeMode: itinerary.safeMode,
+    });
   };
 
   return (
@@ -57,7 +56,6 @@ export default function ResultScreen() {
       <Header />
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-
         {/* ---- HEADER ---- */}
         <View className="flex-row justify-between items-start mb-8">
           <View style={{ flex: 1 }}>
@@ -101,7 +99,20 @@ export default function ResultScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ---- TRIP SUMMARY ---- */}
+        {/* ---- META INFO ---- */}
+        <View className="mb-6">
+          <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+            Travelers: {itinerary.travelers}
+          </Text>
+          <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+            Age Group: {itinerary.ageGroup}
+          </Text>
+          <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
+            Safety Mode: {itinerary.safeMode ? "ON" : "OFF"}
+          </Text>
+        </View>
+
+        {/* ---- SUMMARY ---- */}
         <View style={{ borderLeftColor: colors.primary }} className="pl-4 border-l mb-10">
           <Text style={{ color: colors.textMuted }} className="text-sm leading-relaxed">
             {itinerary.tripDescription}
@@ -110,7 +121,6 @@ export default function ResultScreen() {
 
         {/* ---- DAY PLAN ---- */}
         <View className="relative">
-          {/* Vertical timeline line */}
           <View
             style={{ backgroundColor: colors.border }}
             className="absolute left-[11px] top-6 bottom-0 w-[1px]"
@@ -118,7 +128,6 @@ export default function ResultScreen() {
 
           {itinerary.tripDetails.map((day: any) => (
             <View key={day.day} className="relative pl-8 mb-10">
-              {/* Day bubble */}
               <View
                 style={{ backgroundColor: colors.background, borderColor: colors.primary }}
                 className="absolute left-0 top-1 w-6 h-6 border rounded-full items-center justify-center"
@@ -128,12 +137,10 @@ export default function ResultScreen() {
                 </Text>
               </View>
 
-              {/* Theme */}
               <Text style={{ color: colors.text }} className="text-lg font-bold mb-4">
                 {day.theme}
               </Text>
 
-              {/* Activities */}
               <View className="space-y-3">
                 {day.activities.map((act: any, idx: number) => (
                   <Card
