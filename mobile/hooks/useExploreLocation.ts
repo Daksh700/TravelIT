@@ -1,7 +1,6 @@
 import { exploreLocation } from "@/services/explore"
 import { useAuth } from "@clerk/clerk-expo"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "expo-router"
 
 type ExploreLocationParams = {
     query: string
@@ -9,7 +8,6 @@ type ExploreLocationParams = {
 
 export const useExploreLocation = () => {
     const {getToken} = useAuth();
-    const router = useRouter();
     const queryClient = useQueryClient();
 
     return useMutation({
