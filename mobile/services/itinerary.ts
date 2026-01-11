@@ -136,3 +136,37 @@ export const getUserItineraries = async(token: string) => {
         return null;
     }
 }
+
+export const updateTripStatus = async(
+    token: string,
+    id: string,
+    status: string
+) => {
+    try {
+        console.log("Connecting to Backend");
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/status/${id}`, {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status
+            })
+        })
+
+        const data = await response.json();
+
+        if(!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+
+        console.log("Data Received from Backend");
+
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
