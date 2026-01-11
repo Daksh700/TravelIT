@@ -115,3 +115,25 @@ export const updateStatus = asyncHandler(async (req: Request, res: Response) => 
     new ApiResponse(200, updatedItinerary, "Status updated")
   )
 })
+
+export const deleteTrip = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if(!user) {
+    throw new ApiError(401, "Use not authenticated");
+  }
+
+  const {id} = req.params;
+
+  const removed = await Itinerary.findOneAndDelete(
+    {_id: id, userId: user._id}
+  )
+
+  if(!removed) {
+    throw new ApiError(404, "Trip not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, removed, "Trip Deleted Successfully")
+  )
+})
