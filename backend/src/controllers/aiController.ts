@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { GoogleGenAI } from "@google/genai";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { verifyPlace } from "../services/placeVerifier.js";
 
 export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
   const {
@@ -127,6 +128,21 @@ ${interestPrompt}
 
   try {
     const itineraryData = JSON.parse(cleanText || "{}");
+
+    const verifiedDays = [];
+
+    for(const day of itineraryData.tripDetails) {
+      const verifiedActs = [];
+
+      for(const act of day.activities) {
+        const verified = await verifyPlace(act.activity, act.location);
+        verifiedActs.push({...act, ...verified});
+      }
+
+      verifiedDays.push({...day, activities: verifiedActs});
+    }
+
+    itineraryData.tripDetails = verifiedDays;
 
     return res.status(200).json(
       new ApiResponse(200, itineraryData, "Itinerary generated successfully")
