@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Itinerary } from "../models/Itinerary.js";
+import { verifyPlace } from "../services/placeVerifier.js";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
@@ -44,6 +45,18 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     throw new ApiError(400, "All required fields are missing");
   }
 
+  const verifiedDays = [];
+
+  for(const day of tripDetails) {
+    const verifiedActs = [];
+    for(const act of day.activities) {
+      const verified = await verifyPlace(act.activity, act.location);
+      verifiedActs.push({...act, ...verified});
+    }
+
+    verifiedDays.push({...day, activities: verifiedActs});
+  }
+
   const newItinerary = new Itinerary({
     userId: user._id,
     source,
@@ -59,7 +72,7 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     interests: interests || [],
     tripTitle,
     tripDescription,
-    tripDetails,
+    tripDetails: verifiedDays,
     status: "draft",
     travelers,
     ageGroup,
