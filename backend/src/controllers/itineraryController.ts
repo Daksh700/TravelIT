@@ -50,7 +50,7 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
   for(const day of tripDetails) {
     const verifiedActs = [];
     for(const act of day.activities) {
-      const verified = await verifyPlace(act.activity, act.location);
+      const verified = await verifyPlace(`${act.activity} ${act.location} ${destination}`);
       verifiedActs.push({...act, ...verified});
     }
 
