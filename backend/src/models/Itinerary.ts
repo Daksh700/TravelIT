@@ -113,7 +113,17 @@ const ItinerarySchema = new Schema<IItinerary>(
                         activity: {type: String},
                         location: {type: String},
                         description: {type: String},
-                        estimatedCost: {type: Number}
+                        estimatedCost: {type: Number},
+
+                        verified: {type: Boolean, default: false},
+                        reason: {type: String, default: null},
+                        openingHours: { type: String, default: null },
+                        closedToday: { type: Boolean, default: false },
+                        seasonalWarning: { type: String, default: null },
+                        rating: { type: Number, default: null },
+                        priceLevel: { type: Number, default: null },
+                        website: { type: String, default: null },
+                        formattedAddress: { type: String, default: null }
                     }
                 ]
             }
