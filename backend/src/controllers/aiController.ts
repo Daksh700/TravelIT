@@ -135,7 +135,7 @@ ${interestPrompt}
       const verifiedActs = [];
 
       for(const act of day.activities) {
-        const verified = await verifyPlace(act.activity, act.location);
+        const verified = await verifyPlace(act.activity, `${act.location} ${destination}`);
         verifiedActs.push({...act, ...verified});
       }
 
