@@ -60,23 +60,29 @@ export const verifyPlace = async(placeName: string, city?: string) => {
         }
 
         return {
-            name: details.name || placeName,
             verified: true,
-            location: details.formatted_address || null,
-            rating: details.rating || null,
-            priceLevel: details.price_level || null,
-            website: details.website || null,
-            openingHours: openingHoursText,
-            closedToday,
-            seasonalWarning,
+            reason: null,
+            formattedAddress: details.formatted_address || null,
+            rating: details.rating ?? null,
+            priceLevel: details.price_level ?? null,
+            website: details.website ?? null,
+            openingHours: openingHoursText ?? null,
+            closedToday: closedToday ?? false,
+            seasonalWarning: seasonalWarning ?? null,
         }
         
     } catch (error) {
         console.error("Google verify error", error);
         return {
-            name: placeName,
             verified: false,
-            reason: "API verification failed",
+            reason: "Not found in Google Places",
+            formattedAddress: null,
+            rating: null,
+            priceLevel: null,
+            website: null,
+            openingHours: null,
+            closedToday: false,
+            seasonalWarning: null
         }
     }
 }
