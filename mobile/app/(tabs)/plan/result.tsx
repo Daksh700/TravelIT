@@ -51,6 +51,50 @@ export default function ResultScreen() {
     });
   };
 
+  const renderStatusBadge = (act: any) => {
+    if (act.verified === false) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#fee2e2" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#dc2626" }}>
+            Not Found
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.closedToday) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#dbeafe" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#1d4ed8" }}>
+            Closed Today
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.seasonalWarning) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#fef9c3" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#ca8a04" }}>
+            Seasonal Risk
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.verified) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#dcfce7" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#15803d" }}>
+            Verified
+          </Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <Header />
@@ -154,6 +198,11 @@ export default function ResultScreen() {
                           {act.time}
                         </Text>
                       </View>
+                    </View>
+
+                    {/* ⭐ NEW BADGES */}
+                    <View className="flex-row gap-2 mb-2">
+                      {renderStatusBadge(act)}
                     </View>
 
                     <Text style={{ color: colors.text }} className="font-bold text-base mb-1">
