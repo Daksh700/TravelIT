@@ -1,4 +1,4 @@
-import { getAmadeusAccessToken } from "./amadeusAuth";
+import { getAmadeusAccessToken } from "./amadeusAuth.js";
 
 type FlightDestination = {
   origin: string;
