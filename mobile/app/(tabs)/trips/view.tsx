@@ -29,6 +29,50 @@ export default function ViewTripScreen() {
 
   const currencySymbol = symbols[trip.currency] ?? "";
 
+  const renderStatusBadge = (act: any) => {
+    if (act.verified === false) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#fee2e2" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#dc2626" }}>
+            Not Found
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.closedToday) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#dbeafe" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#1d4ed8" }}>
+            Closed Today
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.seasonalWarning) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#fef9c3" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#ca8a04" }}>
+            Seasonal Risk
+          </Text>
+        </View>
+      );
+    }
+
+    if (act.verified) {
+      return (
+        <View className="px-2 py-1 rounded-sm" style={{ backgroundColor: "#dcfce7" }}>
+          <Text className="text-[10px] font-bold uppercase" style={{ color: "#15803d" }}>
+            Verified
+          </Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       {/* Header */}
@@ -79,7 +123,7 @@ export default function ViewTripScreen() {
               Status: {trip.status || "draft"}
             </Text>
 
-            {/* NEW — EXTRA META */}
+            {/* EXTRA META */}
             <View className="mt-2 space-y-1">
               <Text style={{ color: colors.textSecondary }} className="text-xs font-bold">
                 Travelers: {trip.travelers}
@@ -130,10 +174,9 @@ export default function ViewTripScreen() {
                     style={{ borderColor: colors.border, backgroundColor: colors.surface }}
                     className="p-4 border"
                   >
-                    <View style={{ backgroundColor: colors.card }} className="px-2 py-1 rounded-sm mb-2">
-                      <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold uppercase">
-                        {act.time}
-                      </Text>
+                    {/* BADGES */}
+                    <View className="flex-row gap-2 mb-2">
+                      {renderStatusBadge(act)}
                     </View>
 
                     <Text style={{ color: colors.text }} className="font-bold text-base mb-1">
