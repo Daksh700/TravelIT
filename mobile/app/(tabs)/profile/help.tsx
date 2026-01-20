@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, Pressable, Linking } from "react-native";
+import { ScrollView, Text, View, Pressable, Linking, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowLeft,
@@ -95,10 +95,22 @@ export default function HelpScreen() {
           </View>
 
           <Pressable
-            onPress={() => {
+            onPress={
+              async () => {
                     handleImpact("medium");
-                    Linking.openURL("mailto:support@travelit.ai")
-                }
+                    const url = "mailto:support@travelit.ai";
+                    try {
+                      const supported = await Linking.canOpenURL(url);
+                      if (supported) {
+                        await Linking.openURL(url);
+                      } else {
+                        Alert.alert("Cannot open mail client", "No mail client is configured on this device.");
+                      }
+                    } catch (err) {
+                      console.warn("Failed to open URL", err);
+                      Alert.alert("Error", "Unable to open mail app.");
+                    }
+              }
             }
             style={{
               backgroundColor: colors.inputBg,
