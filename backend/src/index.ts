@@ -4,7 +4,6 @@ import cors from "cors"
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js"
 import itineraryRoutes from "./routes/itineraryRoutes.js"
-import flightRoutes from "./routes/flightRoutes.js"
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { clerkMiddleware } from "@clerk/express";
 
@@ -31,7 +30,6 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/itinerary", itineraryRoutes);
-app.use("/api/v1/flights", flightRoutes);
 
 // Error handler last
 app.use(errorHandler);
