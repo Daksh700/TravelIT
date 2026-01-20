@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getAuth } from "@clerk/express";
+import { clerkClient, getAuth } from "@clerk/express";
 import { User } from "../models/User.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -13,11 +13,22 @@ export const protectRoute = asyncHandler(async (req: Request, res: Response, nex
 
     const user = await User.findOne({clerkId: userId});
 
-    if(!user) {
-        throw new ApiError(401, "Unauthorized request: User not found in DB");
-    }
+    const clerkUser = await clerkClient.users.getUser(userId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress;
 
-    req.user = user;
+    if(!user) {
+        const newUser = await User.create({
+            clerkId: userId,
+            email: email,
+            firstName: clerkUser.firstName || "",
+            lastName: clerkUser.lastName || "",
+            username: clerkUser.username || email.split("@")[0],
+            avatar: clerkUser.imageUrl || "",
+        });
+        req.user = newUser;
+    } else {
+        req.user = user;
+    }
 
     next();
 })
