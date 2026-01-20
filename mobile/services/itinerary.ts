@@ -1,3 +1,14 @@
+async function parseResponse(response: Response) {
+    try {
+        return await response.json();
+    } catch (err) {
+        const text = await response.text().catch(() => "");
+        console.error("Non-JSON response from backend:", text);
+        // Throw a descriptive error so callers can handle it
+        throw new Error(text || "Non-JSON response from server");
+    }
+}
+
 export const generateItinerary = async(
     token: string,
     source: string,
@@ -34,7 +45,7 @@ export const generateItinerary = async(
             })
         })
 
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
@@ -95,7 +106,7 @@ export const saveItinerary = async(
             })
         })
 
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
@@ -122,7 +133,7 @@ export const getUserItineraries = async(token: string) => {
             }
         })
 
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
@@ -156,7 +167,7 @@ export const updateTripStatus = async(
             })
         })
 
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
@@ -186,7 +197,7 @@ export const deleteTrip = async(
             }
         })
 
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
