@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { GoogleGenAI } from "@google/genai";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { verifyPlace } from "../services/placeVerifier.js";
+import { getHotels } from "../services/hotelService.js";
 
 export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
   const {
@@ -16,11 +17,26 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
     interests = [],
     travelers = 1,
     ageGroup = "adults",
-    safeMode = false
+    safeMode = false,   
+    checkInDate,     
+    checkOutDate  
   } = req.body;
 
-  if (!source || !destination || !duration || !budget || !budgetTier) {
+  if (!source || !destination || !duration || !budget || !budgetTier || !checkInDate ||!checkOutDate) {
     throw new ApiError(400, "All required fields must be provided");
+  }
+
+  if (checkInDate && checkOutDate) {
+    const inDate = new Date(checkInDate);
+    const outDate = new Date(checkOutDate);
+
+    if (isNaN(inDate.getTime()) || isNaN(outDate.getTime())) {
+      throw new ApiError(400, "Invalid hotel dates");
+    }
+
+    if (outDate <= inDate) {
+      throw new ApiError(400, "Check-out must be after check-in");
+    }
   }
 
   const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY as string});
@@ -144,8 +160,42 @@ ${interestPrompt}
 
     itineraryData.tripDetails = verifiedDays;
 
+    let hotelSnapshot = null;
+
+    if (checkInDate && checkOutDate) {
+      const hotelResult = await getHotels(
+        destination,
+        checkInDate,
+        checkOutDate,
+        budget,
+        travelers,
+        currency
+      );
+
+      const best = hotelResult.bestHotel;
+
+      if (best) {
+        hotelSnapshot = {
+          hotelId: best.property.id,
+          name: best.property.name,
+          city: best.property.city,
+          address: best.property.address,
+          arrivalDate: new Date(checkInDate),
+          departureDate: new Date(checkOutDate),
+          pricePerNight: best.property.priceBreakdown?.grossPrice?.value ?? null,
+          totalPrice: best.property.priceBreakdown?.grossPrice?.value
+            ? best.property.priceBreakdown.grossPrice.value * hotelResult.nights
+            : null,
+          currency,
+          rating: best.property.reviewScore ?? null,
+          reviewCount: best.property.reviewCount ?? 0,
+          photos: best.property.photoUrls ?? []
+        };
+      }
+    }
+
     return res.status(200).json(
-      new ApiResponse(200, itineraryData, "Itinerary generated successfully")
+      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null}, "Itinerary generated successfully")
     );
   } catch (error) {
     throw new ApiError(
