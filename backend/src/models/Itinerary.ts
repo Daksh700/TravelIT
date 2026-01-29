@@ -1,4 +1,4 @@
-import mongoose, {Schema, Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 interface IActivity {
     time: string;
@@ -14,6 +14,25 @@ interface IDayPlan {
     activities: IActivity[];
 }
 
+interface IHotelSnapshot {
+    hotelId: number;
+    name: string;
+    city: string;
+    address: string;
+
+    arrivalDate: Date;
+    departureDate: Date;
+
+    pricePerNight: number | null;
+    totalPrice: number | null;
+    currency: string;
+
+    rating: number | null;
+    reviewCount: number;
+
+    photos: string[];
+}
+
 export interface IItinerary extends Document {
     userId: mongoose.Types.ObjectId;
     source: string;
@@ -23,6 +42,8 @@ export interface IItinerary extends Document {
         autoDetected: boolean;
     };
     duration: number;
+    tripStartDate: Date;
+    tripEndDate: Date;
     budgetTier: "low" | "medium" | "high";
     budget: number;
     currency: string;
@@ -33,8 +54,10 @@ export interface IItinerary extends Document {
     tripTitle: string;
     tripDescription: string;
     tripDetails: IDayPlan[];
-    status: "draft" | "active" | "completed";
 
+    hotel?: IHotelSnapshot | null;
+
+    status: "draft" | "active" | "completed";
     createdAt: Date;
     updatedAt: Date;
 }
@@ -43,7 +66,7 @@ const ItinerarySchema = new Schema<IItinerary>(
     {
         userId: {
             type: mongoose.Types.ObjectId,
-            ref: 'User',
+            ref: "User",
             required: true,
         },
         source: {
@@ -55,12 +78,20 @@ const ItinerarySchema = new Schema<IItinerary>(
             required: true,
         },
         sourceMeta: {
-            city: {type: String},
-            autoDetected: {type: Boolean, default: false},
+            city: { type: String },
+            autoDetected: { type: Boolean, default: false },
         },
         duration: {
             type: Number,
             required: true,
+        },
+        tripStartDate: { 
+            type: Date,
+            required: true, 
+        },
+        tripEndDate: { 
+            type: Date,
+            required: true 
         },
         budgetTier: {
             type: String,
@@ -84,13 +115,11 @@ const ItinerarySchema = new Schema<IItinerary>(
             default: 1,
             min: 1,
         },
-
         ageGroup: {
             type: String,
             enum: ["family", "young", "adults", "seniors"],
             default: "adults",
         },
-
         safeMode: {
             type: Boolean,
             default: false,
@@ -98,44 +127,63 @@ const ItinerarySchema = new Schema<IItinerary>(
         tripTitle: {
             type: String,
             required: true,
-        }, 
+        },
         tripDescription: {
             type: String,
             required: true,
         },
         tripDetails: [
             {
-                day: {type: Number, required: true},
-                theme: {type: String},
+                day: { type: Number, required: true },
+                theme: { type: String },
                 activities: [
                     {
-                        time: {type: String},
-                        activity: {type: String},
-                        location: {type: String},
-                        description: {type: String},
-                        estimatedCost: {type: Number},
+                        time: { type: String },
+                        activity: { type: String },
+                        location: { type: String },
+                        description: { type: String },
+                        estimatedCost: { type: Number },
 
-                        verified: {type: Boolean, default: false},
-                        reason: {type: String, default: null},
+                        verified: { type: Boolean, default: false },
+                        reason: { type: String, default: null },
                         openingHours: { type: String, default: null },
                         closedToday: { type: Boolean, default: false },
                         seasonalWarning: { type: String, default: null },
                         rating: { type: Number, default: null },
                         priceLevel: { type: Number, default: null },
                         website: { type: String, default: null },
-                        formattedAddress: { type: String, default: null }
-                    }
-                ]
-            }
+                        formattedAddress: { type: String, default: null },
+                    },
+                ],
+            },
         ],
+
+        hotel: {
+            hotelId: { type: Number },
+            name: { type: String },
+            city: { type: String },
+            address: { type: String },
+
+            arrivalDate: { type: Date },
+            departureDate: { type: Date },
+
+            pricePerNight: { type: Number },
+            totalPrice: { type: Number },
+            currency: { type: String },
+
+            rating: { type: Number },
+            reviewCount: { type: Number },
+
+            photos: { type: [String], default: [] },
+        },
 
         status: {
             type: String,
             enum: ["draft", "active", "completed"],
             default: "draft",
-        }
+        },
     },
-    {timestamps: true}
-)
+    { timestamps: true }
+);
 
 export const Itinerary = mongoose.model<IItinerary>("Itinerary", ItinerarySchema);
