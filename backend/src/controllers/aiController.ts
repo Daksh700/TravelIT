@@ -92,13 +92,18 @@ IMPORTANT TIME RULE:
   - "Night"
   - "Late Night"
 
+CRITICAL COST RULES (READ CAREFULLY):
+1. **REALISTIC PRICING**: You MUST provide realistic market rates for ${destination}. 
+   - Example: A cheap lunch in New York is $15-$20 (approx 1200-1600 INR). DO NOT output 20 INR or 0 INR unless it is truly free (like a park).
+   - Convert realistic local prices to ${currency} accurately.
+2. **NO HOTEL COSTS**: The user has already booked a hotel separately. DO NOT include accommodation costs in the "estimatedCost" field for any activity.
+3. **FLIGHTS**: In Day 1, include an activity named "Flight Arrival" and put the estimated Flight cost there.
+
 Rules:
-- Stay within the budget.
-- Include daily meals: breakfast, lunch, snack, dinner.
-- Include local transportation costs.
+- Stay within the budget (excluding hotel cost).
+- Include daily meals: breakfast, lunch, snack, dinner (with realistic prices).
+- Include local transportation costs (Metro/Subway/Uber).
 - If major city has metro/travel pass (e.g. JR/Metro), include it.
-- If flight + stay realistically fit inside budget, include them in Day 1 and summary note.
-- Prefer hostels for low-budget tiers.
 - Avoid duplicated activities.
 - ${agePrompt}
 - ${safeModePrompt}
