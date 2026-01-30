@@ -70,7 +70,6 @@ export default function SignUp() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <SafeAreaView className="flex-1 px-8">
-          {/* Back */}
           <View className="h-12 justify-center -ml-2">
             <Pressable
               onPress={() => setPendingVerification(false)}
@@ -155,7 +154,6 @@ export default function SignUp() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView className="flex-1 px-8">
-        {/* Back */}
         <View className="h-12 justify-center -ml-2">
           <Pressable
             onPress={() => router.back()}
@@ -187,7 +185,6 @@ export default function SignUp() {
           </View>
 
           <View className="gap-5">
-            {/* EMAIL */}
             <View className="gap-2">
               <Text
                 style={{ color: colors.textMuted }}
@@ -211,7 +208,6 @@ export default function SignUp() {
               />
             </View>
 
-            {/* PASSWORD */}
             <View className="gap-2">
               <Text
                 style={{ color: colors.textMuted }}

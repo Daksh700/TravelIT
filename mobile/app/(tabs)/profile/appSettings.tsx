@@ -83,7 +83,6 @@ export default function AppSettingsScreen() {
       className="flex-1"
       edges={["top"]}
     >
-      {/* Header */}
       <View
         style={{ borderBottomColor: colors.border }}
         className="flex-row items-center gap-4 px-6 py-4 border-b"
@@ -112,7 +111,6 @@ export default function AppSettingsScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6 py-6">
-        {/* Appearance */}
         <Text
           style={{ color: colors.textMuted }}
           className="text-xs font-bold uppercase tracking-widest mb-3"
@@ -148,7 +146,6 @@ export default function AppSettingsScreen() {
           />
         </View>
 
-        {/* Feedback */}
         <Text
           style={{ color: colors.textMuted }}
           className="text-xs font-bold uppercase tracking-widest mb-3"
