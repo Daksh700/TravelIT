@@ -30,7 +30,6 @@ export default function ExploreScreen() {
       
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
         
-        {/* 1. Header */}
         <View className="mb-6">
             <Text style={{ color: colors.text }} className="text-2xl font-bold uppercase tracking-tight mb-1">
               Explore
@@ -40,7 +39,6 @@ export default function ExploreScreen() {
             </Text>
         </View>
 
-        {/* 2. Search Input */}
         <View className="relative mb-4">
             <Input 
                 placeholder="Events in London this week..." 
@@ -62,15 +60,12 @@ export default function ExploreScreen() {
             </TouchableOpacity>
         </View>
 
-        {/* 3. Result Area */}
         {result ? (
             <View className="space-y-6 mb-10">
-                {/* AI summary */}
                 <Text style={{ color: colors.text }} className="leading-relaxed text-base mb-2">
                     {result.text}
                 </Text>
 
-                {/* Links */}
                 {!!result.links?.length && (
                   <View className="gap-2 mt-2">
                       <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase tracking-widest mb-2">
@@ -101,7 +96,6 @@ export default function ExploreScreen() {
                   </View>
                 )}
 
-                {/* FIX: More spacing above clear */}
                 <View className="mt-4">
                   <Button
                     variant="outline"

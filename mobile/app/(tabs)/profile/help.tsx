@@ -26,7 +26,6 @@ export default function HelpScreen() {
       style={{ backgroundColor: colors.background }}
       className="flex-1"
     >
-      {/* ───────── HEADER ───────── */}
         <View
             style={{ borderBottomColor: colors.border }}
             className="flex-row items-center gap-4 px-6 py-4 border-b"
@@ -60,7 +59,6 @@ export default function HelpScreen() {
         className="flex-1 px-6 pt-6"
         showsVerticalScrollIndicator={false}
       >
-        {/* ───────── DIRECT COMMUNICATION ───────── */}
         <SectionLabel label="Direct Communication" />
 
         <View
@@ -128,7 +126,6 @@ export default function HelpScreen() {
           </Pressable>
         </View>
 
-        {/* ───────── FAQ ───────── */}
         <SectionLabel label="Common Queries" />
 
         <View
@@ -144,7 +141,6 @@ export default function HelpScreen() {
           ))}
         </View>
 
-        {/* ───────── RESOURCES ───────── */}
         <SectionLabel label="Resources" />
 
         <View
@@ -182,8 +178,6 @@ export default function HelpScreen() {
   );
 }
 
-/* ───────── SECTION LABEL ───────── */
-
 const SectionLabel = ({ label }: { label: string }) => {
   const { colors } = useThemeColors();
 
@@ -196,8 +190,6 @@ const SectionLabel = ({ label }: { label: string }) => {
     </Text>
   );
 };
-
-/* ───────── RESOURCE ITEM ───────── */
 
 const ResourceItem = ({
   icon: Icon,

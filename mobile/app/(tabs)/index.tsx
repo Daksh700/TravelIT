@@ -14,7 +14,6 @@ export default function HomeScreen() {
   const { colors } = useThemeColors();
   const { data: trips } = useUserItineraries();
 
-  // 🟢 Stats
   const plannedCount = trips?.length ?? 0;
   const completedCount = trips?.filter((t: any) => t.status === "completed").length ?? 0;
 
@@ -30,7 +29,6 @@ export default function HomeScreen() {
         className="flex-1 px-6 pt-4"
         showsVerticalScrollIndicator={false}
       >
-        {/* ───────── HERO ───────── */}
         <View className="mt-3 mb-10 space-y-4">
           <Text
             style={{ color: colors.text }}
@@ -57,7 +55,6 @@ export default function HomeScreen() {
           </Button>
         </View>
 
-        {/* ───────── TRENDING ───────── */}
         <View className="mb-8">
           <Text
             style={{ color: colors.textMuted }}
@@ -67,7 +64,6 @@ export default function HomeScreen() {
           </Text>
 
           <View className="flex-row flex-wrap gap-4">
-            {/* Kyoto */}
             <View
               style={{
                 backgroundColor: colors.card,
@@ -94,7 +90,6 @@ export default function HomeScreen() {
               </ImageBackground>
             </View>
 
-            {/* Bali */}
             <Card className="flex-1 justify-between min-h-[120px]">
               <Sun size={24} color="#eab308" />
               <View>
@@ -110,7 +105,6 @@ export default function HomeScreen() {
               </View>
             </Card>
 
-            {/* Iceland */}
             <Card className="flex-1 justify-between min-h-[120px]">
               <Wind size={24} color="#60a5fa" />
               <View>
@@ -126,7 +120,6 @@ export default function HomeScreen() {
               </View>
             </Card>
 
-            {/* Pro Tip */}
             <Card
               style={{
                 backgroundColor: `${colors.secondary ?? "#0070f3"}20`,
@@ -158,7 +151,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ───────── STATS ───────── */}
         <View className="mb-6 pb-8">
           <Text
             style={{ color: colors.textMuted }}
@@ -168,7 +160,6 @@ export default function HomeScreen() {
           </Text>
 
           <View className="flex-row gap-4">
-            {/* Trips Planned */}
             <View
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"
@@ -187,7 +178,6 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            {/* Trips Completed */}
             <View
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"

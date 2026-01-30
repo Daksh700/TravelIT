@@ -11,7 +11,6 @@ export const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => {
 
   return (
     <View style={{ marginBottom: 24 }}>
-      {/* Title Row */}
       <View
         style={{
           flexDirection: "row",
@@ -20,7 +19,6 @@ export const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => {
           marginBottom: 4,
         }}
       >
-        {/* Accent Dot */}
         <View
           style={{
             width: 8,
@@ -29,7 +27,6 @@ export const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => {
           }}
         />
 
-        {/* Title */}
         <Text
           style={{
             color: colors.text,
@@ -42,7 +39,6 @@ export const SectionHeader = ({ title, subtitle }: SectionHeaderProps) => {
         </Text>
       </View>
 
-      {/* Subtitle */}
       {subtitle && (
         <Text
           style={{

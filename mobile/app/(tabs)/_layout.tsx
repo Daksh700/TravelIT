@@ -27,7 +27,6 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
 
-        // 🎨 TAB BAR THEME (single source of truth)
         tabBarStyle: {
           backgroundColor: colors.tabBarBg,
           borderTopWidth: 1,
@@ -76,7 +75,7 @@ export default function TabsLayout() {
             <View
               style={{
                 backgroundColor: focused
-                  ? `${colors.primary}33` // primary with opacity
+                  ? `${colors.primary}33`
                   : "transparent",
                 padding: 8,
                 borderRadius: 999,

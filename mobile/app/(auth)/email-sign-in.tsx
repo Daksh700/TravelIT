@@ -51,7 +51,6 @@ export default function EmailSignIn() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView className="flex-1 px-8">
-        {/* 🔙 Back */}
         <View className="h-12 justify-center -ml-2">
           <Pressable
             className="w-10 h-10 items-center justify-center"
@@ -61,9 +60,7 @@ export default function EmailSignIn() {
           </Pressable>
         </View>
 
-        {/* CONTENT */}
         <View className="mt-8">
-          {/* HEADER */}
           <View className="mb-10 items-center">
             <Text
               style={{ color: colors.text }}
@@ -80,9 +77,7 @@ export default function EmailSignIn() {
             </Text>
           </View>
 
-          {/* FORM */}
           <View className="gap-5">
-            {/* EMAIL */}
             <View className="gap-2">
               <Text
                 style={{ color: colors.textMuted }}
@@ -106,7 +101,6 @@ export default function EmailSignIn() {
               />
             </View>
 
-            {/* PASSWORD */}
             <View className="gap-2">
               <Text
                 style={{ color: colors.textMuted }}
@@ -143,7 +137,6 @@ export default function EmailSignIn() {
               </View>
             </View>
 
-            {/* FORGOT */}
             <View className="items-end -mt-1">
               <Pressable
                 onPress={() =>
@@ -159,7 +152,6 @@ export default function EmailSignIn() {
               </Pressable>
             </View>
 
-            {/* CTA */}
             <Pressable
               onPress={onSignIn}
               disabled={loading}

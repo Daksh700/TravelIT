@@ -83,7 +83,6 @@ export default function ForgotPassword() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView className="flex-1 px-8">
-        {/* 🔙 Back */}
         <View className="h-12 justify-center -ml-2">
           <Pressable
             onPress={router.back}
@@ -97,9 +96,7 @@ export default function ForgotPassword() {
           </Pressable>
         </View>
 
-        {/* CONTENT */}
         <View className="mt-8">
-          {/* HEADER */}
           <View className="mb-10 items-center">
             <Text
               style={{ color: colors.text }}
@@ -119,7 +116,6 @@ export default function ForgotPassword() {
           </View>
 
           <View className="gap-5">
-            {/* STEP 1 */}
             {!successfulCreation && (
               <>
                 <View className="gap-2">
@@ -164,8 +160,7 @@ export default function ForgotPassword() {
                 </Pressable>
               </>
             )}
-
-            {/* STEP 2 */}
+            
             {successfulCreation && (
               <>
                 <View className="gap-2 w-full mb-2">

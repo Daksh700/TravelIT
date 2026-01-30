@@ -33,8 +33,6 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { colors } = useThemeColors();
 
-  /* ---------------- Loading ---------------- */
-
   if (isLoading) {
     return (
       <SafeAreaView
@@ -48,8 +46,6 @@ export default function ProfileScreen() {
       </SafeAreaView>
     );
   }
-
-  /* ---------------- Menu Item ---------------- */
 
   const MenuItem = ({ icon: Icon, label, value, isSwitch = false }: any) => (
     <View
@@ -95,8 +91,6 @@ export default function ProfileScreen() {
     </View>
   );
 
-  /* ---------------- Screen ---------------- */
-
   return (
     <SafeAreaView
       style={{ backgroundColor: colors.background }}
@@ -106,7 +100,6 @@ export default function ProfileScreen() {
       <Header />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
         <View className="items-center justify-center pt-8 pb-10 px-6">
           <View className="mb-4">
             <View
@@ -126,9 +119,7 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        {/* Menus */}
         <View className="px-6 mb-10">
-          {/* Account */}
           <Text
             style={{ color: colors.textMuted }}
             className="text-xs font-bold uppercase tracking-widest mb-3 ml-1"
@@ -151,7 +142,6 @@ export default function ProfileScreen() {
             <MenuItem icon={Heart} label="Saved Preferences" />
           </View>
 
-          {/* Settings */}
           <Text
             style={{ color: colors.textMuted }}
             className="text-xs font-bold uppercase tracking-widest mb-3 ml-1"
@@ -181,7 +171,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Logout */}
         <SignOutButton />
       </ScrollView>
     </SafeAreaView>

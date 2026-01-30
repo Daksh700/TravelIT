@@ -49,7 +49,6 @@ export default function EditProfileScreen() {
       className="flex-1"
       edges={["top"]}
     >
-      {/* TOP BAR */}
       <View
         style={{ borderBottomColor: colors.border }}
         className="flex-row items-center px-6 py-4 border-b"
@@ -73,7 +72,6 @@ export default function EditProfileScreen() {
         className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
       >
-        {/* AVATAR SECTION */}
         <View className="items-center mt-8 mb-10">
           <View className="relative">
             <View
@@ -90,7 +88,6 @@ export default function EditProfileScreen() {
               />
             </View>
 
-            {/* CHANGE AVATAR BUTTON */}
             <Pressable
               onPress={pickAvatar}
               style={{
@@ -111,7 +108,6 @@ export default function EditProfileScreen() {
           </Text>
         </View>
 
-        {/* FORM SECTION */}
         <View className="gap-6 mb-10">
           <Input
             label="First Name"
@@ -142,7 +138,6 @@ export default function EditProfileScreen() {
           />
         </View>
 
-        {/* ACTIONS */}
         <View className="gap-3 mb-12">
           <Button
             disabled={isPending}

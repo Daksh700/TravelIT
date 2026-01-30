@@ -25,7 +25,6 @@ export const useThemeColors = () => {
         danger: "#ef4444",
         success: "#22c55e",
 
-        // ✅ Switch
         switchOn: "#00dc82",
         switchOff: "#d4d4d8",
         switchThumb: "#ffffff",
@@ -58,7 +57,6 @@ export const useThemeColors = () => {
         danger: "#ef4444",
         success: "#22c55e",
 
-        // ✅ Switch
         switchOn: "#00dc82",
         switchOff: "#52525b",
         switchThumb: "#ffffff",

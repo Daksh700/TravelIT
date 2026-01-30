@@ -142,7 +142,6 @@ export default function CreateTripScreen() {
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <Header />
 
-      {/* 🔹 Step Indicator (1 - 2 - 3) */}
       <View className="mx-6 mt-6 mb-2">
         <View style={{ position: "relative" }}>
           <View
@@ -155,9 +154,7 @@ export default function CreateTripScreen() {
               zIndex: 0,
             }}
           >
-            {/* Gray Background Line */}
             <View style={{ flex: 1, backgroundColor: colors.border, height: "100%" }}>
-                {/* Green Animated Line */}
                 <Animated.View
                   style={[
                     {
@@ -173,7 +170,6 @@ export default function CreateTripScreen() {
             </View>
           </View>
 
-          {/* Circles */}
           <View className="flex-row justify-between" style={{ zIndex: 10 }}>
             {[1, 2, 3].map((num) => {
               const active = step >= num;
@@ -212,23 +208,19 @@ export default function CreateTripScreen() {
           <Text style={{ color: colors.textMuted }} className="text-sm ml-1">Let TravelIt craft your journey ✈️</Text>
         </View>
 
-        {/* ================= STEP 1: Basic Info ================= */}
         {step === 1 && (
           <Animated.View entering={FadeIn}>
             
-            {/* Reduced margin from mb-6 to mb-4 */}
             <View className="mb-4"> 
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Source City</Text>
               <Input value={form.source} placeholder="Mumbai" onChangeText={(t) => setForm({ ...form, source: t })} className="h-14" />
             </View>
 
-            {/* Reduced margin from mb-6 to mb-4 */}
             <View className="mb-4">
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Destination</Text>
               <Input value={form.destination} placeholder="Tokyo" onChangeText={(t) => setForm({ ...form, destination: t })} className="h-14" />
             </View>
 
-            {/* Reduced margin from mb-6 to mb-4 */}
             <View className="flex-row gap-4 mb-4">
               <View className="flex-1">
                 <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Days</Text>
@@ -240,7 +232,6 @@ export default function CreateTripScreen() {
               </View>
             </View>
 
-            {/* Kept mb-6 here as requested */}
             <View className="mb-8">
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Currency</Text>
               <View className="flex-row gap-2">
@@ -252,7 +243,6 @@ export default function CreateTripScreen() {
               </View>
             </View>
 
-            {/* Kept mb-6 here */}
             <View className="mb-8">
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Budget Tier</Text>
               <View className="flex-row gap-2">
@@ -268,7 +258,6 @@ export default function CreateTripScreen() {
           </Animated.View>
         )}
 
-        {/* ================= STEP 2: Dates & Travelers ================= */}
         {step === 2 && (
           <Animated.View entering={FadeIn}>
             <TouchableOpacity onPress={() => openDatePicker("tripStartDate")} className="mb-4">
@@ -330,7 +319,6 @@ export default function CreateTripScreen() {
           </Animated.View>
         )}
 
-        {/* ================= STEP 3: Preferences ================= */}
         {step === 3 && (
           <Animated.View entering={FadeIn}>
             <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-row items-center justify-between p-4 border rounded-md mb-8">
@@ -359,7 +347,6 @@ export default function CreateTripScreen() {
         )}
       </ScrollView>
 
-      {/* 🔹 SINGLE MODAL FOR DATES */}
       {pickerConfig && (
         <Modal transparent animationType="fade" visible={true} onRequestClose={() => setPickerConfig(null)}>
           <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>

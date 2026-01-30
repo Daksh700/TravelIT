@@ -66,7 +66,6 @@ export default function SignUp() {
     }
   };
 
-  /* ================= VERIFY VIEW ================= */
   if (pendingVerification) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -153,7 +152,6 @@ export default function SignUp() {
     );
   }
 
-  /* ================= SIGN UP VIEW ================= */
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView className="flex-1 px-8">

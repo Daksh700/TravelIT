@@ -66,10 +66,8 @@ export default function TripsScreen() {
                 className="p-5 border rounded-xl"
               >
                 
-                {/* TOP BAR: STATUS + DELETE */}
                 <View className="flex-row justify-between items-start mb-4">
-                  
-                  {/* Status */}
+
                   <TouchableOpacity
                     onPress={() => {
                       setActiveTrip(trip);
@@ -84,7 +82,6 @@ export default function TripsScreen() {
                     <ChevronDown size={12} color={colors.textMuted} />
                   </TouchableOpacity>
 
-                  {/* Delete */}
                   <TouchableOpacity
                     onPress={() => {
                       setActiveTrip(trip);
@@ -95,7 +92,6 @@ export default function TripsScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* MAIN CONTENT */}
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => router.push({ pathname: "/(tabs)/trips/view", params: { id: trip._id } })}
@@ -110,7 +106,6 @@ export default function TripsScreen() {
                       : trip.tripDescription}
                   </Text>
 
-                  {/* BADGES */}
                   <View className="flex-row items-center gap-3">
                     <View style={{ backgroundColor: colors.card }} className="px-3 py-2 rounded-md">
                       <Text style={{ color: colors.text, fontWeight: '700', fontSize: 12 }}>
@@ -131,7 +126,6 @@ export default function TripsScreen() {
         )}
       </ScrollView>
 
-      {/* STATUS MODAL */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/80 px-4">
           <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="w-full p-6 rounded-2xl border">
@@ -175,7 +169,6 @@ export default function TripsScreen() {
         </View>
       </Modal>
 
-      {/* DELETE CONFIRM MODAL */}
       <Modal visible={showDelete} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/80 px-4">
           <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="w-full p-6 rounded-2xl border">

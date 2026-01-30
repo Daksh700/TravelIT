@@ -24,7 +24,6 @@ export default function SignIn() {
         justifyContent: "center",
       }}
     >
-      {/* 🔐 Logo */}
       <View
         style={{ backgroundColor: colors.primary }}
         className="w-12 h-12 self-center mb-6 items-center justify-center"
@@ -37,7 +36,6 @@ export default function SignIn() {
         </Text>
       </View>
 
-      {/* 🏷 Brand */}
       <Text
         style={{ color: colors.text }}
         className="text-4xl font-bold tracking-tight uppercase italic text-center"
@@ -52,9 +50,7 @@ export default function SignIn() {
         Your AI Journey Vault
       </Text>
 
-      {/* 🔘 Buttons */}
       <View className="gap-3">
-        {/* Google */}
         <Pressable
           onPress={() => handleSocialAuth("oauth_google")}
           disabled={isLoading}
@@ -82,7 +78,6 @@ export default function SignIn() {
           )}
         </Pressable>
 
-        {/* Apple */}
         <Pressable
           onPress={() => handleSocialAuth("oauth_apple")}
           disabled={isLoading}
@@ -111,7 +106,6 @@ export default function SignIn() {
         </Pressable>
       </View>
 
-      {/* ─── OR ─── */}
       <View className="flex-row items-center my-8">
         <View
           style={{ backgroundColor: colors.border }}
@@ -129,7 +123,6 @@ export default function SignIn() {
         />
       </View>
 
-      {/* Email CTA */}
       <Pressable
         style={{ backgroundColor: colors.primary }}
         className="py-4"
@@ -143,7 +136,6 @@ export default function SignIn() {
         </Text>
       </Pressable>
 
-      {/* Create Account */}
       <Pressable
         style={{
           borderColor: colors.border,
@@ -160,7 +152,6 @@ export default function SignIn() {
         </Text>
       </Pressable>
 
-      {/* 🔒 Footer */}
       <Text
         style={{ color: colors.textMuted }}
         className="text-[10px] font-bold uppercase tracking-[0.3em] text-center mt-12"

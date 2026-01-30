@@ -74,8 +74,7 @@ export default function ResultScreen() {
       <Header />
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        
-        {/* ---- HEADER ---- */}
+
         <View className="flex-row justify-between items-start mb-8">
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.text }} className="text-3xl font-bold leading-tight">
@@ -106,7 +105,6 @@ export default function ResultScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ---- META INFO (Stat Cards) ---- */}
         <View className="flex-row gap-3 mb-8">
           <MetaCard 
             label="Travelers" 
@@ -128,21 +126,18 @@ export default function ResultScreen() {
           />
         </View>
 
-        {/* ---- TRIP SUMMARY (Description) ---- */}
         <View style={{ borderLeftColor: colors.primary }} className="pl-4 border-l mb-10">
           <Text style={{ color: colors.textMuted }} className="text-sm leading-relaxed">
             {itinerary.tripDescription}
           </Text>
         </View>
 
-        {/* ---- HOTEL SUMMARY CARD (Theme Updated) ---- */}
         {hotel && (
           <TouchableOpacity
             onPress={() => setHotelModalVisible(true)}
             className="mb-10 rounded-lg overflow-hidden relative border"
             style={{ backgroundColor: colors.card, borderColor: colors.border }}
           >
-            {/* Blue Accent Line */}
             <View className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 z-10" />
 
             <View className="p-5 pl-7">
@@ -188,7 +183,6 @@ export default function ResultScreen() {
           </TouchableOpacity>
         )}
 
-        {/* ---- DAY PLAN ---- */}
         <View className="relative">
           <View style={{ backgroundColor: colors.border }} className="absolute left-[11px] top-6 bottom-0 w-[1px]" />
 
@@ -227,7 +221,6 @@ export default function ResultScreen() {
           ))}
         </View>
 
-        {/* ---- NEW TRIP BUTTON ---- */}
         <Button variant="outline" onPress={() => router.replace("/(tabs)/plan")} className="mt-10 mb-10 h-14 py-0">
           <View className="flex-row items-center justify-center gap-2">
             <Text style={{ color: colors.text }} className="font-bold">Plan Another Trip</Text>
@@ -235,14 +228,10 @@ export default function ResultScreen() {
         </Button>
       </ScrollView>
 
-      {/* ========================================================= */}
-      {/* 🔹 HOTEL DETAILS MODAL (Updated for Light/Dark Mode) */}
-      {/* ========================================================= */}
       <Modal visible={hotelModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setHotelModalVisible(false)}>
         {hotel && (
           <View style={{ flex: 1, backgroundColor: colors.background }}>
             
-            {/* Modal Header */}
             <View style={{ borderColor: colors.border }} className="px-6 py-4 flex-row justify-between items-center border-b">
               <Text style={{ color: colors.text }} className="text-lg font-bold italic">ACCOMMODATION DETAILS</Text>
               <TouchableOpacity onPress={() => setHotelModalVisible(false)}>
@@ -252,7 +241,6 @@ export default function ResultScreen() {
 
             <ScrollView className="flex-1 px-6 pt-6">
               
-              {/* Hotel Title Section */}
               <View className="mb-6">
                 <Text style={{ color: colors.text }} className="text-2xl font-bold mb-2">{hotel.name}</Text>
                 <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase mb-4">
@@ -264,7 +252,6 @@ export default function ResultScreen() {
                 </Text>
               </View>
 
-              {/* Logic & Amenities */}
               <Text style={{ color: colors.textSecondary }} className="text-xs font-bold uppercase tracking-widest mb-4">
                 LOGIC & AMENITIES
               </Text>
@@ -278,7 +265,6 @@ export default function ResultScreen() {
                 <AmenityItem icon={<Coffee size={14} color="#4ade80" />} label="Kettle" colors={colors} />
               </View>
 
-              {/* Visual Grounding */}
               <Text style={{ color: colors.textSecondary }} className="text-xs font-bold uppercase tracking-widest mb-4">
                 VISUAL GROUNDING
               </Text>
@@ -302,7 +288,6 @@ export default function ResultScreen() {
               </ScrollView>
             </ScrollView>
 
-            {/* Footer Valuation */}
             <View style={{ backgroundColor: colors.background, borderColor: colors.border }} className="absolute bottom-0 left-0 right-0 border-t p-6 pb-10">
                <View 
                  style={{ 

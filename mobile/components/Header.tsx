@@ -13,7 +13,6 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 export const Header = () => {
   const { colors } = useThemeColors();
 
-  // 🔹 Pulsing animation
   const opacity = useSharedValue(1);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export const Header = () => {
       -1,
       true
     );
-  }, []);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -39,7 +38,6 @@ export const Header = () => {
       }}
       className="flex-row items-center justify-between px-6 py-4 border-b"
     >
-      {/* Logo + Title */}
       <View className="flex-row items-center gap-2">
         <View
           style={{ backgroundColor: colors.primary }}
@@ -54,7 +52,6 @@ export const Header = () => {
         </Text>
       </View>
 
-      {/* Pulsing Status Dot */}
       <Animated.View
         style={[
           animatedStyle,

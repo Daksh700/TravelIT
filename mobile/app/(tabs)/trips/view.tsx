@@ -47,7 +47,6 @@ export default function ViewTripScreen() {
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
-      {/* Header */}
       <View
         style={{ borderBottomColor: colors.border }}
         className="flex-row items-center gap-4 px-6 py-4 border-b"
@@ -67,7 +66,6 @@ export default function ViewTripScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-        {/* ---- HEADER ---- */}
         <View className="flex-row justify-between items-start mb-8">
           <View style={{ flex: 1 }}>
             <Text style={{ color: colors.text }} className="text-3xl font-bold leading-tight">
@@ -90,7 +88,6 @@ export default function ViewTripScreen() {
               </View>
             </View>
 
-            {/* STATUS BADGE */}
             <View className="mt-4 flex-row">
               <View 
                 className="px-3 py-1.5 rounded-full flex-row items-center gap-2 border"
@@ -114,7 +111,6 @@ export default function ViewTripScreen() {
           </View>
         </View>
 
-        {/* ---- META INFO (Stat Cards) ---- */}
         <View className="flex-row gap-3 mb-8">
           <MetaCard 
             label="Travelers" 
@@ -136,21 +132,18 @@ export default function ViewTripScreen() {
           />
         </View>
 
-        {/* ---- SUMMARY ---- */}
         <View style={{ borderLeftColor: colors.primary }} className="pl-4 border-l mb-10">
           <Text style={{ color: colors.textMuted }} className="text-sm leading-relaxed">
             {trip.tripDescription}
           </Text>
         </View>
 
-        {/* ---- HOTEL SUMMARY CARD ---- */}
         {hotel && (
           <TouchableOpacity
             onPress={() => setHotelModalVisible(true)}
             className="mb-10 rounded-lg overflow-hidden relative border"
             style={{ backgroundColor: colors.card, borderColor: colors.border }}
           >
-            {/* Blue Accent Line */}
             <View className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 z-10" />
 
             <View className="p-5 pl-7">
@@ -196,7 +189,6 @@ export default function ViewTripScreen() {
           </TouchableOpacity>
         )}
 
-        {/* ---- DAYS ---- */}
         <View className="relative">
           <View
             style={{ backgroundColor: colors.border }}
@@ -225,7 +217,6 @@ export default function ViewTripScreen() {
                     style={{ borderColor: colors.border, backgroundColor: colors.surface }}
                     className="p-4 border"
                   >
-                    {/* BADGES */}
                     <View className="flex-row gap-2 mb-2">
                       {renderStatusBadge(act)}
                     </View>
@@ -255,7 +246,6 @@ export default function ViewTripScreen() {
           ))}
         </View>
 
-        {/* ---- BACK ---- */}
         <Button
           variant="outline"
           onPress={() => router.replace("/(tabs)/trips")}
@@ -269,14 +259,10 @@ export default function ViewTripScreen() {
         </Button>
       </ScrollView>
 
-      {/* ========================================================= */}
-      {/* 🔹 HOTEL DETAILS MODAL (Updated for Light/Dark Mode) */}
-      {/* ========================================================= */}
       <Modal visible={hotelModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setHotelModalVisible(false)}>
         {hotel && (
           <View style={{ flex: 1, backgroundColor: colors.background }}>
             
-            {/* Modal Header */}
             <View style={{ borderColor: colors.border }} className="px-6 py-4 flex-row justify-between items-center border-b">
               <Text style={{ color: colors.text }} className="text-lg font-bold italic">ACCOMMODATION DETAILS</Text>
               <TouchableOpacity onPress={() => setHotelModalVisible(false)}>
@@ -286,7 +272,6 @@ export default function ViewTripScreen() {
 
             <ScrollView className="flex-1 px-6 pt-6">
               
-              {/* Hotel Title Section */}
               <View className="mb-6">
                 <Text style={{ color: colors.text }} className="text-2xl font-bold mb-2">{hotel.name}</Text>
                 <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase mb-4">
@@ -298,7 +283,6 @@ export default function ViewTripScreen() {
                 </Text>
               </View>
 
-              {/* Logic & Amenities */}
               <Text style={{ color: colors.textSecondary }} className="text-xs font-bold uppercase tracking-widest mb-4">
                 LOGIC & AMENITIES
               </Text>
@@ -312,7 +296,6 @@ export default function ViewTripScreen() {
                 <AmenityItem icon={<Coffee size={14} color="#4ade80" />} label="Kettle" colors={colors} />
               </View>
 
-              {/* Visual Grounding */}
               <Text style={{ color: colors.textSecondary }} className="text-xs font-bold uppercase tracking-widest mb-4">
                 VISUAL GROUNDING
               </Text>
@@ -336,7 +319,6 @@ export default function ViewTripScreen() {
               </ScrollView>
             </ScrollView>
 
-            {/* Footer Valuation */}
             <View style={{ backgroundColor: colors.background, borderColor: colors.border }} className="absolute bottom-0 left-0 right-0 border-t p-6 pb-10">
                <View 
                  style={{ 

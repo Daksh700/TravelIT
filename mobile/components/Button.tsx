@@ -25,7 +25,6 @@ export const Button = ({
 
   const isDisabled = disabled || isLoading;
 
-  /* ---------- CONTAINER STYLE ---------- */
   let backgroundColor = "transparent";
   let borderColor = "transparent";
 
@@ -37,7 +36,6 @@ export const Button = ({
     borderColor = colors.border;
   }
 
-  /* ---------- TEXT COLOR ---------- */
   let textColor = colors.text;
 
   if (variant === "primary") {
