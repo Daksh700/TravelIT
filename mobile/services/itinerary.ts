@@ -44,7 +44,7 @@ export const generateItinerary = async(
             throw new Error(data.message || "Something went wrong");
         }
 
-        console.log("Data Received from Backend", data.data);
+        console.log("Data Received from Backend");
 
         return data.data;
     } catch (error) {
