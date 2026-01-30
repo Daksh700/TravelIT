@@ -3,7 +3,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 
 interface InputProps extends TextInputProps {
   label?: string;
-  className?: string; // optional, but styles ab mostly JS se aayengi
+  className?: string; 
 }
 
 export const Input = ({ label, className, ...props }: InputProps) => {
@@ -29,7 +29,7 @@ export const Input = ({ label, className, ...props }: InputProps) => {
           borderColor: colors.border,
         }}
         className={`
-          px-4 py-3 text-base w-full rounded-md border
+          px-4 py-3 text-base w-full rounded-sm border
           ${className ?? ""}
         `}
       />
