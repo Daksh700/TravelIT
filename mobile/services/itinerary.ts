@@ -9,6 +9,8 @@ export const generateItinerary = async(
     travelers: number,
     ageGroup: string,
     safeMode: boolean,
+    checkInDate: string,
+    checkOutDate: string,
     interests?: string[]
 ) => {
     try {
@@ -30,9 +32,11 @@ export const generateItinerary = async(
                 travelers,
                 ageGroup,
                 safeMode,
+                checkInDate,
+                checkOutDate,
                 interests
             })
-        })
+        });
 
         const data = await response.json();
 
@@ -40,7 +44,7 @@ export const generateItinerary = async(
             throw new Error(data.message || "Something went wrong");
         }
 
-        console.log("Data Received from Backend");
+        console.log("Data Received from Backend", data.data);
 
         return data.data;
     } catch (error) {
@@ -55,6 +59,8 @@ export const saveItinerary = async(
     destination: string,
     sourceMeta: object,
     duration: number,
+    tripStartDate: string,
+    tripEndDate: string,
     budgetTier: string,
     budget: number,
     currency: string,
@@ -64,6 +70,7 @@ export const saveItinerary = async(
     travelers: number,
     ageGroup: string,
     safeMode: boolean,
+    hotel: object | null,
     status?: string,
     interests?: string[]
 ) => {
@@ -81,6 +88,8 @@ export const saveItinerary = async(
                 destination,
                 sourceMeta,
                 duration,
+                tripStartDate,
+                tripEndDate,
                 budgetTier,
                 budget,
                 currency,
@@ -90,10 +99,11 @@ export const saveItinerary = async(
                 ageGroup,
                 safeMode,
                 tripDetails,
+                hotel,
                 status,
                 interests,
             })
-        })
+        });
 
         const data = await response.json();
 
