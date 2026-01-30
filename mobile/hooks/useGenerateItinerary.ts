@@ -13,6 +13,8 @@ type GenerateItineraryParams = {
   travelers: number,
   ageGroup: string,
   safeMode: boolean,
+  checkInDate: string,
+  checkOutDate: string,
   interests?: string[]
 }
 
@@ -22,9 +24,9 @@ export const useGenerateItinerary = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async(data: GenerateItineraryParams) => {
+    mutationFn: async (data: GenerateItineraryParams) => {
       const token = await getToken();
-      if(!token) throw new Error("No token");
+      if (!token) throw new Error("No token");
 
       return generateItinerary(
         token,
@@ -37,35 +39,42 @@ export const useGenerateItinerary = () => {
         data.travelers,
         data.ageGroup,
         data.safeMode,
+        data.checkInDate,
+        data.checkOutDate,
         data.interests
       );
     },
-    onSuccess: (data, variables) => {
-        if(!data) return;
 
-        const fullPayload = {
-          ...data,
-          source: variables.source,
-          destination: variables.destination,
-          duration: Number(variables.duration),
-          budgetTier: variables.budgetTier,
-          budget: Number(variables.budget),
-          currency: variables.currency,
-          interests: variables.interests ?? [],
-          sourceMeta: {
-            city: variables.source,
-            autoDetected: false,
-          },
-          status: "draft",
-          travelers: variables.travelers,
-          ageGroup: variables.ageGroup,
-          safeMode: variables.safeMode,
-        }
-        queryClient.setQueryData(["latestItinerary"], fullPayload);
-        router.push("/(tabs)/plan/result")
+    onSuccess: (data, variables) => {
+      if (!data) return;
+
+      const fullPayload = {
+        ...data,
+        source: variables.source,
+        destination: variables.destination,
+        duration: Number(variables.duration),
+        budgetTier: variables.budgetTier,
+        budget: Number(variables.budget),
+        currency: variables.currency,
+        interests: variables.interests ?? [],
+        sourceMeta: {
+          city: variables.source,
+          autoDetected: false,
+        },
+        status: "draft",
+        travelers: variables.travelers,
+        ageGroup: variables.ageGroup,
+        safeMode: variables.safeMode,
+        tripStartDate: variables.checkInDate,
+        tripEndDate: variables.checkOutDate,
+      };
+
+      queryClient.setQueryData(["latestItinerary"], fullPayload);
+      router.push("/(tabs)/plan/result");
     },
+
     onError: (err: any) => {
-        console.log("Generation failed: ", err.message);
+      console.log("Generation failed: ", err.message);
     }
   });
 };
