@@ -28,7 +28,7 @@ export default function CreateTripScreen() {
     if (step === 1) progress.value = withTiming(0, { duration: 400 });
     if (step === 2) progress.value = withTiming(0.5, { duration: 400 });
     if (step === 3) progress.value = withTiming(1, { duration: 400 });
-  }, [step]);
+  }, [step, progress]);
 
   const progressStyle = useAnimatedStyle(() => ({
     width: `${progress.value * 100}%`,
