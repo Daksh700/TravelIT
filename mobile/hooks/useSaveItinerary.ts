@@ -8,6 +8,8 @@ type SaveItineraryParams = {
   destination: string,
   sourceMeta: object,
   duration: number,
+  tripStartDate: string,
+  tripEndDate: string,
   budgetTier: string,
   budget: number,
   currency: string,
@@ -18,6 +20,7 @@ type SaveItineraryParams = {
   travelers: number,
   ageGroup: string,
   safeMode: boolean,
+  hotel?: object | null,
   interests?: string[]
 }
 
@@ -26,9 +29,9 @@ export const useSaveItinerary = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async(data: SaveItineraryParams) => {
+    mutationFn: async (data: SaveItineraryParams) => {
       const token = await getToken();
-      if(!token) throw new Error("No token");
+      if (!token) throw new Error("No token");
 
       return saveItinerary(
         token,
@@ -36,6 +39,8 @@ export const useSaveItinerary = () => {
         data.destination,
         data.sourceMeta,
         data.duration,
+        data.tripStartDate,
+        data.tripEndDate,
         data.budgetTier,
         data.budget,
         data.currency,
@@ -45,15 +50,18 @@ export const useSaveItinerary = () => {
         data.travelers,
         data.ageGroup,
         data.safeMode,
+        data.hotel ?? null,
         "draft",
         data.interests,
       );
     },
+
     onSuccess: () => {
-        router.push("/(tabs)/plan")
+      router.push("/(tabs)/plan");
     },
+
     onError: (err: any) => {
-        console.log("Generation failed: ", err.message);
+      console.log("Save failed: ", err.message);
     }
   });
 };
