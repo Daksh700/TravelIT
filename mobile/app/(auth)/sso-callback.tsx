@@ -15,7 +15,7 @@ export default function SSOScreen() {
                 router.replace("/(auth)/sign-in")
             }
         }
-    }, [isLoaded, isSignedIn, router]);
+    }, [isLoaded, isSignedIn]);
 
     return null;
 }

@@ -18,7 +18,7 @@ export default function TabsLayout() {
     if (isSignedIn) {
       handleAuthSync();
     }
-  }, [isSignedIn, handleAuthSync]);
+  }, [isSignedIn]);
 
   if (!isSignedIn) return <Redirect href="/(auth)/sign-in" />;
 

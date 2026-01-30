@@ -34,7 +34,7 @@ export default function ForgotPassword() {
     if (isSignedIn) {
       router.replace("../(tabs)");
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn]);
 
   if (!isLoaded) return null;
 
@@ -160,7 +160,7 @@ export default function ForgotPassword() {
                 </Pressable>
               </>
             )}
-
+            
             {successfulCreation && (
               <>
                 <View className="gap-2 w-full mb-2">

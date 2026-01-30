@@ -15,5 +15,5 @@ export const useSystemThemeSync = () => {
                 setDarkMode(false);
             }
         }
-    }, [systemTheme, colorScheme, setDarkMode])
+    }, [systemTheme, colorScheme])
 }
