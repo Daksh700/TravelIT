@@ -252,7 +252,7 @@ export const exploreLocation = asyncHandler(async (req: Request, res: Response) 
     
   if (structuredData.recommendations) {
     for (const item of structuredData.recommendations) {
-      const details = await verifyPlace(item.name);
+      const details = await verifyPlace(item.name, query);
             
         enrichedItems.push({
             ...item,
