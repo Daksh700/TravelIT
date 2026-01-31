@@ -26,6 +26,7 @@ export const useExploreLocation = () => {
             queryClient.setQueryData(["exploreResult"], {
                 query: variables.query,
                 text: data.text,
+                items: data.items ?? [],
                 links: data.links ?? []
             });
         },
