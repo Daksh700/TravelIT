@@ -21,12 +21,16 @@ export const verifyPlace = async(placeName: string, city?: string) => {
         const place = searchData.results[0];
         const placeId = place.place_id;
 
-        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,opening_hours,website,price_level,rating&key=${apiKey}`;
+        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,opening_hours,website,price_level,rating,photos,geometry&key=${apiKey}`;
 
         const detailRes = await fetch(detailsUrl);
         const detailData = await detailRes.json() as any;
 
         const details = detailData.result || {};
+
+        const photos = details.photos?.map((p: any) => 
+            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${p.photo_reference}&key=${apiKey}`
+        ) || [];
 
         let closedToday = false;
         let openingHoursText: string | null = null;
@@ -69,6 +73,8 @@ export const verifyPlace = async(placeName: string, city?: string) => {
             openingHours: openingHoursText ?? null,
             closedToday: closedToday ?? false,
             seasonalWarning: seasonalWarning ?? null,
+            photos: photos,
+            location: details.geometry?.location || null
         }
         
     } catch (error) {
@@ -82,7 +88,9 @@ export const verifyPlace = async(placeName: string, city?: string) => {
             website: null,
             openingHours: null,
             closedToday: false,
-            seasonalWarning: null
+            seasonalWarning: null,
+            photos: [],
+            location: null
         }
     }
 }
