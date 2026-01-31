@@ -234,7 +234,6 @@ export const exploreLocation = asyncHandler(async (req: Request, res: Response) 
     model: "gemini-2.5-flash",
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     config: { 
-      responseMimeType: "application/json",
       tools: [{googleSearch: {}}] 
     }
   });
@@ -246,7 +245,7 @@ export const exploreLocation = asyncHandler(async (req: Request, res: Response) 
   try {
     structuredData = JSON.parse(cleanText || "{}");
   } catch (e) {
-    return res.status(200).json(new ApiResponse(200, { text: responseText, items: [] }, "Raw text returned"));
+    return res.status(200).json(new ApiResponse(200, { text: responseText, items: [], links: [] }, "Raw text returned"));
   }
 
   const enrichedItems = [];
