@@ -211,39 +211,71 @@ ${interestPrompt}
 });
 
 export const exploreLocation = asyncHandler(async (req: Request, res: Response) => {
-    const { query } = req.body;
+  const { query } = req.body;
 
-    if(!query) {
-        throw new ApiError(400, "Query is required");
+  if (!query) {
+    throw new ApiError(400, "Query is required");
+  }
+
+  const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+
+  const prompt = `
+  You are a travel assistant. The user is asking: "${query}".
+    
+  Return a valid JSON object with:
+   1. "summary": A concise answer (max 2 sentences).
+   2. "recommendations": An array of places/items mentioned (max 5).
+    Each recommendation must have: "name", "description" (short).
+
+    JSON FORMAT ONLY. NO MARKDOWN.
+  `;
+
+  const model = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    config: { 
+      responseMimeType: "application/json",
+      tools: [{googleSearch: {}}] 
+    }
+  });
+
+  const responseText = model.text; 
+  const cleanText = responseText?.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+  let structuredData;
+  try {
+    structuredData = JSON.parse(cleanText || "{}");
+  } catch (e) {
+    return res.status(200).json(new ApiResponse(200, { text: responseText, items: [] }, "Raw text returned"));
+  }
+
+  const enrichedItems = [];
+    
+  if (structuredData.recommendations) {
+    for (const item of structuredData.recommendations) {
+      const details = await verifyPlace(item.name);
+            
+        enrichedItems.push({
+            ...item,
+            image: details.photos?.[0] || null, 
+            address: details.formattedAddress || null,
+            rating: details.rating || null,
+            verified: details.verified
+          });
+        }
     }
 
-    const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY as string});
+  const groundingMetadata = model.candidates?.[0]?.groundingMetadata;
+  const links = groundingMetadata?.groundingChunks?.map((chunk: any) => {
+    if (chunk.web) return { title: chunk.web.title, url: chunk.web.uri };
+      return null;
+  }).filter((link: any) => link !== null) || [];
 
-    const prompt = `Answer this travel query concisely: ${query}`;
-
-    const model = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          tools: [{googleSearch: {}}]
-        }
-    });
-
-    const text = model.text;
-
-    const groundingMetadata = model.candidates?.[0]?.groundingMetadata;
-
-    const links = groundingMetadata?.groundingChunks?.map((chunk: any) => {
-        if(chunk.web) {
-            return {
-                title: chunk.web.title,
-                url: chunk.web.uri
-            };
-        }
-        return null;
-    }).filter((link: any) => link !== null) || [];
-
-    return res.status(200).json(
-        new ApiResponse(200, {text, links}, "Search results fetched")
-    );
+  return res.status(200).json(
+    new ApiResponse(200, { 
+      text: structuredData.summary, 
+      items: enrichedItems, 
+      links 
+    }, "Search results fetched")
+  );
 })
