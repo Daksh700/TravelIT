@@ -169,7 +169,7 @@ export default function ExploreScreen() {
                   {[
                     'Best coffee in Seattle',
                     'Hidden gems in Rome',
-                    'Visa requirements for Bali'
+                    'Tourist Places in Bali'
                   ].map((text) => (
                       <TouchableOpacity
                           key={text}
