@@ -43,6 +43,9 @@ export const saveItinerarySchema = z.object({
 
   duration: z.number(),
 
+  tripStartDate: z.string(),
+  tripEndDate: z.string(),
+
   budgetTier: z.enum(["low", "medium", "high"]),
   budget: z.number(),
   currency: z.string(),
@@ -71,6 +74,9 @@ export const saveItinerarySchema = z.object({
       ),
     })
   ),
+
+  hotel: z.any().optional().nullable(),
+  flight: z.any().optional().nullable(),
 
   status: z.enum(["draft", "active", "completed"]).default("draft"),
 });
