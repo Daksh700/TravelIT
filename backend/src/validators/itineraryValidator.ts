@@ -25,6 +25,11 @@ export const generateItinerarySchema = z.object({
   ageGroup: z.enum(["family", "young", "adults", "seniors"]).default("adults"),
 
   safeMode: z.boolean().default(false),
+
+  tripStartDate: z.string(),
+  tripEndDate: z.string(),
+  checkInDate: z.string(),
+  checkOutDate: z.string(),
 });
 
 export const saveItinerarySchema = z.object({
