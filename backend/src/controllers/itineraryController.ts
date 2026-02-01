@@ -29,7 +29,8 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     safeMode = false,
     tripStartDate,
     tripEndDate,
-    hotel
+    hotel,
+    flight
   } = req.body;
 
   if (
@@ -82,7 +83,8 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     safeMode,
     tripStartDate,
     tripEndDate,
-    hotel: hotel || null
+    hotel: hotel || null,
+    flight: flight || null
   });
 
   const savedItinerary = await newItinerary.save();
