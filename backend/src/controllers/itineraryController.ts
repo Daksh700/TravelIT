@@ -56,9 +56,10 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
   for(const day of tripDetails) {
     const verifiedActs = [];
     for(const act of day.activities) {
-      const locationStr = typeof act.location === 'string' ? act.location : act.formattedAddress;
+      const locationStr = typeof act.location === 'string' ? act.location : act.location?.formattedAddress || act.location?.name || 'Unknown';
       const verified = await verifyPlace(`${act.activity} ${locationStr} ${destination}`);
-      verifiedActs.push({...act, ...verified});
+      const {location, ...verifiedData} = verified; 
+      verifiedActs.push({...act, location: locationStr, ...verifiedData}); 
     }
 
     verifiedDays.push({...day, activities: verifiedActs});
