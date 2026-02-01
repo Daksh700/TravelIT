@@ -44,7 +44,9 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     !currency ||
     !tripTitle ||
     !tripDescription ||
-    !tripDetails
+    !tripDetails ||
+    !tripStartDate ||
+    !tripEndDate
   ) {
     throw new ApiError(400, "All required fields are missing");
   }
@@ -54,7 +56,8 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
   for(const day of tripDetails) {
     const verifiedActs = [];
     for(const act of day.activities) {
-      const verified = await verifyPlace(`${act.activity} ${act.location} ${destination}`);
+      const locationStr = typeof act.location === 'string' ? act.location : act.formattedAddress;
+      const verified = await verifyPlace(`${act.activity} ${locationStr} ${destination}`);
       verifiedActs.push({...act, ...verified});
     }
 
