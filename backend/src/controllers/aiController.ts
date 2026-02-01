@@ -19,6 +19,8 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
     travelers = 1,
     ageGroup = "adults",
     safeMode = false,   
+    tripStartDate,
+    tripEndDate,
     checkInDate,     
     checkOutDate  
   } = req.body;
@@ -202,9 +204,9 @@ ${interestPrompt}
 
     let flightSnapshot = null;
 
-    if (checkInDate && checkOutDate) {
+    if (tripStartDate && tripEndDate) {
 
-      const flightResult = await getFlights(source, destination, checkInDate, checkOutDate, travelers, currency);
+      const flightResult = await getFlights(source, destination, tripStartDate, tripEndDate, travelers, currency);
 
       if (flightResult && flightResult.bestFlight) {
         flightSnapshot = {
@@ -222,7 +224,7 @@ ${interestPrompt}
     }
 
     return res.status(200).json(
-      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null, flight: flightSnapshot || null}, "Itinerary generated successfully")
+      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null, flight: flightSnapshot || null, tripStartDate, tripEndDate}, "Itinerary generated successfully")
     );
   } catch (error) {
     throw new ApiError(
