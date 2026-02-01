@@ -5,6 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { verifyPlace } from "../services/placeVerifier.js";
 import { getHotels } from "../services/hotelService.js";
+import { getFlights } from "../services/flightService.js";
 
 export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
   const {
@@ -199,8 +200,29 @@ ${interestPrompt}
       }
     }
 
+    let flightSnapshot = null;
+
+    if (checkInDate && checkOutDate) {
+
+      const flightResult = await getFlights(source, destination, checkInDate, checkOutDate, travelers, currency);
+
+      if (flightResult && flightResult.bestFlight) {
+        flightSnapshot = {
+          airline: flightResult.bestFlight.airline,
+          logo: flightResult.bestFlight.logo,
+          price: flightResult.bestFlight.price,
+          currency: flightResult.bestFlight.currency,
+          departureTime: flightResult.bestFlight.departureTime,
+          arrivalTime: flightResult.bestFlight.arrivalTime,
+          duration: flightResult.bestFlight.durationLabel,
+          stops: flightResult.bestFlight.stops
+        };
+      }
+      
+    }
+
     return res.status(200).json(
-      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null}, "Itinerary generated successfully")
+      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null, flight: flightSnapshot || null}, "Itinerary generated successfully")
     );
   } catch (error) {
     throw new ApiError(
