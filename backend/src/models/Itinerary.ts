@@ -33,6 +33,17 @@ interface IHotelSnapshot {
     photos: string[];
 }
 
+interface IFlightSnapshot {
+    airline: string;
+    logo: string | null;
+    price: number;
+    currency: string;
+    departureTime: string;
+    arrivalTime: string;
+    duration: string;
+    stops: number;
+}
+
 export interface IItinerary extends Document {
     userId: mongoose.Types.ObjectId;
     source: string;
@@ -56,6 +67,7 @@ export interface IItinerary extends Document {
     tripDetails: IDayPlan[];
 
     hotel?: IHotelSnapshot | null;
+    flight?: IFlightSnapshot | null
 
     status: "draft" | "active" | "completed";
     createdAt: Date;
@@ -177,6 +189,17 @@ const ItinerarySchema = new Schema<IItinerary>(
             photos: { type: [String], default: [] },
         },
 
+        flight: {
+            airline: { type: String },
+            logo: { type: String },
+            price: { type: Number },
+            currency: { type: String },
+            departureTime: { type: String },
+            arrivalTime: { type: String },
+            duration: { type: String },
+            stops: { type: Number },
+        },
+        
         status: {
             type: String,
             enum: ["draft", "active", "completed"],
