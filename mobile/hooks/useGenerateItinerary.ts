@@ -13,6 +13,8 @@ type GenerateItineraryParams = {
   travelers: number,
   ageGroup: string,
   safeMode: boolean,
+  tripStartDate: string,
+  tripEndDate: string,
   checkInDate: string,
   checkOutDate: string,
   interests?: string[]
@@ -39,6 +41,8 @@ export const useGenerateItinerary = () => {
         data.travelers,
         data.ageGroup,
         data.safeMode,
+        data.tripStartDate,
+        data.tripEndDate,
         data.checkInDate,
         data.checkOutDate,
         data.interests
@@ -65,8 +69,8 @@ export const useGenerateItinerary = () => {
         travelers: variables.travelers,
         ageGroup: variables.ageGroup,
         safeMode: variables.safeMode,
-        tripStartDate: variables.checkInDate,
-        tripEndDate: variables.checkOutDate,
+        tripStartDate: variables.tripStartDate,
+        tripEndDate: variables.tripEndDate,
       };
 
       queryClient.setQueryData(["latestItinerary"], fullPayload);
