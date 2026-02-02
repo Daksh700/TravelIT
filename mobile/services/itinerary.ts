@@ -9,6 +9,8 @@ export const generateItinerary = async(
     travelers: number,
     ageGroup: string,
     safeMode: boolean,
+    tripStartDate: string,
+    tripEndDate: string,
     checkInDate: string,
     checkOutDate: string,
     interests?: string[]
@@ -32,6 +34,8 @@ export const generateItinerary = async(
                 travelers,
                 ageGroup,
                 safeMode,
+                tripStartDate,
+                tripEndDate,
                 checkInDate,
                 checkOutDate,
                 interests
@@ -39,11 +43,7 @@ export const generateItinerary = async(
         });
 
         const data = await response.json();
-
-        if(!response.ok) {
-            throw new Error(data.message || "Something went wrong");
-        }
-
+        
         console.log("Data Received from Backend");
 
         return data.data;
@@ -71,6 +71,7 @@ export const saveItinerary = async(
     ageGroup: string,
     safeMode: boolean,
     hotel: object | null,
+    flight: object | null,
     status?: string,
     interests?: string[]
 ) => {
@@ -98,8 +99,28 @@ export const saveItinerary = async(
                 travelers,
                 ageGroup,
                 safeMode,
-                tripDetails,
+                tripDetails: tripDetails.map((day: any) => ({
+                    ...day,
+                    activities: day.activities.map((act: any) => {
+                        let locationStr = '';
+                        if (typeof act.location === 'string') {
+                            locationStr = act.location;
+                        } else if (act.location && typeof act.location === 'object') {
+                            locationStr = act.location.formattedAddress || act.location.name || act.location.address || `${act.activity} Location`;
+                        } else {
+                            locationStr = `${act.activity} Location`;
+                        }
+                        return {
+                            time: act.time,
+                            activity: act.activity,
+                            location: locationStr,
+                            description: act.description,
+                            estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : parseFloat(act.estimatedCost) || 0,
+                        };
+                    })
+                })),
                 hotel,
+                flight,
                 status,
                 interests,
             })
@@ -108,7 +129,11 @@ export const saveItinerary = async(
         const data = await response.json();
 
         if(!response.ok) {
-            throw new Error(data.message || "Something went wrong");
+            console.error("Full error response:", data);
+            const errorMsg = Array.isArray(data.errors) 
+                ? data.errors.join(", ") 
+                : data.message || "Something went wrong";
+            throw new Error(errorMsg);
         }
 
         console.log("Data Received from Backend");
