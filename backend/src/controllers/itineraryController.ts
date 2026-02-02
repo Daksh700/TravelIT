@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Itinerary } from "../models/Itinerary.js";
+import { GoogleGenAI } from "@google/genai";
 import { verifyPlace } from "../services/placeVerifier.js";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
@@ -162,3 +163,138 @@ export const deleteTrip = asyncHandler(async (req: Request, res: Response) => {
     new ApiResponse(200, removed, "Trip Deleted Successfully")
   )
 })
+
+export const modifyItinerary = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { itineraryId, modificationType, delayHours, dayNumber } = req.body;
+
+  if (!user) throw new ApiError(401, "User not authenticated");
+
+  const itinerary = await Itinerary.findOne({ _id: itineraryId, userId: user._id });
+
+  if (!itinerary) {
+    throw new ApiError(404, "Itinerary not found");
+  }
+
+  if (!['weather', 'delay'].includes(modificationType)) {
+    throw new ApiError(400, "Invalid modification type. Must be 'weather' or 'delay'");
+  }
+
+  const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+  
+  let instructions = "";
+
+  const targetDay = dayNumber || 1;
+  
+  if (modificationType === "weather") {
+    instructions = `
+      CRITICAL WEATHER ALERT: It is raining/snowing heavily on DAY ${targetDay}.
+      ACTION: Review the activities for DAY ${targetDay} (and other days if necessary).
+      - Identify outdoor activities (Parks, Open Markets, Beaches, Hiking, Walking Tours).
+      - SWAP them with nearby INDOOR alternatives (Museums, Art Galleries, Covered Malls, Aquariums, Cozy Cafes).
+      - Keep the "time" slots the same if possible.
+      - Update the "description" to mention it's a good rainy day option.
+    `;
+  } else if (modificationType === "delay") {
+    const buffer = delayHours || 2;
+    instructions = `
+      TIMING ADJUSTMENT ALERT: The user has encountered a delay of ${buffer} hours on DAY ${targetDay}.
+      
+      ACTION: 
+      1. For DAY ${targetDay} ONLY:
+         - Shift the start time of all remaining activities forward by ${buffer} hours.
+         - If an activity shifts past 9:00 PM or 10:00 PM, either:
+           a) Shorten its duration.
+           b) Remove it if it's not critical.
+           c) Replace it with a "Late Night Dinner" or "Relaxation".
+      2. Ensure the timeline for DAY ${targetDay} remains logical (e.g., don't schedule Lunch at 5 PM).
+      3. DO NOT change the schedule for other days (Day ${targetDay === 1 ? 2 : 1}, etc.) unless absolutely necessary.
+    `;
+  }
+
+  const prompt = `
+    You are a travel itinerary modifier.
+    
+    Current Itinerary JSON:
+    ${JSON.stringify(itinerary.tripDetails)}
+
+    ${instructions}
+
+    REQUIREMENTS:
+    - Return the FULL updated "tripDetails" array (all days, even unchanged ones).
+    - Return ONLY valid JSON.
+    - Make NO MISTAKES !!!
+
+    JSON FORMAT (MUST MATCH, NO markdown):
+      [
+        {
+          "day": number,
+          "theme": "string",
+          "activities": [
+            {
+              "time": "string",
+              "activity": "string",
+              "location": "string",
+              "description": "string",
+              "estimatedCost": number
+            }
+          ]
+        }
+      ]
+  `;
+
+  const model = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: { responseMimeType: "application/json" }
+  });
+
+  const responseText = await model.text;
+  const cleanText = responseText?.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  let newTripDetails;
+  try {
+    newTripDetails = JSON.parse(cleanText || "[]");
+
+    if (!Array.isArray(newTripDetails) && (newTripDetails as any).tripDetails) {
+        newTripDetails = (newTripDetails as any).tripDetails;
+    }
+  } catch (error) {
+    throw new ApiError(500, "AI failed to modify itinerary properly.");
+  }
+  
+  const finalVerifiedDetails = [];
+
+  for (const day of newTripDetails) {
+    const verifiedActs = [];
+    for (const act of day.activities) {
+      
+      const locationStr = typeof act.location === 'string' ? act.location : itinerary.destination;
+      const query = `${act.activity} ${locationStr} ${itinerary.destination}`;
+      
+      const verified = await verifyPlace(act.activity, query);
+      const {location, ...verifiedData} = verified;
+      
+      verifiedActs.push({
+        ...act,
+        location: locationStr,
+        ...verifiedData, 
+      });
+    }
+    finalVerifiedDetails.push({ ...day, activities: verifiedActs });
+  }
+
+  itinerary.tripDetails = finalVerifiedDetails;
+  
+  if (modificationType === "weather") {
+    itinerary.tripDescription = `(Weather Adapted) ${itinerary.tripDescription}`;
+  } else if (modificationType === "delay") {
+    itinerary.tripDescription = `(Delayed Schedule) ${itinerary.tripDescription}`;
+  }
+
+  await itinerary.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, itinerary, "Itinerary modified successfully")
+  );
+});
