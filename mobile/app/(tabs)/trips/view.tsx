@@ -5,7 +5,7 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { 
   MapPin, Clock, ArrowLeft, Building2, Star, X, 
-  Wifi, Wind, Tv, Coffee, Briefcase, Users, User, ShieldCheck 
+  Wifi, Wind, Tv, Coffee, Briefcase, Users, User, ShieldCheck, Plane 
 } from "lucide-react-native";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -34,11 +34,12 @@ export default function ViewTripScreen() {
   }
 
   const hotel = trip.hotel;
+  const flight = trip.flight; 
   const currencySymbol = symbols[trip.currency] ?? "";
   const isDraft = trip.status === 'draft';
 
   const renderStatusBadge = (act: any) => {
-    if (act.verified === false) return <Badge text="Not Found" bg="#fee2e2" color="#dc2626" />;
+    if (act.verified === false) return <Badge text="Not Found (Re-Check With Locals)" bg="#fee2e2" color="#dc2626" />;
     if (act.closedToday) return <Badge text="Closed Today" bg="#dbeafe" color="#1d4ed8" />;
     if (act.seasonalWarning) return <Badge text="Seasonal Risk" bg="#fef9c3" color="#ca8a04" />;
     if (act.verified) return <Badge text="Verified" bg="#dcfce7" color="#15803d" />;
@@ -138,6 +139,63 @@ export default function ViewTripScreen() {
           </Text>
         </View>
 
+        {flight && (
+          <View 
+            className="mb-6 rounded-lg overflow-hidden relative border"
+            style={{ backgroundColor: colors.card, borderColor: colors.border }}
+          >
+            <View className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#4ade80] z-10" />
+
+            <View className="p-5 pl-7">
+              <View className="flex-row items-center gap-2 mb-6">
+                <Plane size={16} color="#4ade80" />
+                <Text className="text-[#4ade80] font-bold text-xs uppercase tracking-wider">
+                  Round Trip Recommendation
+                </Text>
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-neutral-500 text-[10px] font-bold uppercase mb-1">OUTBOUND</Text>
+                <View className="flex-row justify-between items-start">
+                  <View>
+                    <Text style={{ color: colors.text }} className="text-lg font-bold">{flight.airline}</Text>
+                    <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase mt-0.5">
+                      {trip.source.toUpperCase()} → {trip.destination.toUpperCase()} • ECONOMY
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text style={{ color: colors.text }} className="text-xl font-bold">
+                       {currencySymbol}{flight.price.toLocaleString()}
+                    </Text>
+                    <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold">{flight.duration}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={{ backgroundColor: colors.border }} className="h-[1px] mb-6" />
+
+              <View>
+                <Text className="text-neutral-500 text-[10px] font-bold uppercase mb-1">RETURN</Text>
+                <View className="flex-row justify-between items-start">
+                  <View>
+                    <Text style={{ color: colors.text }} className="text-lg font-bold">{flight.airline}</Text>
+                    <Text style={{ color: colors.textMuted }} className="text-xs font-bold uppercase mt-0.5">
+                       {trip.destination.toUpperCase()} → {trip.source.toUpperCase()} • ECONOMY
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text style={{ color: colors.text }} className="text-xl font-bold">
+                       {currencySymbol}{flight.price.toLocaleString()}
+                    </Text>
+                    <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold">{flight.duration}</Text>
+                  </View>
+                </View>
+              </View>
+
+            </View>
+          </View>
+        )}
+
         {hotel && (
           <TouchableOpacity
             onPress={() => setHotelModalVisible(true)}
@@ -211,36 +269,42 @@ export default function ViewTripScreen() {
               </Text>
 
               <View className="space-y-3">
-                {day.activities.map((act: any, idx: number) => (
-                  <Card
-                    key={idx}
-                    style={{ borderColor: colors.border, backgroundColor: colors.surface }}
-                    className="p-4 border"
-                  >
-                    <View className="flex-row gap-2 mb-2">
-                      {renderStatusBadge(act)}
-                    </View>
+                {day.activities.map((act: any, idx: number) => {
+                  const locationString = typeof act.location === 'string' 
+                    ? act.location 
+                    : act.formattedAddress || "Location Info";
+                    
+                  return (
+                    <Card
+                      key={idx}
+                      style={{ borderColor: colors.border, backgroundColor: colors.surface }}
+                      className="p-4 border"
+                    >
+                      <View className="flex-row gap-2 mb-2">
+                        {renderStatusBadge(act)}
+                      </View>
 
-                    <Text style={{ color: colors.text }} className="font-bold text-base mb-1">
-                      {act.activity}
-                    </Text>
-
-                    <View className="flex-row items-center gap-1 mb-2">
-                      <MapPin size={10} color={colors.primary} />
-                      <Text style={{ color: colors.primary }} className="text-xs font-bold">
-                        {act.location}
+                      <Text style={{ color: colors.text }} className="font-bold text-base mb-1">
+                        {act.activity}
                       </Text>
-                    </View>
 
-                    <Text style={{ color: colors.textMuted }} className="text-sm">
-                      {act.description}
-                    </Text>
+                      <View className="flex-row items-center gap-1 mb-2">
+                        <MapPin size={10} color={colors.primary} />
+                        <Text style={{ color: colors.primary }} className="text-xs font-bold">
+                           {locationString}
+                        </Text>
+                      </View>
 
-                    <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">
-                      Est. Cost: {currencySymbol}{act.estimatedCost}
-                    </Text>
-                  </Card>
-                ))}
+                      <Text style={{ color: colors.textMuted }} className="text-sm">
+                        {act.description}
+                      </Text>
+
+                      <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">
+                        Est. Cost: {currencySymbol}{act.estimatedCost}
+                      </Text>
+                    </Card>
+                  );
+                })}
               </View>
             </View>
           ))}
