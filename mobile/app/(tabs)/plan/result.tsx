@@ -6,7 +6,7 @@ import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { 
   MapPin, Clock, Save, Building2, Star, X, 
-  Wifi, Wind, Tv, Coffee, Briefcase, User, Users, ShieldCheck 
+  Wifi, Wind, Tv, Coffee, Briefcase, User, Users, ShieldCheck, Plane 
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -36,6 +36,7 @@ export default function ResultScreen() {
   }
 
   const hotel = itinerary.hotel;
+  const flight = itinerary.flight;
   const currencySymbol = symbols[itinerary.currency] ?? itinerary.currency;
 
   const handleSave = () => {
@@ -53,6 +54,7 @@ export default function ResultScreen() {
       tripDescription: itinerary.tripDescription,
       tripDetails: itinerary.tripDetails,
       hotel: itinerary.hotel,
+      flight: itinerary.flight,
       status: "draft",
       interests: itinerary.interests ?? [],
       travelers: itinerary.travelers,
@@ -132,6 +134,63 @@ export default function ResultScreen() {
           </Text>
         </View>
 
+        {flight && (
+          <View 
+            className="mb-6 rounded-lg overflow-hidden relative border"
+            style={{ backgroundColor: "#0a0a0a", borderColor: "#262626" }}
+          >
+            <View className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#4ade80] z-10" />
+
+            <View className="p-5 pl-7">
+              <View className="flex-row items-center gap-2 mb-6">
+                <Plane size={16} color="#4ade80" />
+                <Text className="text-[#4ade80] font-bold text-xs uppercase tracking-wider">
+                  Round Trip Recommendation
+                </Text>
+              </View>
+
+              <View className="mb-6">
+                <Text className="text-neutral-500 text-[10px] font-bold uppercase mb-1">OUTBOUND</Text>
+                <View className="flex-row justify-between items-start">
+                  <View>
+                    <Text className="text-white text-lg font-bold">{flight.airline}</Text>
+                    <Text className="text-neutral-400 text-xs font-bold uppercase mt-0.5">
+                      {itinerary.source.toUpperCase()} → {itinerary.destination.toUpperCase()} • ECONOMY
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-white text-xl font-bold">
+                       {currencySymbol}{flight.price.toLocaleString()}
+                    </Text>
+                    <Text className="text-neutral-500 text-[10px] font-bold">{flight.duration}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View className="h-[1px] bg-neutral-800 mb-6" />
+
+              <View>
+                <Text className="text-neutral-500 text-[10px] font-bold uppercase mb-1">RETURN</Text>
+                <View className="flex-row justify-between items-start">
+                  <View>
+                    <Text className="text-white text-lg font-bold">{flight.airline}</Text>
+                    <Text className="text-neutral-400 text-xs font-bold uppercase mt-0.5">
+                       {itinerary.destination.toUpperCase()} → {itinerary.source.toUpperCase()} • ECONOMY
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-white text-xl font-bold">
+                       {currencySymbol}{flight.price.toLocaleString()}
+                    </Text>
+                    <Text className="text-neutral-500 text-[10px] font-bold">{flight.duration}</Text>
+                  </View>
+                </View>
+              </View>
+
+            </View>
+          </View>
+        )}
+
         {hotel && (
           <TouchableOpacity
             onPress={() => setHotelModalVisible(true)}
@@ -195,27 +254,30 @@ export default function ResultScreen() {
               <Text style={{ color: colors.text }} className="text-lg font-bold mb-4">{day.theme}</Text>
 
               <View className="space-y-3">
-                {day.activities.map((act: any, idx: number) => (
-                  <Card key={idx} style={{ borderColor: colors.border, backgroundColor: colors.surface }} className="p-4 border">
-                    <View className="flex-row justify-between items-start mb-1">
-                      <View style={{ backgroundColor: colors.card }} className="px-2 py-1 rounded-sm">
-                        <Text style={{ color: colors.textMuted }} className="text-[10px] font-bold uppercase">{act.time}</Text>
+                {day.activities.map((act: any, idx: number) => {
+                  const locationString = typeof act.location === 'string' 
+                    ? act.location 
+                    : act.formattedAddress || "Unknown Location";
+
+                  return (
+                    <Card key={idx} style={{ borderColor: colors.border, backgroundColor: colors.surface }} className="p-4 border">
+
+                      <View className="flex-row gap-2 mb-2">{renderStatusBadge(act)}</View>
+
+                      <Text style={{ color: colors.text }} className="font-bold text-base mb-1">{act.activity}</Text>
+
+                      <View className="flex-row items-center gap-1 mb-2">
+                        <MapPin size={10} color={colors.primary} />
+                        <Text style={{ color: colors.primary }} className="text-xs font-bold">
+                          {locationString}
+                        </Text>
                       </View>
-                    </View>
 
-                    <View className="flex-row gap-2 mb-2">{renderStatusBadge(act)}</View>
-
-                    <Text style={{ color: colors.text }} className="font-bold text-base mb-1">{act.activity}</Text>
-
-                    <View className="flex-row items-center gap-1 mb-2">
-                      <MapPin size={10} color={colors.primary} />
-                      <Text style={{ color: colors.primary }} className="text-xs font-bold">{act.location}</Text>
-                    </View>
-
-                    <Text style={{ color: colors.textMuted }} className="text-sm">{act.description}</Text>
-                    <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">Est. Cost: {currencySymbol}{act.estimatedCost}</Text>
-                  </Card>
-                ))}
+                      <Text style={{ color: colors.textMuted }} className="text-sm">{act.description}</Text>
+                      <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">Est. Cost: {currencySymbol}{act.estimatedCost}</Text>
+                    </Card>
+                  );
+                })}
               </View>
             </View>
           ))}
