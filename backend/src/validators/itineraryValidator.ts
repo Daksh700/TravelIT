@@ -84,3 +84,12 @@ export const saveItinerarySchema = z.object({
 export const exploreSchema = z.object({
   query: z.string().min(3, "Query must be at least 3 characters long")
 })
+
+export const modifyItinerarySchema = z.object({
+  itineraryId: z.string().min(1, "Itinerary ID is required"),
+  modificationType: z.enum(["weather", "delay"], {
+    message: "Type must be 'weather' or 'delay'",
+  }),
+  delayHours: z.number().optional(), 
+  dayNumber: z.number().optional(),
+});
