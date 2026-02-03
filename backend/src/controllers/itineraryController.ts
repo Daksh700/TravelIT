@@ -333,6 +333,17 @@ export const updateItineraryDetails = asyncHandler(async (req: Request, res: Res
         throw new ApiError(400, "Itinerary ID and new details are required");
     }
 
+    if (!Array.isArray(tripDetails)) {
+        throw new ApiError(400, "Trip details must be an array");
+    }
+
+    for (let i = 0; i < tripDetails.length; i++) {
+        const day = tripDetails[i];
+        if (typeof day.day !== 'number' || !Array.isArray(day.activities)) {
+            throw new ApiError(400, `Day ${i + 1}: Invalid structure. Each day must have a 'day' number and 'activities' array`);
+        }
+    }
+
     const itinerary = await Itinerary.findOneAndUpdate(
         { _id: itineraryId, userId: user._id },
         { 
