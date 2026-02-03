@@ -108,9 +108,9 @@ export const updateTripDetailsSchema = z.object({
           location: z.string(),
           description: z.string(),
           estimatedCost: z.number(),
-          verified: z.boolean().optional(),
-          closedToday: z.boolean().optional(),
-          seasonalWarning: z.boolean().optional(),
+          verified: z.boolean().optional().nullable(),
+          closedToday: z.boolean().optional().nullable(),
+          seasonalWarning: z.boolean().optional().nullable(),
         })
       ) 
     })
