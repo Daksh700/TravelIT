@@ -2,9 +2,9 @@ import express from "express"
 import { rateLimiter } from "../middlewares/ratelimitMiddleware.js";
 import { validate } from "../middlewares/validateMiddleware.js";
 import { exploreLocation, generateItinerary } from "../controllers/aiController.js";
-import { exploreSchema, generateItinerarySchema, modifyItinerarySchema, saveItinerarySchema } from "../validators/itineraryValidator.js";
+import { exploreSchema, generateItinerarySchema, modifyItinerarySchema, saveItinerarySchema, updateTripDetailsSchema } from "../validators/itineraryValidator.js";
 import { protectRoute } from "../middlewares/authMiddleware.js";
-import { createItinerary, deleteTrip, getUserItineraries, modifyItinerary, updateStatus } from "../controllers/itineraryController.js";
+import { createItinerary, deleteTrip, getUserItineraries, modifyItinerary, updateItineraryDetails, updateStatus } from "../controllers/itineraryController.js";
 
 const router = express.Router();
 
@@ -43,10 +43,24 @@ router.post(
     modifyItinerary
 );
 
+router.post(
+    "/modify",
+    protectRoute,
+    validate(modifyItinerarySchema),
+    modifyItinerary
+)
+
 router.patch(
     "/status/:id",
     protectRoute,
     updateStatus
+)
+
+router.patch(
+    "/details",
+    protectRoute,
+    validate(updateTripDetailsSchema),
+    updateItineraryDetails
 )
 
 router.delete(
