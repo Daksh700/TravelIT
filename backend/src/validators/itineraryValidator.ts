@@ -101,7 +101,18 @@ export const updateTripDetailsSchema = z.object({
     z.object({
       day: z.number(),
       theme: z.string().optional(),
-      activities: z.array(z.any()) 
+      activities: z.array(
+        z.object({
+          time: z.string(),
+          activity: z.string(),
+          location: z.string(),
+          description: z.string(),
+          estimatedCost: z.number(),
+          verified: z.boolean().optional(),
+          closedToday: z.boolean().optional(),
+          seasonalWarning: z.boolean().optional(),
+        })
+      ) 
     })
   )
 });
