@@ -166,7 +166,7 @@ export const deleteTrip = asyncHandler(async (req: Request, res: Response) => {
 
 export const modifyItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
-  const { itineraryId, modificationType, delayHours, dayNumber } = req.body;
+  const { itineraryId, modificationType, delayHours, dayNumber, userPrompt } = req.body;
 
   if (!user) throw new ApiError(401, "User not authenticated");
 
@@ -176,8 +176,8 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
     throw new ApiError(404, "Itinerary not found");
   }
 
-  if (!['weather', 'delay'].includes(modificationType)) {
-    throw new ApiError(400, "Invalid modification type. Must be 'weather' or 'delay'");
+  if (!['weather', 'delay', 'ai_edit'].includes(modificationType)) {
+    throw new ApiError(400, "Invalid modification type. Must be 'weather', 'delay', or 'ai_edit'");
   }
 
   const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
@@ -209,6 +209,25 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
            c) Replace it with a "Late Night Dinner" or "Relaxation".
       2. Ensure the timeline for DAY ${targetDay} remains logical (e.g., don't schedule Lunch at 5 PM).
       3. DO NOT change the schedule for other days (Day ${targetDay === 1 ? 2 : 1}, etc.) unless absolutely necessary.
+    `;
+  }
+  else if (modificationType === "ai_edit") {
+    if (!userPrompt) throw new ApiError(400, "User prompt is required for AI edits");
+
+    instructions = `
+      USER REQUEST: "${userPrompt}"
+      
+      ACTION:
+      - Modify the "tripDetails" based strictly on the user's request.
+      - Examples:
+        - If user says "Make Day 2 cheaper", replace expensive paid activities on Day 2 with free/cheap ones (parks, walking tours).
+        - If user says "Remove the Museum on Day 1", remove that specific activity object.
+        - If user says "Add a coffee break", insert a café visit.
+      
+      CONSTRAINTS:
+      - DO NOT modify the flights or hotels (they are stored separately).
+      - DO NOT change the number of days unless explicitly asked.
+      - Keep the JSON structure exact.
     `;
   }
 
@@ -290,6 +309,8 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
     itinerary.tripDescription = `(Weather Adapted) ${itinerary.tripDescription}`;
   } else if (modificationType === "delay") {
     itinerary.tripDescription = `(Delayed Schedule) ${itinerary.tripDescription}`;
+  } else if (modificationType === "ai_edit") {
+    itinerary.tripDescription = `(Edited) ${itinerary.tripDescription}`;
   }
 
   await itinerary.save();
@@ -297,4 +318,34 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
   return res.status(200).json(
     new ApiResponse(200, itinerary, "Itinerary modified successfully")
   );
+});
+
+export const updateItineraryDetails = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+
+    const { itineraryId, tripDetails } = req.body; 
+
+    if (!user) {
+        throw new ApiError(401, "User not authenticated");
+    }
+
+    if (!itineraryId || !tripDetails) {
+        throw new ApiError(400, "Itinerary ID and new details are required");
+    }
+
+    const itinerary = await Itinerary.findOneAndUpdate(
+        { _id: itineraryId, userId: user._id },
+        { 
+            $set: { tripDetails: tripDetails } 
+        },
+        { new: true }
+    );
+
+    if (!itinerary) {
+        throw new ApiError(404, "Itinerary not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, itinerary, "Itinerary details updated successfully")
+    );
 });
