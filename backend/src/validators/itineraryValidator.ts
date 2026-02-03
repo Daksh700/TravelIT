@@ -87,9 +87,21 @@ export const exploreSchema = z.object({
 
 export const modifyItinerarySchema = z.object({
   itineraryId: z.string().min(1, "Itinerary ID is required"),
-  modificationType: z.enum(["weather", "delay"], {
-    message: "Type must be 'weather' or 'delay'",
+  modificationType: z.enum(["weather", "delay", "ai_edit"], { 
+    message: "Type must be 'weather', 'delay', or 'ai_edit'",
   }),
   delayHours: z.number().optional(), 
   dayNumber: z.number().optional(),
+  userPrompt: z.string().optional(), 
+});
+
+export const updateTripDetailsSchema = z.object({
+  itineraryId: z.string().min(1),
+  tripDetails: z.array(
+    z.object({
+      day: z.number(),
+      theme: z.string().optional(),
+      activities: z.array(z.any()) 
+    })
+  )
 });
