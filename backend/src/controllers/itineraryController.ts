@@ -228,6 +228,7 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
       - DO NOT modify the flights or hotels (they are stored separately).
       - DO NOT change the number of days unless explicitly asked.
       - Keep the JSON structure exact.
+      - DO NOT generate or include any "_id" fields in the activities.
     `;
   }
 
@@ -287,6 +288,8 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
   for (const day of newTripDetails) {
     const verifiedActs = [];
     for (const act of day.activities) {
+
+      const { _id, ...activityDataWithoutId } = act;
       
       const locationStr = typeof act.location === 'string' ? act.location : itinerary.destination;
       const query = `${act.activity} ${locationStr} ${itinerary.destination}`;
@@ -295,7 +298,7 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
       const {location, ...verifiedData} = verified;
       
       verifiedActs.push({
-        ...act,
+        ...activityDataWithoutId,
         location: locationStr,
         ...verifiedData, 
       });
