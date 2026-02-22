@@ -45,7 +45,6 @@ export const generateItinerary = async(
         const data = await response.json();
         
         console.log("Data Received from Backend");
-
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
@@ -125,9 +124,7 @@ export const saveItinerary = async(
                 interests,
             })
         });
-
         const data = await response.json();
-
         if(!response.ok) {
             console.error("Full error response:", data);
             const errorMsg = Array.isArray(data.errors) 
@@ -135,9 +132,113 @@ export const saveItinerary = async(
                 : data.message || "Something went wrong";
             throw new Error(errorMsg);
         }
-
         console.log("Data Received from Backend");
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
 
+export const modifyItinerary = async (
+    token: string,
+    itineraryId: string,
+    modificationType: "weather" | "delay" | "ai_edit",
+    delayHours?: number,
+    dayNumber?: number,
+    userPrompt?: string
+) => {
+    try {
+        console.log("Connecting to Backend");
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/modify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                itineraryId,
+                modificationType,
+                delayHours,
+                dayNumber,
+                userPrompt
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+        console.log("Data Received from Backend");
+        return data.data; 
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+};
+
+export const updateItineraryDetails = async(
+    token: string,
+    itineraryId: string,
+    tripDetails: any[]
+) => {
+    try {
+        console.log("Connecting to Backend");
+        
+        const cleanTripDetails = tripDetails.map((day: any) => ({
+            day: day.day,
+            theme: day.theme || '',
+            activities: day.activities.map((act: any) => {
+                let locationStr = '';
+                if (typeof act.location === 'string') {
+                    locationStr = act.location;
+                } else if (act.location && typeof act.location === 'object') {
+                    locationStr = act.location.formattedAddress || act.location.name || act.location.address || '';
+                } else {
+                    locationStr = act.location || '';
+                }
+                
+                const activity: any = {
+                    time: act.time || '',
+                    activity: act.activity || '',
+                    location: locationStr,
+                    description: act.description || '',
+                    estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : 0,
+                };
+                
+                if (act.verified !== null && act.verified !== undefined) {
+                    activity.verified = act.verified;
+                }
+                if (act.closedToday !== null && act.closedToday !== undefined) {
+                    activity.closedToday = act.closedToday;
+                }
+                if (act.seasonalWarning !== null && act.seasonalWarning !== undefined) {
+                    activity.seasonalWarning = act.seasonalWarning;
+                }
+                
+                return activity;
+            })
+        }));
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/details`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                itineraryId,
+                tripDetails: cleanTripDetails
+            })
+        })
+        
+        if(!response.ok) {
+            const data = await response.json();
+            console.error("Error response:", data);
+            throw new Error(data.message || "Something went wrong");
+        }
+        
+        const data = await response.json();
+        console.log("Data Received from Backend");
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
@@ -148,7 +249,6 @@ export const saveItinerary = async(
 export const getUserItineraries = async(token: string) => {
     try {
         console.log("Connecting to Backend");
-
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/history`, {
             method: 'GET',
             headers: {
@@ -156,15 +256,11 @@ export const getUserItineraries = async(token: string) => {
                 Authorization: `Bearer ${token}`
             }
         })
-
         const data = await response.json();
-
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
         }
-
         console.log("Data Received from Backend");
-
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
@@ -179,7 +275,6 @@ export const updateTripStatus = async(
 ) => {
     try {
         console.log("Connecting to Backend");
-
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/status/${id}`, {
             method: "PATCH",
             headers: {
@@ -190,15 +285,11 @@ export const updateTripStatus = async(
                 status
             })
         })
-
         const data = await response.json();
-
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
         }
-
         console.log("Data Received from Backend");
-
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
@@ -212,7 +303,6 @@ export const deleteTrip = async(
 ) => {
     try {
         console.log("Connecting to Backend");
-
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/${id}`, {
             method: 'DELETE',
             headers: {
@@ -220,15 +310,11 @@ export const deleteTrip = async(
                 Authorization: `Bearer ${token}`
             }
         })
-
         const data = await response.json();
-
         if(!response.ok) {
             throw new Error(data.message || "Something went wrong");
         }
-
         console.log("Data Received from Backend");
-
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
