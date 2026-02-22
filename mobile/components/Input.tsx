@@ -1,12 +1,13 @@
-import { TextInput, View, Text, TextInputProps } from "react-native";
+import { TextInput, View, Text, TextInputProps, StyleProp, ViewStyle } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 
 interface InputProps extends TextInputProps {
   label?: string;
   className?: string; 
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
-export const Input = ({ label, className, ...props }: InputProps) => {
+export const Input = ({ label, className, containerStyle, ...props }: InputProps) => {
   const { colors } = useThemeColors();
 
   return (
@@ -22,9 +23,9 @@ export const Input = ({ label, className, ...props }: InputProps) => {
 
       <TextInput
         {...props}
-        placeholderTextColor={colors.placeholder}
+        placeholderTextColor={colors.textMuted}
         style={{
-          backgroundColor: colors.inputBg,
+          backgroundColor: colors.surface,
           color: colors.text,
           borderColor: colors.border,
         }}
