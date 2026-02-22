@@ -307,14 +307,6 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
   }
 
   itinerary.tripDetails = finalVerifiedDetails;
-  
-  if (modificationType === "weather") {
-    itinerary.tripDescription = `(Weather Adapted) ${itinerary.tripDescription}`;
-  } else if (modificationType === "delay") {
-    itinerary.tripDescription = `(Delayed Schedule) ${itinerary.tripDescription}`;
-  } else if (modificationType === "ai_edit") {
-    itinerary.tripDescription = `(Edited) ${itinerary.tripDescription}`;
-  }
 
   await itinerary.save();
 
