@@ -35,7 +35,7 @@ const userSchema = new Schema<IUser>(
         },
         avatar: {
             type: String,
-            default: "https://ui-avatars.com/api/?name=User&background=random"
+            default: "https:ui-avatars.com/api/?name=User&background=random"
         }
     },
     {timestamps: true}

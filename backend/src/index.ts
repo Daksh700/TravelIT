@@ -12,14 +12,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Body parsing middleware first
 app.use(cors());
 app.use(express.json({limit: '1mb'}));
 
-// Then authentication middleware
 app.use(clerkMiddleware());
 
-// Routes
 app.get('/', (req: Request, res: Response) => {
     res.json({
         message: "TravelIt Backend is Live With DB!",
@@ -31,7 +28,6 @@ app.get('/', (req: Request, res: Response) => {
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/itinerary", itineraryRoutes);
 
-// Error handler last
 app.use(errorHandler);
 
 const startServer = async () => {
@@ -52,5 +48,4 @@ const startServer = async () => {
 
 startServer();
 
-// export for vercel 
 export default app;

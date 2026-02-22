@@ -147,7 +147,6 @@ ${interestPrompt}
 
   const response = await result.text;
 
-  // Cleanup possible markdown wrappers
   const cleanText = response?.replace(/```json/g, "").replace(/```/g, "").trim();
 
   try {
