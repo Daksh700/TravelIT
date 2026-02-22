@@ -7,7 +7,7 @@ module.exports = {
       colors: {
         background: '#050505', // Ultra Dark
         surface: '#0a0a0a',    // Slightly lighter dark
-        primary: '#00dc82',    // Sharp Green (Web wala)
+        primary: '#00dc82',    // Sharp Green
         secondary: '#0070f3',  // Sharp Blue
         border: '#27272a',     // Zinc Border
       }
