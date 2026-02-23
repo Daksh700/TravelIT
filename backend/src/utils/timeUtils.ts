@@ -23,8 +23,10 @@ export const timeStringToMin = (timeString: string): number => {
 }
 
 export const minutesToTimeStr = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
+    let hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
+
+    hours = hours % 24;
 
     const formattedHrs = hours.toString().padStart(2, '0');
     const formattedMins = mins.toString().padStart(2, '0');
