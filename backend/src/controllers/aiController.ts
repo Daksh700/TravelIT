@@ -152,7 +152,10 @@ ${interestPrompt}
       for(const act of day.activities) {
         const verified = await verifyPlace(act.activity, `${act.location} ${destination}`);
         const {location, ...verifiedData} = verified; 
-        verifiedActs.push({...act, ...verifiedData}); 
+
+        const coordinates = location ? { lat: location.lat, lng: location.lng } : null;
+
+        verifiedActs.push({...act, coordinates, ...verifiedData}); 
       }
 
       verifiedDays.push({...day, activities: verifiedActs});
