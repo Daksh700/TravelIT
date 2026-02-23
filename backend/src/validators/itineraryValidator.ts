@@ -70,6 +70,10 @@ export const saveItinerarySchema = z.object({
           location: z.string(),
           description: z.string(),
           estimatedCost: z.number(),
+          coordinates: z.object({
+            lat: z.number(),
+            lng: z.number(),
+          }).optional().nullable(),
         })
       ),
     })
@@ -108,6 +112,10 @@ export const updateTripDetailsSchema = z.object({
           location: z.string(),
           description: z.string(),
           estimatedCost: z.number(),
+          coordinates: z.object({
+            lat: z.number(),
+            lng: z.number(),
+          }).optional().nullable(),
           verified: z.boolean().optional().nullable(),
           closedToday: z.boolean().optional().nullable(),
           seasonalWarning: z.boolean().optional().nullable(),
@@ -123,9 +131,9 @@ export const optimizeDayRouteSchema = z.object({
     z.object({
       time: z.string().min(1, "Time is required (e.g., '10:00 AM - 11:30 AM')"),
       activity: z.string().min(1, "Activity name is required"),
-      location: z.object({
-        lat: z.number().optional(),
-        lng: z.number().optional(),
+      coordinates: z.object({
+        lat: z.number(),
+        lng: z.number(),
       }).optional().nullable(),
       openingHours: z.string().optional().nullable(),
       closedToday: z.boolean().optional().nullable(),
