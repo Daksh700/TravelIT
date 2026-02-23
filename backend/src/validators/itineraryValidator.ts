@@ -116,3 +116,19 @@ export const updateTripDetailsSchema = z.object({
     })
   )
 });
+
+export const optimizeDayRouteSchema = z.object({
+  dayStartTime: z.string().optional(),
+  activities: z.array(
+    z.object({
+      time: z.string().min(1, "Time is required (e.g., '10:00 AM - 11:30 AM')"),
+      activity: z.string().min(1, "Activity name is required"),
+      location: z.object({
+        lat: z.number().optional(),
+        lng: z.number().optional(),
+      }).optional().nullable(),
+      openingHours: z.string().optional().nullable(),
+      closedToday: z.boolean().optional().nullable(),
+    }).loose() 
+  ).min(1, "Activities array must contain at least one activity to optimize"),
+});
