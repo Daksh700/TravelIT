@@ -97,8 +97,8 @@ CRITICAL COST RULES (READ CAREFULLY):
 Rules:
 - Stay within the budget (excluding hotel and flight costs).
 - Include daily meals: breakfast, lunch, snack, dinner (with realistic prices).
-- Include local transportation costs (Metro/Subway/Uber).
-- If major city has metro/travel pass (e.g. JR/Metro), include it.
+- DO NOT create separate activities for "Traveling", "Commuting", or "Local Transportation". The cost and time of travel should be assumed.
+- If major city has a metro/travel pass (e.g., JR Pass, Oyster Card), include it ONLY ONCE as a "Purchase Travel Pass" activity on Day 1.
 - Avoid duplicated activities.
 - ${agePrompt}
 - ${safeModePrompt}
