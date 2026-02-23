@@ -6,6 +6,10 @@ interface IActivity {
     location: string;
     description: string;
     estimatedCost: number;
+    coordinates?: {
+        lat: number;
+        lng: number;
+    };
 }
 
 interface IDayPlan {
@@ -155,6 +159,10 @@ const ItinerarySchema = new Schema<IItinerary>(
                         location: { type: String },
                         description: { type: String },
                         estimatedCost: { type: Number },
+                        coordinates: {
+                            lat: { type: Number, default: null },
+                            lng: { type: Number, default: null },
+                        },
 
                         verified: { type: Boolean, default: false },
                         reason: { type: String, default: null },
