@@ -1,4 +1,4 @@
-import { minutesToTimeStr, timeStringToMin } from "../utils/timeUtils";
+import { minutesToTimeStr, timeStringToMin } from "../utils/timeUtils.js";
 
 export interface PlaceInput {
     id: string,
