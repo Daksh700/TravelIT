@@ -5,6 +5,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Itinerary } from "../models/Itinerary.js";
 import { GoogleGenAI } from "@google/genai";
 import { verifyPlace } from "../services/placeVerifier.js";
+import { PlaceInput, optimizeItinerary, fetchDistanceMatrix } from "../services/routeOptimizerService.js";
+import { getDurationFromTimeRange } from "../utils/timeUtils.js";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
@@ -353,5 +355,57 @@ export const updateItineraryDetails = asyncHandler(async (req: Request, res: Res
 
     return res.status(200).json(
         new ApiResponse(200, itinerary, "Itinerary details updated successfully")
+    );
+});
+
+export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response) => {
+    const { activities, dayStartTime = "09:00 AM" } = req.body;
+
+    if (!activities || !Array.isArray(activities) || activities.length === 0) {
+        throw new ApiError(400, "Activities array is required to optimize route");
+    }
+
+    const placesToOptimize: PlaceInput[] = activities.map((act: any, index: number) => {
+        
+        const durationMins = getDurationFromTimeRange(act.time);
+
+        return {
+            id: `place_${index}`, 
+            name: act.activity,
+            lat: act.location?.lat || 0, 
+            lng: act.location?.lng || 0,
+            openTime: act.openingHours || "08:00 AM", 
+            closeTime: act.closedToday ? "00:00 AM" : "22:00 PM",
+            durationMins: durationMins
+        };
+    });
+
+    const distanceMatrix = await fetchDistanceMatrix(placesToOptimize);
+
+    const optimizedResult = optimizeItinerary(placesToOptimize, dayStartTime, distanceMatrix);
+
+    if (!optimizedResult) {
+        throw new ApiError(400, "Could not find a valid route. Constraints might be too tight.");
+    }
+
+    const finalActivities = optimizedResult.optimizedPlaces.map((optPlace) => {
+        const originalAct = activities.find(a => a.activity === optPlace.name);
+        
+        return {
+            ...originalAct,
+            time: `${optPlace.arrivalTime} - ${optPlace.departureTime}`,
+            waitingTime: optPlace.waitingTime 
+        };
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            originalOrder: activities,
+            optimizedOrder: finalActivities,
+            stats: {
+                totalTravelTimeMins: optimizedResult.totalTravelTimeMins,
+                totalWaitingTimeMins: optimizedResult.totalWaitingTimeMins
+            }
+        }, "Route optimized successfully!")
     );
 });
