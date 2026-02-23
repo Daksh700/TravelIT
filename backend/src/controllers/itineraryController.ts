@@ -371,15 +371,31 @@ export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response)
         throw new ApiError(400, "Activities array is required to optimize route");
     }
 
-    const placesToOptimize: PlaceInput[] = activities.map((act: any, index: number) => {
-        
+    const validPlaces = activities.filter(act => 
+       act.verified === true && 
+       !act.activity.toLowerCase().includes("transportation")
+    );
+    
+    const ignoredPlaces = activities.filter(act => 
+       act.verified !== true || 
+       act.activity.toLowerCase().includes("transportation")
+    );
+
+    if (validPlaces.length === 0) {
+        throw new ApiError(400, "No valid places found to optimize.");
+    }
+
+    const placesToOptimize: PlaceInput[] = validPlaces.map((act: any, index: number) => {
         const durationMins = getDurationFromTimeRange(act.time);
+
+        const latitude = act.coordinates?.lat || act.lat || act.geometry?.location?.lat || 0;
+        const longitude = act.coordinates?.lng || act.lng || act.geometry?.location?.lng || 0;
 
         return {
             id: `place_${index}`, 
             name: act.activity,
-            lat: act.coordinates?.lat || 0, 
-            lng: act.coordinates?.lng || 0,
+            lat: latitude, 
+            lng: longitude,
             openTime: act.openingHours || "08:00 AM", 
             closeTime: act.closedToday ? "00:00 AM" : "22:00 PM",
             durationMins: durationMins
@@ -387,15 +403,14 @@ export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response)
     });
 
     const distanceMatrix = await fetchDistanceMatrix(placesToOptimize);
-
     const optimizedResult = optimizeItinerary(placesToOptimize, dayStartTime, distanceMatrix);
 
     if (!optimizedResult) {
         throw new ApiError(400, "Could not find a valid route. Constraints might be too tight.");
     }
 
-    const finalActivities = optimizedResult.optimizedPlaces.map((optPlace) => {
-        const originalAct = activities.find(a => a.activity === optPlace.name);
+    const optimizedValidActivities = optimizedResult.optimizedPlaces.map((optPlace) => {
+        const originalAct = validPlaces.find(a => a.activity === optPlace.name);
         
         return {
             ...originalAct,
@@ -404,10 +419,12 @@ export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response)
         };
     });
 
+    const finalActivities = [...optimizedValidActivities, ...ignoredPlaces];
+
     return res.status(200).json(
         new ApiResponse(200, {
             originalOrder: activities,
-            optimizedOrder: finalActivities,
+            optimizedOrder: finalActivities, 
             stats: {
                 totalTravelTimeMins: optimizedResult.totalTravelTimeMins,
                 totalWaitingTimeMins: optimizedResult.totalWaitingTimeMins
