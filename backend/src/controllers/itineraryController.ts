@@ -61,8 +61,11 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
     for(const act of day.activities) {
       const locationStr = typeof act.location === 'string' ? act.location : act.location?.formattedAddress || act.location?.name || 'Unknown';
       const verified = await verifyPlace(`${act.activity} ${locationStr} ${destination}`);
-      const {location, ...verifiedData} = verified; 
-      verifiedActs.push({...act, location: locationStr, ...verifiedData}); 
+      const {location, ...verifiedData} = verified;
+      
+      const coordinates = verified.location ? { lat: verified.location.lat, lng: verified.location.lng } : null;
+      
+      verifiedActs.push({...act, location: locationStr, coordinates, ...verifiedData}); 
     }
 
     verifiedDays.push({...day, activities: verifiedActs});
@@ -299,9 +302,12 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
       const verified = await verifyPlace(act.activity, query);
       const {location, ...verifiedData} = verified;
       
+      const coordinates = verified.location ? { lat: verified.location.lat, lng: verified.location.lng } : null;
+      
       verifiedActs.push({
         ...activityDataWithoutId,
         location: locationStr,
+        coordinates,
         ...verifiedData, 
       });
     }
@@ -372,8 +378,8 @@ export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response)
         return {
             id: `place_${index}`, 
             name: act.activity,
-            lat: act.location?.lat || 0, 
-            lng: act.location?.lng || 0,
+            lat: act.coordinates?.lat || 0, 
+            lng: act.coordinates?.lng || 0,
             openTime: act.openingHours || "08:00 AM", 
             closeTime: act.closedToday ? "00:00 AM" : "22:00 PM",
             durationMins: durationMins
