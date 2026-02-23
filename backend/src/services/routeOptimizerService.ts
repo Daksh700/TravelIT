@@ -64,8 +64,39 @@ export const evaluateRoute = (route: PlaceInput[], dayStartTimeStr: string, matr
 
     const optimizedRoute: OptimizedPlace[] = [];
 
+    const hasKeyword = (name: string, keywords: string[]) => {
+        const lowerName = name.toLowerCase();
+        return keywords.some(k => lowerName.includes(k));
+    };
+
     for (let i = 0; i < route.length; i++) {
         const place = route[i];
+
+        const isBreakfast = hasKeyword(place.name, ["breakfast", "morning"]);
+        const isLunch = hasKeyword(place.name, ["lunch"]);
+        const isDinner = hasKeyword(place.name, ["dinner", "supper"]);
+        const isReturn = hasKeyword(place.name, ["return", "accommodation", "hotel"]);
+
+        if (isBreakfast && currentTimeMins > 720) {
+            isValid = false;
+            break;
+        }
+
+        if (isLunch && (currentTimeMins < 660 || currentTimeMins > 960)) {
+           isValid = false;
+            break;
+        }
+
+        if (isDinner && currentTimeMins < 1020) {
+           isValid = false; 
+           break;
+        }
+
+        if (isReturn && i !== route.length - 1) {
+            isValid = false; 
+            break;
+        }
+
         const openTimeMins = timeStringToMin(place.openTime);
         const closeTimeMins = timeStringToMin(place.closeTime);
 
