@@ -84,16 +84,8 @@ Create a realistic ${duration}-day itinerary:
 - Safety consideration: ${safeMode ? "HIGH" : "normal"}
 
 IMPORTANT TIME RULE:
-- DO NOT use exact times like "7:00 AM - 10:00 AM" or "2:45 PM".
-- Instead use broad time slots ONLY from this list:
-  - "Early Morning"
-  - "Morning"
-  - "Late Morning"
-  - "Afternoon"
-  - "Late Afternoon"
-  - "Evening"
-  - "Night"
-  - "Late Night"
+- Use exact times like "7:00 AM - 10:00 AM" or "2:45 PM - 4:00 PM".
+- Also Always start the Day from "9:00 AM" onwards.
 
 CRITICAL COST RULES (READ CAREFULLY):
 1. **REALISTIC PRICING**: You MUST provide realistic market rates for ${destination}. 
