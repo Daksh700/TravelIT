@@ -4,8 +4,8 @@ import { validate } from "../middlewares/validateMiddleware.js";
 import { exploreLocation, generateItinerary } from "../controllers/aiController.js";
 import { exploreSchema, generateItinerarySchema, modifyItinerarySchema, optimizeDayRouteSchema, saveItinerarySchema, updateTripDetailsSchema } from "../validators/itineraryValidator.js";
 import { protectRoute } from "../middlewares/authMiddleware.js";
-import { createItinerary, deleteTrip, getUserItineraries, modifyItinerary, updateItineraryDetails, updateStatus } from "../controllers/itineraryController.js";
-import { optimizeDayRoute } from "../controllers/itineraryController.js";
+import { createItinerary, deleteTrip, getUserItineraries, modifyItinerary, updateItineraryDetails, updateStatus, optimizeDayRoute, uploadTripPhoto} from "../controllers/itineraryController.js";
+import { upload } from "../middlewares/multerMiddleware.js"
 
 const router = express.Router();
 
@@ -45,17 +45,17 @@ router.post(
 );
 
 router.post(
-    "/modify",
-    protectRoute,
-    validate(modifyItinerarySchema),
-    modifyItinerary
-)
-
-router.post(
     "/optimize-route",
     protectRoute,
     validate(optimizeDayRouteSchema),
     optimizeDayRoute,
+)
+
+router.post(
+    "/:id/photo",
+    protectRoute,
+    upload.single("photo"),
+    uploadTripPhoto
 )
 
 router.patch(
