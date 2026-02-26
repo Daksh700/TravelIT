@@ -4,10 +4,11 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { exportTripToPDF } from "@/utils/pdfExport";
 import { 
   MapPin, Clock, ArrowLeft, Building2, Star, X, 
   Wifi, Wind, Tv, Coffee, Briefcase, Users, User, ShieldCheck, Plane,
-  CloudRain, Sparkles, Trash2, GripVertical, Send, Edit3,
+  CloudRain, Sparkles, Trash2, GripVertical, Send, Edit3, Download
 } from "lucide-react-native";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
 import { useModifyItinerary, useUpdateItineraryDetails, useOptimizeRoute } from "@/hooks/useModifyItinerary"; 
@@ -42,6 +43,7 @@ export default function ViewTripScreen() {
   const [delayHours, setDelayHours] = useState("2");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [optimizingDay, setOptimizingDay] = useState<number | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const symbols: Record<string, string> = { USD: "$", EUR: "€", INR: "₹", GBP: "£" };
 
@@ -156,6 +158,12 @@ export default function ViewTripScreen() {
     } finally {
       setOptimizingDay(null);
     }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    await exportTripToPDF(trip);
+    setIsExporting(false);
   };
 
   const renderStatusBadge = (act: any) => {
@@ -284,6 +292,20 @@ export default function ViewTripScreen() {
                 >
                     <Sparkles size={16} color="#22c55e" />
                     <Text style={{ color: "#22c55e" }} className="font-bold uppercase text-xs">Chat with AI</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    onPress={handleExportPDF}
+                    disabled={isExporting}
+                    style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                    className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-1.5"
+                >
+                    {isExporting ? (
+                        <ActivityIndicator size="small" color={colors.text} />
+                    ) : (
+                        <Download size={14} color={colors.text} />
+                    )}
+                    <Text style={{ color: colors.text }} className="font-bold uppercase text-[10px]">PDF</Text>
                 </TouchableOpacity>
             </View>
 
