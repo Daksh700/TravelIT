@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export const generateItinerary = async(
     token: string,
     source: string,
@@ -263,9 +265,19 @@ export const getUserItineraries = async(token: string) => {
             throw new Error(data.message || "Something went wrong");
         }
         console.log("Data Received from Backend");
+
+        await AsyncStorage.setItem("@offline_trips", JSON.stringify(data.data));
+
         return data.data;
     } catch (error) {
-        console.error("API Error: ", error);
+        console.error("API Error, trying offline storage: ", error);
+
+        const offlineData = await AsyncStorage.getItem("@offline_trips");
+
+        if(offlineData) {
+            console.log("Loaded trips from Offline Storage");
+            return JSON.parse(offlineData);
+        }
         return null;
     }
 }
