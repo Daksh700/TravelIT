@@ -10,21 +10,24 @@ import {
   CloudRain, Sparkles, Trash2, GripVertical, Send, Edit3,
 } from "lucide-react-native";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
-import { useModifyItinerary, useUpdateItineraryDetails } from "@/hooks/useModifyItinerary"; 
+import { useModifyItinerary, useUpdateItineraryDetails, useOptimizeRoute } from "@/hooks/useModifyItinerary"; 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState, useEffect } from "react";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ViewTripScreen() {
   const { colors } = useThemeColors();
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const queryClient = useQueryClient();
   
   const { data: trips } = useUserItineraries();
   const trip = trips?.find((t: any) => t._id === id);
   const { mutate: modifyTrip, isPending: isModifying } = useModifyItinerary();
   const { mutate: saveOrder } = useUpdateItineraryDetails();
+  const { mutateAsync: optimizeRoute } = useOptimizeRoute();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [localData, setLocalData] = useState<any[]>([]); 
@@ -38,6 +41,7 @@ export default function ViewTripScreen() {
   const [selectedDay, setSelectedDay] = useState("1");
   const [delayHours, setDelayHours] = useState("2");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [optimizingDay, setOptimizingDay] = useState<number | null>(null);
 
   const symbols: Record<string, string> = { USD: "$", EUR: "€", INR: "₹", GBP: "£" };
 
@@ -125,6 +129,35 @@ export default function ViewTripScreen() {
     setModifyModalVisible(false);
   };
 
+  const handleOptimizeDay = async (dayIndex: number, activities: any[]) => {
+    try {
+      setOptimizingDay(dayIndex);
+      
+      const result = await optimizeRoute({
+        activities,
+        dayStartTime: "09:00 AM" 
+      });
+
+      if (result && result.optimizedOrder) {
+        const updatedDetails = [...trip.tripDetails];
+        updatedDetails[dayIndex].activities = result.optimizedOrder;
+        
+        saveOrder({ itineraryId: trip._id, tripDetails: updatedDetails });
+
+        queryClient.setQueryData(["user-itineraries"], (oldData: any[]) => {
+            if (!oldData) return oldData;
+            return oldData.map((t) => 
+                t._id === trip._id ? { ...t, tripDetails: updatedDetails } : t
+            );
+        });
+      }
+    } catch (error) {
+      console.error("Failed to optimize UI:", error);
+    } finally {
+      setOptimizingDay(null);
+    }
+  };
+
   const renderStatusBadge = (act: any) => {
     if (act.verified === false) return <Badge text="Not Found (Re-Check)" bg="#fee2e2" color="#dc2626" />;
     if (act.closedToday) return <Badge text="Closed Today" bg="#dbeafe" color="#1d4ed8" />;
@@ -205,7 +238,7 @@ export default function ViewTripScreen() {
             />
         </View>
       ) : (
-        <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
             <View className="flex-row justify-between items-start mb-8">
             <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text }} className="text-3xl font-bold leading-tight">{trip.tripTitle}</Text>
@@ -352,31 +385,71 @@ export default function ViewTripScreen() {
 
             <View className="relative">
                 <View style={{ backgroundColor: colors.border }} className="absolute left-[11px] top-6 bottom-0 w-[1px]" />
-                {trip.tripDetails.map((day: any) => (
+                
+                {trip.tripDetails.map((day: any, dayIndex: number) => {
+                    const isOptimizingThisDay = optimizingDay === dayIndex;
+
+                    return (
                     <View key={day.day} className="relative pl-8 mb-10">
-                    <View style={{ backgroundColor: colors.background, borderColor: colors.primary }} className="absolute left-0 top-1 w-6 h-6 border rounded-full items-center justify-center">
-                        <Text style={{ color: colors.primary }} className="text-xs font-bold">{day.day}</Text>
+                        <View style={{ backgroundColor: colors.background, borderColor: colors.primary }} className="absolute left-0 top-1 w-6 h-6 border rounded-full items-center justify-center z-10">
+                            <Text style={{ color: colors.primary }} className="text-xs font-bold">{day.day}</Text>
+                        </View>
+                        
+                        <View className="flex-row justify-between items-center mb-4">
+                            <Text style={{ color: colors.text, flex: 1 }} className="text-lg font-bold pr-4">
+                                {day.theme}
+                            </Text>
+                            
+                            <TouchableOpacity
+                                onPress={() => handleOptimizeDay(dayIndex, day.activities)}
+                                disabled={isOptimizingThisDay}
+                                style={{ backgroundColor: colors.surface, borderColor: isOptimizingThisDay ? colors.border : colors.primary }}
+                                className="flex-row items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border"
+                            >
+                                {isOptimizingThisDay ? (
+                                    <ActivityIndicator size="small" color={colors.primary} />
+                                ) : (
+                                    <Sparkles size={12} color={colors.primary} />
+                                )}
+                                <Text style={{ color: isOptimizingThisDay ? colors.textMuted : colors.primary }} className="text-xs font-bold uppercase tracking-wider">
+                                    {isOptimizingThisDay ? "Thinking..." : "Optimize"}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View className="space-y-3">
+                            {day.activities.map((act: any, idx: number) => {
+                                const locationString = typeof act.location === 'string' ? act.location : act.formattedAddress || "Unknown Location";
+                                return (
+                                    <Card key={idx} style={{ borderColor: colors.border, backgroundColor: colors.surface }} className="p-4 border">
+                                        <View className="flex-row justify-between items-start mb-2">
+                                            <View className="flex-row gap-2 flex-wrap flex-1 pr-2">
+                                                {renderStatusBadge(act)}
+                                                {/* Wait Time Badge */}
+                                                {act.waitingTime > 0 && (
+                                                    <Badge text={`Wait: ${act.waitingTime}m`} bg="#fef9c3" color="#ca8a04" />
+                                                )}
+                                            </View>
+                                            <View className="bg-neutral-800/50 px-2 py-1 rounded">
+                                                <Text style={{ color: colors.primary }} className="text-xs font-bold tracking-widest">
+                                                    {act.time}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <Text style={{ color: colors.text }} className="font-bold text-base mb-1">{act.activity}</Text>
+                                        <View className="flex-row items-center gap-1 mb-2">
+                                            <MapPin size={10} color={colors.primary} />
+                                            <Text style={{ color: colors.primary }} className="text-xs font-bold">{locationString}</Text>
+                                        </View>
+                                        <Text style={{ color: colors.textMuted }} className="text-sm">{act.description}</Text>
+                                        <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">Est. Cost: {currencySymbol}{act.estimatedCost}</Text>
+                                    </Card>
+                                );
+                            })}
+                        </View>
                     </View>
-                    <Text style={{ color: colors.text }} className="text-lg font-bold mb-4">{day.theme}</Text>
-                    <View className="space-y-3">
-                        {day.activities.map((act: any, idx: number) => {
-                        const locationString = typeof act.location === 'string' ? act.location : act.formattedAddress || "Unknown Location";
-                        return (
-                            <Card key={idx} style={{ borderColor: colors.border, backgroundColor: colors.surface }} className="p-4 border">
-                            <View className="flex-row gap-2 mb-2">{renderStatusBadge(act)}</View>
-                            <Text style={{ color: colors.text }} className="font-bold text-base mb-1">{act.activity}</Text>
-                            <View className="flex-row items-center gap-1 mb-2">
-                                <MapPin size={10} color={colors.primary} />
-                                <Text style={{ color: colors.primary }} className="text-xs font-bold">{locationString}</Text>
-                            </View>
-                            <Text style={{ color: colors.textMuted }} className="text-sm">{act.description}</Text>
-                            <Text style={{ color: colors.textSecondary }} className="text-xs font-bold mt-2">Est. Cost: {currencySymbol}{act.estimatedCost}</Text>
-                            </Card>
-                        );
-                        })}
-                    </View>
-                    </View>
-                ))}
+                    );
+                })}
             </View>
 
             <Button variant="outline" onPress={() => router.replace("/(tabs)/trips")} className="mt-10 mb-10 h-14 py-0">
