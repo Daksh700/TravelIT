@@ -7,6 +7,8 @@ import { GoogleGenAI } from "@google/genai";
 import { verifyPlace } from "../services/placeVerifier.js";
 import { PlaceInput, optimizeItinerary, fetchDistanceMatrix } from "../services/routeOptimizerService.js";
 import { getDurationFromTimeRange } from "../utils/timeUtils.js";
+import cloudinary from "../config/cloudinary.js";
+import { UploadApiResponse } from "cloudinary";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
@@ -430,5 +432,60 @@ export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response)
                 totalWaitingTimeMins: optimizedResult.totalWaitingTimeMins
             }
         }, "Route optimized successfully!")
+    );
+});
+
+export const uploadTripPhoto = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+    const { id } = req.params; 
+
+    if (!user) {
+        throw new ApiError(401, "User not authenticated");
+    }
+
+    if (!req.file) {
+        throw new ApiError(400, "Please upload an image");
+    }
+
+    let imageUrl = "";
+
+    try {
+        const uploadResponse: UploadApiResponse = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "trip_vault", 
+                    resource_type: "image",
+                    transformation: [
+                        { width: 1080, crop: "limit" }, 
+                        { quality: "auto" },
+                        { format: "auto" },
+                    ],
+                },
+                (error, result) => {
+                    if (error) return reject(error);
+                    if (result) resolve(result);
+                }
+            );
+            stream.end(req.file?.buffer); 
+        });
+
+        imageUrl = uploadResponse.secure_url;
+    } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+        throw new ApiError(500, "Failed to upload image to cloud storage");
+    }
+
+    const updatedItinerary = await Itinerary.findOneAndUpdate(
+        { _id: id, userId: user._id },
+        { $push: { userPhotos: imageUrl } },
+        { new: true } 
+    );
+
+    if (!updatedItinerary) {
+        throw new ApiError(404, "Trip not found or unauthorized to edit");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedItinerary, "Photo uploaded successfully!")
     );
 });
