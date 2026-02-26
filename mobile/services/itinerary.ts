@@ -44,7 +44,7 @@ export const generateItinerary = async(
 
         const data = await response.json();
         
-        console.log("Data Received from Backend");
+        console.log("Data Received from Backend", data.data);
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
@@ -115,6 +115,7 @@ export const saveItinerary = async(
                             location: locationStr,
                             description: act.description,
                             estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : parseFloat(act.estimatedCost) || 0,
+                            coordinates: act.coordinates || null,
                         };
                     })
                 })),
@@ -203,6 +204,7 @@ export const updateItineraryDetails = async(
                     location: locationStr,
                     description: act.description || '',
                     estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : 0,
+                    coordinates: act.coordinates || null,
                 };
                 
                 if (act.verified !== null && act.verified !== undefined) {
@@ -293,6 +295,41 @@ export const updateTripStatus = async(
         return data.data;
     } catch (error) {
         console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const optimizeRoute = async (
+    token: string,
+    activities: any[],
+    dayStartTime?: string
+) => {
+    try {
+        console.log("Connecting to Backend for Route Optimization");
+        
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/optimize-route`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                activities,
+                dayStartTime
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Error response from optimizer:", data);
+            throw new Error(data.message || "Failed to optimize route");
+        }
+        
+        console.log("Optimization Data Received from Backend", data.data);
+        return data.data;
+    } catch (error) {
+        console.error("API Error during optimization: ", error);
         return null;
     }
 }
