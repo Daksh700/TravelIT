@@ -71,7 +71,9 @@ export interface IItinerary extends Document {
     tripDetails: IDayPlan[];
 
     hotel?: IHotelSnapshot | null;
-    flight?: IFlightSnapshot | null
+    flight?: IFlightSnapshot | null;
+
+    userPhotos: string[];
 
     status: "draft" | "active" | "completed";
     createdAt: Date;
@@ -206,6 +208,11 @@ const ItinerarySchema = new Schema<IItinerary>(
             arrivalTime: { type: String },
             duration: { type: String },
             stops: { type: Number },
+        },
+
+        userPhotos: {
+            type: [String],
+            default: []
         },
         
         status: {
