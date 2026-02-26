@@ -1,4 +1,4 @@
-import { modifyItinerary, updateItineraryDetails } from "@/services/itinerary";
+import { modifyItinerary, optimizeRoute, updateItineraryDetails } from "@/services/itinerary";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -14,6 +14,11 @@ type UpdateDetailsParams = {
   itineraryId: string;
   tripDetails: any[];
 }
+
+type OptimizeRouteParams = {
+  activities: any[];
+  dayStartTime?: string;
+};
 
 export const useModifyItinerary = () => {
   const { getToken } = useAuth();
@@ -85,6 +90,26 @@ export const useUpdateItineraryDetails = () => {
 
     onError: (err: any) => {
       console.error("Drag & Drop save failed: ", err.message);
+    }
+  });
+};
+
+export const useOptimizeRoute = () => {
+  const { getToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: OptimizeRouteParams) => {
+      const token = await getToken();
+      if (!token) throw new Error("No token");
+
+      return optimizeRoute(
+        token,
+        data.activities,
+        data.dayStartTime
+      );
+    },
+    onError: (err: any) => {
+      console.error("Route optimization failed: ", err.message);
     }
   });
 };
