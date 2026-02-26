@@ -82,6 +82,8 @@ export const saveItinerarySchema = z.object({
   hotel: z.any().optional().nullable(),
   flight: z.any().optional().nullable(),
 
+  userPhotos: z.array(z.string()).optional().nullable(),
+
   status: z.enum(["draft", "active", "completed"]).default("draft"),
 });
 
