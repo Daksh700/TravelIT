@@ -370,3 +370,41 @@ export const deleteTrip = async(
         return null;
     }
 }
+
+export const uploadTripPhoto = async (
+    token: string,
+    tripId: string,
+    asset: any 
+) => {
+    try {
+        console.log("Uploading photo to Backend");
+
+        const formData = new FormData();
+        formData.append('photo', {
+            uri: asset.uri,
+            type: asset.mimeType || 'image/jpeg',
+            name: asset.fileName || `photo_${Date.now()}.jpg`
+        } as any);
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/${tripId}/photo`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,                
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Upload error response:", data);
+            throw new Error(data.message || "Failed to upload photo");
+        }
+
+        console.log("Photo Uploaded Successfully");
+        return data.data;
+    } catch (error) {
+        console.error("API Error during photo upload: ", error);
+        return null;
+    }
+}
