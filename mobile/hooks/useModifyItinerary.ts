@@ -1,4 +1,4 @@
-import { modifyItinerary, optimizeRoute, updateItineraryDetails } from "@/services/itinerary";
+import { modifyItinerary, optimizeRoute, updateItineraryDetails, uploadTripPhoto } from "@/services/itinerary";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -18,6 +18,11 @@ type UpdateDetailsParams = {
 type OptimizeRouteParams = {
   activities: any[];
   dayStartTime?: string;
+};
+
+type UploadPhotoParams = {
+  itineraryId: string;
+  asset: any;
 };
 
 export const useModifyItinerary = () => {
@@ -111,5 +116,43 @@ export const useOptimizeRoute = () => {
     onError: (err: any) => {
       console.error("Route optimization failed: ", err.message);
     }
+  });
+};
+
+export const useUploadTripPhoto = () => {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UploadPhotoParams) => {
+      const token = await getToken();
+      if (!token) throw new Error("No token");
+
+      return uploadTripPhoto(
+        token,
+        data.itineraryId,
+        data.asset
+      );
+    },
+
+    onSuccess: (updatedTrip) => {
+      if (!updatedTrip) return;
+
+      queryClient.setQueryData(["user-itineraries"], (oldData: any[] | undefined) => {
+        if (!oldData) return [updatedTrip];
+
+        return oldData.map((trip) => 
+          trip._id === updatedTrip._id ? updatedTrip : trip
+        );
+      });
+
+      queryClient.setQueryData(["trip", updatedTrip._id], updatedTrip);
+      
+      queryClient.invalidateQueries({ queryKey: ["user-itineraries"] });
+    },
+
+    onError: (err: any) => {
+      console.error("Photo upload failed: ", err.message);
+    },
   });
 };
