@@ -1,24 +1,29 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Text, View, TouchableOpacity, Modal } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Modal, ActivityIndicator, Image } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Header } from "@/components/Header";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
 import { useUpdateTripStatus } from "@/hooks/useUpdateTripStatus";
 import { useDeleteTrip } from "@/hooks/useDeleteTrip";
+import { useUploadTripPhoto } from "@/hooks/useModifyItinerary";
 import { useRouter } from "expo-router";
-import { ChevronDown, X, Trash2 } from "lucide-react-native"; 
+import { ChevronDown, X, Trash2, ImagePlus } from "lucide-react-native"; 
 import { useState } from "react";
+import * as ImagePicker from "expo-image-picker"
 
 export default function TripsScreen() {
   const { colors } = useThemeColors();
   const { data: trips, isLoading } = useUserItineraries();
   const { mutate: updateStatus } = useUpdateTripStatus();
   const { mutate: deleteTrip } = useDeleteTrip();
+  const { mutate: uploadPhoto } = useUploadTripPhoto();
   const router = useRouter();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTrip, setActiveTrip] = useState<any>(null);
   const [showDelete, setShowDelete] = useState(false);
+  const [uploadingTripId, setUploadingTripId] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   const getStatusDetails = (status: string) => {
     switch (status) {
@@ -30,6 +35,33 @@ export default function TripsScreen() {
         return { label: "Completed", sub: "SUCCESSFULLY CONCLUDED", color: "#3b82f6" };
       default:
         return { label: status, sub: "", color: "#52525b" };
+    }
+  };
+
+  const handleAddPhoto = async (tripId: string) => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("We need camera roll permissions to add your memories!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7, 
+    });
+
+    if (!result.canceled && result.assets[0].uri) {
+      setUploadingTripId(tripId);
+      
+      uploadPhoto(
+        { itineraryId: tripId, asset: result.assets[0] },
+        {
+          onSettled: () => {
+            setUploadingTripId(null);
+          }
+        }
+      );
     }
   };
 
@@ -82,14 +114,27 @@ export default function TripsScreen() {
                     <ChevronDown size={12} color={colors.textMuted} />
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    onPress={() => {
-                      setActiveTrip(trip);
-                      setShowDelete(true);
-                    }}
-                  >
-                    <Trash2 size={20} color={colors.textMuted} />
-                  </TouchableOpacity>
+                  <View className="flex-row items-center gap-4">
+                    <TouchableOpacity 
+                      onPress={() => handleAddPhoto(trip._id)} 
+                      disabled={uploadingTripId === trip._id}
+                    >
+                      {uploadingTripId === trip._id ? (
+                        <ActivityIndicator size="small" color={colors.text} />
+                      ) : (
+                        <ImagePlus size={20} color={colors.textMuted} />
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => {
+                        setActiveTrip(trip);
+                        setShowDelete(true);
+                      }}
+                    >
+                      <Trash2 size={20} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 <TouchableOpacity
@@ -120,6 +165,26 @@ export default function TripsScreen() {
                     </View>
                   </View>
                 </TouchableOpacity>
+                {trip.userPhotos && trip.userPhotos.length > 0 && (
+                    <View className="mt-6">
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+                        {trip.userPhotos.map((photoUrl: string, index: number) => (
+                          <TouchableOpacity 
+                            key={index} 
+                            onPress={() => setSelectedPhoto(photoUrl)} 
+                            style={{ borderColor: colors.border, backgroundColor: colors.card }} 
+                            className="w-16 h-16 rounded-lg overflow-hidden border mr-3"
+                          >
+                            <Image
+                              source={{ uri: photoUrl }} 
+                              style={{ width: '100%', height: '100%' }} 
+                              resizeMode="cover"
+                            />
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                )}
               </View>
             ))}
           </View>
@@ -204,6 +269,34 @@ export default function TripsScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </Modal>
+
+      <Modal 
+        visible={!!selectedPhoto} 
+        transparent 
+        animationType="fade" 
+        onRequestClose={() => setSelectedPhoto(null)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          
+          <TouchableOpacity 
+            onPress={() => setSelectedPhoto(null)} 
+            style={{ position: 'absolute', top: 50, right: 20, zIndex: 50, padding: 10 }}
+          >
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: 6 }}>
+              <X size={24} color="#fff" />
+            </View>
+          </TouchableOpacity>
+
+          {selectedPhoto && (
+            <Image
+              source={{ uri: selectedPhoto }}
+              style={{ width: '100%', height: '80%' }}
+              resizeMode="contain" 
+            />
+          )}
+          
         </View>
       </Modal>
     </SafeAreaView>
