@@ -16,6 +16,7 @@ interface RoomState {
     roomId: string;
     hostId: string;
     users: Set<string>;
+    targetUsersCount: number; 
     pendingActivities: SwipeActivity[];
     confirmedItinerary: SwipeActivity[];
     discarded: SwipeActivity[];
@@ -28,7 +29,7 @@ export const initializeTripTinderSocket = (io: Server) => {
     io.on("connection", (socket: Socket) => {
         console.log(`⚡ Client connected: ${socket.id}`);
 
-        socket.on("create_room", ({ userId, activities }) => {
+        socket.on("create_room", ({ userId, activities, targetUsersCount }) => {
             const roomId = `TRIP-${randomBytes(2).toString("hex").toUpperCase()}`;
 
             const formattedActivities: SwipeActivity[] = activities.map((act: any, index: number) => ({
@@ -45,6 +46,7 @@ export const initializeTripTinderSocket = (io: Server) => {
                 roomId,
                 hostId: userId,
                 users: new Set([userId]),
+                targetUsersCount: targetUsersCount || 2,
                 pendingActivities: formattedActivities,
                 confirmedItinerary: [],
                 discarded: [],
@@ -54,12 +56,14 @@ export const initializeTripTinderSocket = (io: Server) => {
             activeRooms.set(roomId, newRoom);
             socket.join(roomId);
 
-            console.log(`🏠 Room Created: ${roomId} by User: ${userId}`);
+            console.log(`🏠 Room Created: ${roomId} by User: ${userId} for ${newRoom.targetUsersCount} users`);
 
             socket.emit("room_created", {
                 roomId,
                 users: Array.from(newRoom.users),
-                totalActivities: formattedActivities.length
+                targetUsersCount: newRoom.targetUsersCount, 
+                totalActivities: formattedActivities.length,
+                currentActivity: formattedActivities[0] ? serializeActivity(formattedActivities[0]) : null,
             });
         });
 
@@ -74,6 +78,10 @@ export const initializeTripTinderSocket = (io: Server) => {
                 return socket.emit("error", { message: "Swiping is already finished for this trip."});
             }
 
+            if(room.users.size >= room.targetUsersCount && !room.users.has(userId)) {
+                return socket.emit("error", { message: "Room is already full!"});
+            }
+
             room.users.add(userId);
             socket.join(roomId);
 
@@ -85,6 +93,7 @@ export const initializeTripTinderSocket = (io: Server) => {
             socket.emit("room_joined", {
                 roomId,
                 users: Array.from(room.users),
+                targetUsersCount: room.targetUsersCount, 
                 pendingActivitiesCount: room.pendingActivities.length,
                 currentActivity: room.pendingActivities[0] ? serializeActivity(room.pendingActivities[0]) : null,
             })
@@ -103,15 +112,14 @@ export const initializeTripTinderSocket = (io: Server) => {
             if(direction === "right") {
                 activity.yesVotes.add(userId);
                 activity.noVotes.delete(userId);
-            } else if(direction === "light") {
+            } else if(direction === "left") { 
                 activity.noVotes.add(userId);
                 activity.yesVotes.delete(userId);
             }
 
             const totalVotes = activity.yesVotes.size + activity.noVotes.size;
-            const totalUsers = room.users.size;
-
-            if(totalVotes === totalUsers) {
+            
+            if(totalVotes === room.targetUsersCount) {
                 room.pendingActivities.splice(activityIndex, 1);
 
                 if(activity.yesVotes.size > activity.noVotes.size) {
