@@ -297,7 +297,7 @@ export default function ViewTripScreen() {
                 <TouchableOpacity 
                     onPress={handleExportPDF}
                     disabled={isExporting}
-                    style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                    style={{ backgroundColor: "transparent", borderColor: colors.border }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-1.5"
                 >
                     {isExporting ? (
@@ -313,24 +313,24 @@ export default function ViewTripScreen() {
                 <Text style={{ color: colors.textMuted }} className="text-sm leading-relaxed">{trip.tripDescription}</Text>
             </View>
 
-            <View className="mb-10 rounded-lg overflow-hidden border p-5" style={{ backgroundColor: "#0a0a0a", borderColor: "#262626" }}>
+            <View className="mb-10 rounded-lg overflow-hidden border p-5" style={{ backgroundColor: colors.surface, borderColor: colors.border }}>
                 <View className="flex-row justify-between items-center mb-6">
-                    <Text className="text-white text-base font-bold italic tracking-wider">REAL-TIME LOGIC</Text>
-                    {isModifying && <ActivityIndicator size="small" color="#fff" />}
+                    <Text style={{ color: colors.text }} className="text-base font-bold italic tracking-wider">REAL-TIME LOGIC</Text>
+                    {isModifying && <ActivityIndicator size="small" color={colors.text} />}
                 </View>
                 <View className="gap-3">
-                    <TouchableOpacity onPress={() => openModificationModal("weather")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border border-[#262626] bg-[#121212] active:bg-[#1a1a1a]">
+                    <TouchableOpacity onPress={() => openModificationModal("weather")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <CloudRain size={24} color="#3b82f6" />
                     <View className="ml-4 flex-1">
-                        <Text className="text-white font-bold text-sm">Adapt for Rain</Text>
-                        <Text className="text-neutral-500 text-xs">Switch outdoor plans to indoor venues.</Text>
+                        <Text style={{ color: colors.text }} className="font-bold text-sm">Adapt for Rain</Text>
+                        <Text style={{ color: colors.textMuted }} className="text-xs">Switch outdoor plans to indoor venues.</Text>
                     </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openModificationModal("delay")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border border-[#262626] bg-[#121212] active:bg-[#1a1a1a]">
+                    <TouchableOpacity onPress={() => openModificationModal("delay")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <Clock size={24} color="#22c55e" />
                     <View className="ml-4 flex-1">
-                        <Text className="text-white font-bold text-sm">Handle Delay</Text>
-                        <Text className="text-neutral-500 text-xs">Shift timing due to late arrival/traffic.</Text>
+                        <Text style={{ color: colors.text }} className="font-bold text-sm">Handle Delay</Text>
+                        <Text style={{ color: colors.textMuted }} className="text-xs">Shift timing due to late arrival/traffic.</Text>
                     </View>
                     </TouchableOpacity>
                 </View>
@@ -508,11 +508,11 @@ export default function ViewTripScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", alignItems: "center" }}
         >
-            <View style={{ backgroundColor: "#000", borderColor: "#333", width: "85%", borderRadius: 16, borderWidth: 1 }} className="p-6">
+            <View style={{ backgroundColor: colors.surface, borderColor: colors.border, width: "85%", borderRadius: 16, borderWidth: 1 }} className="p-6">
                 <View className="flex-row justify-between items-center mb-6">
-                    <Text style={{ color: "#fff" }} className="text-lg font-bold italic uppercase">Chat Assistant</Text>
+                    <Text style={{ color: colors.text }} className="text-lg font-bold italic uppercase">Chat Assistant</Text>
                     <TouchableOpacity onPress={() => !isChatLoading && setChatVisible(false)} disabled={isChatLoading}>
-                        <X size={24} color={isChatLoading ? "#666" : "#666"} />
+                        <X size={24} color={isChatLoading ? colors.textMuted : colors.text} />
                     </TouchableOpacity>
                 </View>
                 
@@ -521,13 +521,13 @@ export default function ViewTripScreen() {
                         value={chatQuery}
                         onChangeText={setChatQuery}
                         placeholder="e.g. 'Make Day 2 cheaper'"
-                        placeholderTextColor="#666"
+                        placeholderTextColor={colors.textMuted}
                         editable={!isChatLoading}
                         style={{ 
                             flex: 1, 
-                            backgroundColor: "#1a1a1a", 
-                            color: isChatLoading ? "#666" : "#fff", 
-                            borderColor: "#333",
+                            backgroundColor: colors.background, 
+                            color: isChatLoading ? colors.textMuted : colors.text, 
+                            borderColor: colors.border,
                             borderWidth: 1,
                             borderRadius: 8,
                             paddingHorizontal: 16,
@@ -537,13 +537,13 @@ export default function ViewTripScreen() {
                     <TouchableOpacity 
                         onPress={handleAiEdit}
                         disabled={isChatLoading || !chatQuery.trim()}
-                        style={{ backgroundColor: isChatLoading || !chatQuery.trim() ? "#999" : "#22c55e" }} 
+                        style={{ backgroundColor: isChatLoading || !chatQuery.trim() ? colors.border : "#22c55e" }} 
                         className="h-[50px] w-[50px] rounded-lg items-center justify-center"
                     >
                         {isChatLoading ? (
-                            <ActivityIndicator size="small" color="#000" />
+                            <ActivityIndicator size="small" color={colors.text} />
                         ) : (
-                            <Send size={20} color="#000" />
+                            <Send size={20} color="#fff" />
                         )}
                     </TouchableOpacity>
                 </View>
