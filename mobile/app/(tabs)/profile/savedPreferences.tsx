@@ -46,7 +46,6 @@ export default function SavedPreferencesScreen() {
                 style={{ backgroundColor: colors.card, borderColor: colors.border }} 
                 className="border rounded-xl overflow-hidden shadow-sm"
               >
-                {/* Place Image */}
                 {item.image ? (
                   <Image source={{ uri: item.image }} style={{ width: "100%", height: 180 }} resizeMode="cover" />
                 ) : (
