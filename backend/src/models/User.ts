@@ -7,6 +7,13 @@ export interface IUser extends Document {
     lastName?: string;
     username?: string;
     avatar?: string;
+    savedPlaces: {
+        name: string;
+        address?: string;
+        description?: string;
+        image?: string;
+        rating?: number;
+    }[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -36,7 +43,16 @@ const userSchema = new Schema<IUser>(
         avatar: {
             type: String,
             default: "https:ui-avatars.com/api/?name=User&background=random"
-        }
+        },
+        savedPlaces: [
+            {
+                name: { type: String, required: true },
+                address: { type: String },
+                description: { type: String },
+                image: { type: String },
+                rating: { type: Number }
+            }
+        ]
     },
     {timestamps: true}
 )
