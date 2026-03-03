@@ -70,3 +70,46 @@ export const updateUserProfile = asyncHandler(async (req: Request, res: Response
         new ApiResponse(200, updatedUser, "Profile updated successfully")
     )
 })
+
+export const toggleBookmark = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+    const place = req.body;
+
+    if (!user) throw new ApiError(401, "User not authenticated");
+    if (!place || !place.name) throw new ApiError(400, "Place details missing");
+
+    const existingUser = await User.findById(user._id);
+    if (!existingUser) throw new ApiError(404, "User not found");
+
+    const isBookmarked = existingUser.savedPlaces.some((p: any) => p.name === place.name);
+
+    let updatedUser;
+    if (isBookmarked) {
+        updatedUser = await User.findByIdAndUpdate(
+            user._id, 
+            { $pull: { savedPlaces: { name: place.name } } }, 
+            { new: true }
+        );
+    } else {
+        updatedUser = await User.findByIdAndUpdate(
+            user._id, 
+            { $push: { savedPlaces: place } }, 
+            { new: true }
+        );
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedUser?.savedPlaces, "Bookmarks updated")
+    );
+});
+
+export const getBookmarks = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+    if (!user) throw new ApiError(401, "User not authenticated");
+
+    const existingUser = await User.findById(user._id);
+    
+    return res.status(200).json(
+        new ApiResponse(200, existingUser?.savedPlaces || [], "Bookmarks fetched successfully")
+    );
+});
