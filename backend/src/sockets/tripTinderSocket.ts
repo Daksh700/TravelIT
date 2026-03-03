@@ -19,6 +19,7 @@ interface RoomState {
     hostId: string;
     users: Set<string>;
     targetUsersCount: number; 
+    currency: string;
     pendingActivities: SwipeActivity[];
     confirmedItinerary: SwipeActivity[];
     discarded: SwipeActivity[];
@@ -31,7 +32,7 @@ export const initializeTripTinderSocket = (io: Server) => {
     io.on("connection", (socket: Socket) => {
         console.log(`⚡ Client connected: ${socket.id}`);
 
-        socket.on("create_room", ({ userId, activities, targetUsersCount }) => {
+        socket.on("create_room", ({ userId, activities, targetUsersCount, currency }) => {
             const roomId = `TRIP-${randomBytes(2).toString("hex").toUpperCase()}`;
 
             const formattedActivities: SwipeActivity[] = activities.map((act: any, index: number) => ({
@@ -51,6 +52,7 @@ export const initializeTripTinderSocket = (io: Server) => {
                 hostId: userId,
                 users: new Set([userId]),
                 targetUsersCount: targetUsersCount || 2,
+                currency: currency || "USD",
                 pendingActivities: formattedActivities,
                 confirmedItinerary: [],
                 discarded: [],
@@ -66,6 +68,7 @@ export const initializeTripTinderSocket = (io: Server) => {
                 roomId,
                 users: Array.from(newRoom.users),
                 targetUsersCount: newRoom.targetUsersCount, 
+                currency: newRoom.currency,
                 totalActivities: formattedActivities.length,
                 currentActivity: formattedActivities[0] ? serializeActivity(formattedActivities[0]) : null,
             });
@@ -98,6 +101,7 @@ export const initializeTripTinderSocket = (io: Server) => {
                 roomId,
                 users: Array.from(room.users),
                 targetUsersCount: room.targetUsersCount, 
+                currency: room.currency,
                 pendingActivitiesCount: room.pendingActivities.length,
                 currentActivity: room.pendingActivities[0] ? serializeActivity(room.pendingActivities[0]) : null,
             })
