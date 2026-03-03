@@ -3,6 +3,8 @@ import { randomBytes } from "crypto";
 
 interface SwipeActivity {
     id: string;
+    day: number;
+    time: string;
     name: string;
     description: string;
     location: string;
