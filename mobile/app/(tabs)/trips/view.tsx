@@ -405,6 +405,28 @@ export default function ViewTripScreen() {
             </TouchableOpacity>
             )}
 
+            {trip.travelers > 1 && isDraft && (
+                <TouchableOpacity 
+                    activeOpacity={0.9}
+                    onPress={() => router.push({ pathname: "/(tabs)/trips/tinder", params: { itineraryId: trip._id } })}
+                    className="mb-8 rounded-2xl overflow-hidden border border-[#3b82f6]/30 relative"
+                >
+                    <View style={{ backgroundColor: "#1e3a8a" }} className="absolute inset-0 opacity-20" />
+                    <View className="p-6 flex-row items-center justify-between">
+                        <View className="flex-1 pr-6">
+                            <Text className="text-[#60a5fa] text-[10px] font-bold uppercase tracking-widest mb-1">Multiplayer Mode</Text>
+                            <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">Group Sync</Text>
+                            <Text style={{ color: colors.textMuted }} className="text-xs leading-relaxed">
+                                Traveling with {trip.travelers} others? Invite them to swipe and finalize this itinerary together!
+                            </Text>
+                        </View>
+                        <View className="w-14 h-14 bg-blue-600 rounded-full items-center justify-center shadow-lg shadow-blue-500/50">
+                            <Users size={24} color="#fff" />
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            )}
+
             <View className="relative">
                 <View style={{ backgroundColor: colors.border }} className="absolute left-[11px] top-6 bottom-0 w-[1px]" />
                 
@@ -447,7 +469,6 @@ export default function ViewTripScreen() {
                                         <View className="flex-row justify-between items-start mb-2">
                                             <View className="flex-row gap-2 flex-wrap flex-1 pr-2">
                                                 {renderStatusBadge(act)}
-                                                {/* Wait Time Badge */}
                                                 {act.waitingTime > 0 && (
                                                     <Badge text={`Wait: ${act.waitingTime}m`} bg="#fef9c3" color="#ca8a04" />
                                                 )}
