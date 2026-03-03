@@ -36,7 +36,9 @@ export const initializeTripTinderSocket = (io: Server) => {
 
             const formattedActivities: SwipeActivity[] = activities.map((act: any, index: number) => ({
                 id: `act_${index}_${Date.now()}`,
-                name: act.activity,
+                day: act.day,
+                time: act.time || "TBD",
+                name: act.activity || act.name,
                 description: act.description,
                 location: act.location,
                 estimatedCost: act.estimatedCost,
