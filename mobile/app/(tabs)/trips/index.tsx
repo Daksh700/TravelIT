@@ -7,7 +7,7 @@ import { useUpdateTripStatus } from "@/hooks/useUpdateTripStatus";
 import { useDeleteTrip } from "@/hooks/useDeleteTrip";
 import { useUploadTripPhoto } from "@/hooks/useModifyItinerary";
 import { useRouter } from "expo-router";
-import { ChevronDown, X, Trash2, ImagePlus } from "lucide-react-native"; 
+import { ChevronDown, X, Trash2, ImagePlus, Users } from "lucide-react-native"; 
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker"
 
@@ -78,12 +78,25 @@ export default function TripsScreen() {
       <Header />
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-        <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight mb-1">
-          My Vault
-        </Text>
-        <Text style={{ color: colors.textMuted }} className="text-sm mb-8">
-          Archived journeys & memories.
-        </Text>
+        <View className="flex-row justify-between items-start mb-4">
+          <View>
+            <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight mb-1">
+              My Vault
+            </Text>
+            <Text style={{ color: colors.textMuted }} className="text-sm mb-8">
+              Archived journeys & memories.
+            </Text>
+          </View>
+
+            <TouchableOpacity 
+                onPress={() => router.push("/(tabs)/trips/tinder")}
+                style={{ backgroundColor: colors.surface, borderColor: colors.primary }}
+                className="px-3 py-2 rounded-lg border border-dashed flex-row items-center gap-2"
+            >
+                <Users size={14} color={colors.primary} />
+                <Text style={{ color: colors.primary }} className="text-xs font-bold uppercase tracking-widest">Join Sync</Text>
+            </TouchableOpacity>
+        </View>
 
         {(!trips || trips.length === 0) ? (
           <View className="items-center justify-center py-20">
