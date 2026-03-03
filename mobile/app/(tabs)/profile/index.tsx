@@ -139,7 +139,12 @@ export default function ProfileScreen() {
             </Pressable>
 
             <MenuItem icon={CreditCard} label="Subscription" value="Active" />
-            <MenuItem icon={Heart} label="Saved Preferences" />
+            <Pressable onPress={() => {
+              handleImpact("soft");
+              router.push("/(tabs)/profile/savedPreferences")
+            }}>
+              <MenuItem icon={Heart} label="Saved Preferences" />
+            </Pressable>
           </View>
 
           <Text
