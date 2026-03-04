@@ -43,7 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/itinerary", itineraryRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/v1/payment", paymentRoutes);
 
 app.use(errorHandler);
 
