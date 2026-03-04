@@ -14,6 +14,10 @@ export interface IUser extends Document {
         image?: string;
         rating?: number;
     }[];
+    isPro: boolean;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    proActivatedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -52,7 +56,20 @@ const userSchema = new Schema<IUser>(
                 image: { type: String },
                 rating: { type: Number }
             }
-        ]
+        ],
+        isPro: {
+            type: Boolean,
+            default: false
+        },
+        razorpayOrderId: { 
+            type: String 
+        },
+        razorpayPaymentId: { 
+            type: String 
+        },
+        proActivatedAt: { 
+            type: Date 
+        },
     },
     {timestamps: true}
 )
