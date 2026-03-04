@@ -350,7 +350,7 @@ export default function CreateTripScreen() {
       {pickerConfig && (
         <Modal transparent animationType="fade" visible={true} onRequestClose={() => setPickerConfig(null)}>
           <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" }}>
-            <View style={{ backgroundColor: "white", borderRadius: 16, padding: 10, width: "90%", maxWidth: 350 }}>
+            <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 10, width: "90%", maxWidth: 350 }}>
               <DateTimePicker
                 value={pickerConfig.value}
                 mode="date"
