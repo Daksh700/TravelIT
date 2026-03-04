@@ -6,6 +6,7 @@ import { Server } from "socket.io"
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js"
 import itineraryRoutes from "./routes/itineraryRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js"
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import { clerkMiddleware } from "@clerk/express";
 import { initializeTripTinderSocket } from "./sockets/tripTinderSocket.js";
@@ -42,6 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/itinerary", itineraryRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.use(errorHandler);
 
