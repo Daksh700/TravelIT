@@ -13,13 +13,19 @@ import { useSystemThemeSync } from '@/hooks/useSystemThemeSync';
 
 const queryClient = new QueryClient();
 
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  throw new Error('Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env');
+}
+
 export default function RootLayout() {
   const { colors, isDark } = useThemeColors();
   useSystemThemeSync();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ClerkProvider tokenCache={tokenCache}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <SafeAreaProvider>
           <View
             style={{ flex: 1, backgroundColor: colors.background }}
