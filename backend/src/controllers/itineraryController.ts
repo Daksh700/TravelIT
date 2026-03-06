@@ -8,7 +8,7 @@ import { verifyPlace } from "../services/placeVerifier.js";
 import { PlaceInput, optimizeItinerary, fetchDistanceMatrix } from "../services/routeOptimizerService.js";
 import { getDurationFromTimeRange } from "../utils/timeUtils.js";
 import cloudinary from "../config/cloudinary.js";
-import { UploadApiResponse } from "cloudinary";
+import fs from "fs"
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
@@ -450,29 +450,24 @@ export const uploadTripPhoto = asyncHandler(async (req: Request, res: Response) 
     let imageUrl = "";
 
     try {
-        const uploadResponse: UploadApiResponse = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                {
-                    folder: "trip_vault", 
-                    resource_type: "image",
-                    transformation: [
-                        { width: 1080, crop: "limit" }, 
-                        { quality: "auto" },
-                        { format: "auto" },
-                    ],
-                },
-                (error, result) => {
-                    if (error) return reject(error);
-                    if (result) resolve(result);
-                }
-            );
-            stream.end(req.file?.buffer); 
+        const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
+            folder: "trip_vault", 
+            resource_type: "image",
+            transformation: [
+                { width: 1080, crop: "limit" }, 
+                { quality: "auto" },
+                { format: "auto" },
+            ],
         });
 
         imageUrl = uploadResponse.secure_url;
     } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError);
         throw new ApiError(500, "Failed to upload image to cloud storage");
+    } finally {
+      if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
     }
 
     const updatedItinerary = await Itinerary.findOneAndUpdate(

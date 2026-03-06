@@ -1,4 +1,6 @@
 import { Request, Response } from "express";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs"
 import { clerkClient, getAuth } from "@clerk/express";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/User.js";
@@ -50,16 +52,37 @@ export const getCurrentUser = asyncHandler(async (req: Request, res: Response) =
 
 export const updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
     const {firstName, lastName, username, avatar} = req.body;
+    let avatarUrl = req.body.avatar;
+
+    if (req.file) {
+        try {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: "travelit_avatars",
+            });
+            avatarUrl = result.secure_url;
+        } catch (error) {
+            throw new ApiError(500, "Error uploading image to Cloudinary");
+        } finally {
+            if (fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
+        }
+    }
+
+    const updateData: any = {
+        firstName,
+        lastName,
+        username,
+    };
+
+    if (avatarUrl) {
+        updateData.avatar = avatarUrl;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
         req.user?._id,
-        {
-            firstName,
-            lastName,
-            username,
-            avatar
-        },
-        {new: true, runValidators: true},
+        updateData,
+        { new: true, runValidators: true }
     );
 
     if(!updatedUser) {

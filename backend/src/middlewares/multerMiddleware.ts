@@ -1,18 +1,18 @@
-import multer, {FileFilterCallback} from "multer";
-import { Request } from "express";
-import { ApiError } from "../utils/ApiError.js";
+import multer from "multer";
+import fs from "fs";
 
-// Use memory storage instead of disk storage
-const storage = multer.memoryStorage();
+const tempDir = './public/temp';
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+}
 
-export const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-    if(file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new ApiError(400, "Only Image files are allowed") as any, false);
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, tempDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname.replace(/\s+/g, '-'));
     }
-  }
 });
+
+export const upload = multer({ storage });
