@@ -62,18 +62,32 @@ export const updateUserProfile = async(
     try {
         console.log("Connecting to Backend");
 
+        const formData = new FormData();
+        
+        if (firstName) formData.append('firstName', firstName);
+        if (lastName) formData.append('lastName', lastName);
+        if (username) formData.append('username', username);
+
+        if (avatar && (avatar.startsWith('file://') || avatar.startsWith('content://'))) {
+            const filename = avatar.split('/').pop() || 'avatar.jpg';
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+            formData.append('avatar', {
+                uri: avatar,
+                name: filename,
+                type,
+            } as any);
+        } else if (avatar) {
+            formData.append('avatar', avatar);
+        }
+
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
             method: 'PATCH',
             headers: {
-                'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             },
-            body: JSON.stringify({
-                firstName,
-                lastName,
-                username,
-                avatar
-            })
+            body: formData 
         })
 
         const data = await response.json();
