@@ -1,4 +1,4 @@
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ScrollView,
   Text,
@@ -38,6 +38,7 @@ import { useOptimizeRoute } from "@/hooks/useModifyItinerary";
 
 export default function ResultScreen() {
   const { colors } = useThemeColors();
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const router = useRouter();
   const { mutate: save, isPending } = useSaveItinerary();
@@ -533,7 +534,7 @@ export default function ResultScreen() {
         onRequestClose={() => setHotelModalVisible(false)}
       >
         {hotel && (
-          <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: insets.top }}>
             <View
               style={{ borderColor: colors.border }}
               className="px-6 py-4 flex-row justify-between items-center border-b"
