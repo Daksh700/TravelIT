@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Text, View, TouchableOpacity, Modal, ActivityIndicator, Image } from "react-native";
+import { ScrollView, Text, View, TouchableOpacity, Modal, ActivityIndicator, Image, RefreshControl } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Header } from "@/components/Header";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
@@ -13,7 +13,7 @@ import * as ImagePicker from "expo-image-picker"
 
 export default function TripsScreen() {
   const { colors } = useThemeColors();
-  const { data: trips, isLoading } = useUserItineraries();
+  const { data: trips, isLoading, refetch } = useUserItineraries();
   const { mutate: updateStatus } = useUpdateTripStatus();
   const { mutate: deleteTrip } = useDeleteTrip();
   const { mutate: uploadPhoto } = useUploadTripPhoto();
@@ -24,6 +24,7 @@ export default function TripsScreen() {
   const [showDelete, setShowDelete] = useState(false);
   const [uploadingTripId, setUploadingTripId] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getStatusDetails = (status: string) => {
     switch (status) {
@@ -65,7 +66,13 @@ export default function TripsScreen() {
     }
   };
 
-  if (isLoading) {
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch(); 
+    setRefreshing(false);
+  };
+
+  if (isLoading && !refreshing) {
     return (
       <SafeAreaView
         style={{ backgroundColor: colors.background }}
@@ -84,7 +91,14 @@ export default function TripsScreen() {
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <Header />
 
-      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+        }>
         <View className="flex-row justify-between items-start mb-4">
           <View>
             <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight mb-1">
