@@ -49,23 +49,24 @@ export default function EditProfileScreen() {
       className="flex-1"
       edges={["top"]}
     >
-      <View
-        style={{ borderBottomColor: colors.border }}
-        className="flex-row items-center px-6 py-4 border-b"
+      <View 
+        style={{ borderBottomColor: colors.border }} 
+        className="flex-row items-center gap-4 px-6 py-4 border-b"
       >
         <Pressable onPress={() => {
           handleImpact("soft")
           router.back()
-        }} className="mr-4">
+        }}>
           <ArrowLeft size={22} color={colors.textMuted} />
         </Pressable>
-
-        <Text
-          style={{ color: colors.text }}
-          className="text-lg font-bold tracking-tight"
-        >
-          Edit Profile
-        </Text>
+        <View>
+          <Text style={{ color: colors.text }} className="text-lg font-bold">
+            Edit Profile
+          </Text>
+          <Text style={{ color: colors.textMuted }} className="text-xs">
+            Update your personal details.
+          </Text>
+        </View>
       </View>
 
       <ScrollView
