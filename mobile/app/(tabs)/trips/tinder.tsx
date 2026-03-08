@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native'; 
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Pressable } from 'react-native'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useTripTinder } from '@/hooks/useTripTinder';
@@ -283,54 +283,60 @@ export default function TripTinderScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
-      <SafeAreaView className="flex-1 px-6 pt-6">
-        <View className="flex-row items-center mb-10 mt-2">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4">
-            <ArrowLeft size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight">Group Sync</Text>
+      <SafeAreaView className="flex-1" edges={["top"]}>
+        <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
+          <Pressable onPress={() => router.back()}>
+            <ArrowLeft size={22} color={colors.textMuted} />
+          </Pressable>
+          <View>
+            <Text style={{ color: colors.text }} className="text-lg font-bold">Group Sync</Text>
+            <Text style={{ color: colors.textMuted }} className="text-xs">Collaborative itinerary planning.</Text>
+          </View>
         </View>
 
-        {isHost ? (
-            <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border mb-6 shadow-sm">
-              <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">Host this Trip</Text>
-              <Text style={{ color: colors.textMuted }} className="text-sm mb-6">You are finalizing: {activeTrip?.tripTitle}</Text>
-              
-              <Text style={{ color: colors.text }} className="text-[10px] uppercase font-bold mb-2 ml-1 tracking-widest">TOTAL PARTICIPANTS</Text>
-              <Input 
-                placeholder="2" 
-                keyboardType="numeric"
-                value={participantCount} 
-                onChangeText={(t) => { setParticipantCount(t); setError(null); }} 
-                className="mb-6 h-14 font-bold text-lg" 
-              />
+        <View className="px-6 pt-8">
+            {isHost ? (
+                <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border mb-6 shadow-sm">
+                  <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">Host this Trip</Text>
+                  <Text style={{ color: colors.textMuted }} className="text-sm mb-6">You are finalizing: {activeTrip?.tripTitle}</Text>
+                  
+                  <Text style={{ color: colors.text }} className="text-[10px] uppercase font-bold mb-2 ml-1 tracking-widest">TOTAL PARTICIPANTS</Text>
+                  <Input 
+                    placeholder="2" 
+                    keyboardType="numeric"
+                    value={participantCount} 
+                    onChangeText={(t) => { setParticipantCount(t); setError(null); }} 
+                    className="mb-6 h-14 font-bold text-lg" 
+                  />
 
-              {error && <Text className="text-red-500 text-xs mb-4 font-bold">{error}</Text>}
-              <Button title="Create Room" onPress={handleCreateRoom} className="h-14" />
-            </View>
-        ) : (
-          <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border shadow-sm">
-            <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">Join a Room</Text>
-            <Text style={{ color: colors.textMuted }} className="text-sm mb-6">Enter the 9-character code shared by your host.</Text>
-            
-            {error && <Text className="text-red-500 text-xs mb-4 font-bold">{error}</Text>}
-            
-            <Input 
-              placeholder="TRIP-XXXX" 
-              value={joinCode} 
-              onChangeText={(t) => { setJoinCode(t.toUpperCase()); setError(null); }} 
-              className="mb-6 h-14 uppercase font-bold tracking-widest text-center text-lg" 
-              autoCapitalize="characters"
-            />
-            <Button 
-              title="Join Room" 
-              onPress={() => joinRoom(joinCode)} 
-              disabled={joinCode.length < 5} 
-              style={{ opacity: joinCode.length < 5 ? 0.5 : 1 }}
-              className="h-14"
-            />
-          </View>
-        )}
+                  {error && <Text className="text-red-500 text-xs mb-4 font-bold">{error}</Text>}
+                  <Button title="Create Room" onPress={handleCreateRoom} className="h-14" />
+                </View>
+            ) : (
+              <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border shadow-sm">
+                <Text style={{ color: colors.text }} className="text-xl font-bold mb-2">Join a Room</Text>
+                <Text style={{ color: colors.textMuted }} className="text-sm mb-6">Enter the 9-character code shared by your host.</Text>
+                
+                {error && <Text className="text-red-500 text-xs mb-4 font-bold">{error}</Text>}
+                
+                <Input 
+                  placeholder="TRIP-XXXX" 
+                  value={joinCode} 
+                  onChangeText={(t) => { setJoinCode(t.toUpperCase()); setError(null); }} 
+                  className="mb-6 h-14 uppercase font-bold tracking-widest text-center text-lg" 
+                  autoCapitalize="characters"
+                />
+                <Button 
+                  title="Join Room" 
+                  onPress={() => joinRoom(joinCode)} 
+                  disabled={joinCode.length < 5} 
+                  style={{ opacity: joinCode.length < 5 ? 0.5 : 1 }}
+                  className="h-14"
+                />
+              </View>
+            )}
+        </View>
+
       </SafeAreaView>
     </GestureHandlerRootView>
   );
