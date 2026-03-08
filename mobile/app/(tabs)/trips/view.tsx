@@ -296,6 +296,7 @@ export default function ViewTripScreen() {
             <View className="flex-row gap-3 mb-6">
                 <TouchableOpacity 
                     onPress={() => setIsEditMode(true)}
+                    disabled={optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: colors.border }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-2"
                 >
@@ -305,6 +306,7 @@ export default function ViewTripScreen() {
 
                 <TouchableOpacity 
                     onPress={() => setChatVisible(true)}
+                    disabled={optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: "#22c55e" }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-2"
                 >
@@ -314,7 +316,7 @@ export default function ViewTripScreen() {
 
                 <TouchableOpacity 
                     onPress={handleExportPDF}
-                    disabled={isExporting}
+                    disabled={isExporting || optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: colors.border }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-1.5"
                 >
@@ -337,14 +339,14 @@ export default function ViewTripScreen() {
                     {isModifying && <ActivityIndicator size="small" color={colors.text} />}
                 </View>
                 <View className="gap-3">
-                    <TouchableOpacity onPress={() => openModificationModal("weather")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                    <TouchableOpacity onPress={() => openModificationModal("weather")} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <CloudRain size={24} color="#3b82f6" />
                     <View className="ml-4 flex-1">
                         <Text style={{ color: colors.text }} className="font-bold text-sm">Adapt for Rain</Text>
                         <Text style={{ color: colors.textMuted }} className="text-xs">Switch outdoor plans to indoor venues.</Text>
                     </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openModificationModal("delay")} disabled={isModifying} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                    <TouchableOpacity onPress={() => openModificationModal("delay")} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <Clock size={24} color="#22c55e" />
                     <View className="ml-4 flex-1">
                         <Text style={{ color: colors.text }} className="font-bold text-sm">Handle Delay</Text>
@@ -464,7 +466,7 @@ export default function ViewTripScreen() {
                             
                             <TouchableOpacity
                                 onPress={() => handleOptimizeDay(dayIndex, day.activities)}
-                                disabled={isOptimizingThisDay}
+                                disabled={optimizingDay !== null}
                                 style={{ backgroundColor: colors.surface, borderColor: isOptimizingThisDay ? colors.border : colors.primary }}
                                 className="flex-row items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border"
                             >
