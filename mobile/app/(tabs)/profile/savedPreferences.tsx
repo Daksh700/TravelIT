@@ -25,7 +25,7 @@ export default function SavedPreferencesScreen() {
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={['top']}>
       <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
         <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
+          <ArrowLeft size={22} color={colors.textMuted} />
         </TouchableOpacity>
         <View>
           <Text style={{ color: colors.text }} className="text-lg font-bold">Saved Places</Text>
