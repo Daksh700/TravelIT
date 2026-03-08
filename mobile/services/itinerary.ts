@@ -342,7 +342,7 @@ export const optimizeRoute = async (
         return data.data;
     } catch (error) {
         console.error("API Error during optimization: ", error);
-        return null;
+        throw error;
     }
 }
 

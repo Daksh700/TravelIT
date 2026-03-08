@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Text, View, Pressable, TouchableOpacity, Modal, Image, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
+import { ScrollView, Text, View, Pressable, TouchableOpacity, Modal, Image, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, RefreshControl, Alert } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
@@ -160,8 +160,12 @@ export default function ViewTripScreen() {
             );
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to optimize UI:", error);
+      Alert.alert(
+        "Optimization Failed", 
+        error?.message || "We couldn't calculate a perfect route for this day. The locations might be too far apart or the time schedule is too tight. Try re-ordering manually or removing an activity."
+      );
     } finally {
       setOptimizingDay(null);
     }
