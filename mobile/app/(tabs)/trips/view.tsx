@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Text, View, Pressable, TouchableOpacity, Modal, Image, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { ScrollView, Text, View, Pressable, TouchableOpacity, Modal, Image, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, RefreshControl } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
@@ -24,7 +24,7 @@ export default function ViewTripScreen() {
   const { id } = useLocalSearchParams();
   const queryClient = useQueryClient();
   
-  const { data: trips } = useUserItineraries();
+  const { data: trips, refetch } = useUserItineraries();
   const trip = trips?.find((t: any) => t._id === id);
   const { mutate: modifyTrip, isPending: isModifying } = useModifyItinerary();
   const { mutate: saveOrder } = useUpdateItineraryDetails();
@@ -44,6 +44,7 @@ export default function ViewTripScreen() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [optimizingDay, setOptimizingDay] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const symbols: Record<string, string> = { USD: "$", EUR: "€", INR: "₹", GBP: "£" };
 
@@ -65,6 +66,12 @@ export default function ViewTripScreen() {
         setLocalData(flat);
     }
   }, [trip, isModifying]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch(); 
+    setRefreshing(false);
+  };
 
   if (!trip) return null;
 
@@ -246,7 +253,14 @@ export default function ViewTripScreen() {
             />
         </View>
       ) : (
-        <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }} refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }>
             <View className="flex-row justify-between items-start mb-8">
             <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text }} className="text-3xl font-bold leading-tight">{trip.tripTitle}</Text>
@@ -501,6 +515,15 @@ export default function ViewTripScreen() {
                 </View>
             </Button>
         </ScrollView>
+      )}
+
+      {isModifying && (
+        <View style={{ flex: 1, backgroundColor: colors.background, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={{ color: colors.textMuted }} className="text-sm mt-4">
+            Editing Itinerary…
+          </Text>
+        </View>
       )}
 
       <Modal visible={chatVisible} transparent animationType="fade" onRequestClose={() => setChatVisible(false)}>
