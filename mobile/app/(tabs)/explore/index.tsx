@@ -18,7 +18,6 @@ export default function ExploreScreen() {
   const { mutate: explore, isPending } = useExploreLocation();
   const result = queryClient.getQueryData<any>(["exploreResult"]);
 
-  // 🔥 Database Hooks
   const { data: savedPlaces } = useBookmarks();
   const { mutate: toggleBookmark } = useToggleBookmark();
 
