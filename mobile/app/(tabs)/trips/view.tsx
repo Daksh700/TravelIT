@@ -253,7 +253,7 @@ export default function ViewTripScreen() {
                 onDragEnd={({ data }) => updateBackendOrder(data)}
                 keyExtractor={(item) => item.uniqueId || item.key}
                 renderItem={renderDraggableItem}
-                contentContainerStyle={{ paddingBottom: 100, paddingTop: 20 }}
+                contentContainerStyle={{ paddingBottom: 120, paddingTop: 12, paddingHorizontal: 24 }}
             />
         </View>
       ) : (
