@@ -7,6 +7,7 @@ import {
   Modal,
   Image,
   ActivityIndicator,
+  Alert
 } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Header } from "@/components/Header";
@@ -46,6 +47,8 @@ export default function ResultScreen() {
 
   const [hotelModalVisible, setHotelModalVisible] = useState(false);
   const [optimizingDay, setOptimizingDay] = useState<number | null>(null);
+
+  const isBusy = isPending || optimizingDay !== null;
 
   const symbols: Record<string, string> = {
     USD: "$",
@@ -106,8 +109,12 @@ export default function ResultScreen() {
           return { ...oldData, tripDetails: updatedDetails };
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to optimize UI:", error);
+      Alert.alert(
+        "Optimization Failed 🚦", 
+        error?.message || "We couldn't calculate a perfect route for this day. The locations might be too far apart or the time schedule is too tight."
+      );
     } finally {
       setOptimizingDay(null);
     }
@@ -162,12 +169,12 @@ export default function ResultScreen() {
             </View>
           </View>
           <TouchableOpacity
-            disabled={isPending}
+            disabled={isBusy}
             onPress={handleSave}
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.border,
-              opacity: isPending ? 0.5 : 1,
+              opacity: isBusy ? 0.5 : 1,
             }}
             className="p-3 border rounded-md"
           >
@@ -410,12 +417,13 @@ export default function ResultScreen() {
 
                   <TouchableOpacity
                     onPress={() => handleOptimizeDay(dayIndex, day.activities)}
-                    disabled={isOptimizingThisDay}
+                    disabled={isBusy}
                     style={{
                       backgroundColor: colors.surface,
                       borderColor: isOptimizingThisDay
                         ? colors.border
                         : colors.primary,
+                        opacity: (isBusy && !isOptimizingThisDay) ? 0.5 : 1
                     }}
                     className="flex-row items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border"
                   >
