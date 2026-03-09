@@ -297,3 +297,55 @@ export const exploreLocation = asyncHandler(async (req: Request, res: Response) 
     }, "Search results fetched")
   );
 })
+
+let cachedDestinations: any[] = [];
+let lastDestFetchDate: string = "";
+
+export const getTrendingDestinations = asyncHandler(async (req: Request, res: Response) => {
+  const today = new Date().toISOString().split('T')[0];
+
+  if (cachedDestinations.length > 0 && lastDestFetchDate === today) {
+    return res.status(200).json(new ApiResponse(200, cachedDestinations, "Fetched from cache"));
+  }
+
+  const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+  const prompt = `Give me exactly 3 highly trending global travel destinations for today. 
+  Assign a one-word theme to each (e.g., "Culture", "Adventure", "Relax", "Nature").
+  Return ONLY a valid JSON array of objects. No markdown.
+  Format: [{"theme": "Culture", "location": "Kyoto, Japan", "description": "A short 1-line description"}]`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    const cleanText = result.text?.replace(/```json/g, "").replace(/```/g, "").trim();
+    const destinations = JSON.parse(cleanText || "[]");
+
+    const enrichedDestinations = [];
+    for (const dest of destinations) {
+      try {
+        const placeDetails = await verifyPlace(dest.location, dest.location);
+        enrichedDestinations.push({
+          ...dest,
+          image: placeDetails.photos?.[0] || null 
+        });
+      } catch (err) {
+        enrichedDestinations.push({ ...dest, image: null });
+      }
+    }
+
+    cachedDestinations = enrichedDestinations;
+    lastDestFetchDate = today;
+
+    return res.status(200).json(new ApiResponse(200, enrichedDestinations, "Fetched fresh from AI & Places API"));
+  } catch (error) {
+    const fallback = [
+      { theme: "Culture", location: "Kyoto, Japan", description: "Ancient temples and shrines", image: null },
+      { theme: "Relax", location: "Bali, Indonesia", description: "Tropical beaches and retreats", image: null },
+      { theme: "Adventure", location: "Reykjavik, Iceland", description: "Volcanoes and hot springs", image: null }
+    ];
+    return res.status(200).json(new ApiResponse(200, fallback, "Fallback data"));
+  }
+});
