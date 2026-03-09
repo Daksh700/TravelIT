@@ -1,4 +1,4 @@
-import { ImageBackground, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ImageBackground, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowRight, Globe, Sun, Wind } from "lucide-react-native";
@@ -8,11 +8,13 @@ import { Card } from "@/components/Card";
 import { Header } from "@/components/Header";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
+import { useTrendingDestinations } from "@/hooks/useTrendingDestinations";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useThemeColors();
   const { data: trips } = useUserItineraries();
+  const { data: trending, isLoading: isTrendingLoading } = useTrendingDestinations();
 
   const plannedCount = trips?.length ?? 0;
   const completedCount = trips?.filter((t: any) => t.status === "completed").length ?? 0;
@@ -63,92 +65,82 @@ export default function HomeScreen() {
             Trending Now
           </Text>
 
-          <View className="flex-row flex-wrap gap-4">
-            <View
-              style={{
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              }}
-              className="w-full h-64 overflow-hidden border"
-            >
-              <ImageBackground
-                source={{ uri: "https://picsum.photos/800/600" }}
-                className="w-full h-full justify-end p-5"
-              >
-                <View className="absolute inset-0 bg-black/30" />
-
-                <Text
-                  style={{ color: colors.primary }}
-                  className="font-bold text-xs uppercase mb-1 tracking-wider"
-                >
-                  Culture
-                </Text>
-
-                <Text className="text-3xl font-bold text-white">
-                  Kyoto, Japan
-                </Text>
-              </ImageBackground>
+          {isTrendingLoading ? (
+            <View className="h-64 items-center justify-center border rounded-md" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
+                <ActivityIndicator color={colors.primary} />
             </View>
-
-            <Card className="flex-1 justify-between min-h-[120px]">
-              <Sun size={24} color="#eab308" />
-              <View>
-                <Text style={{ color: colors.textMuted }} className="text-xs">
-                  Relax
-                </Text>
-                <Text
-                  style={{ color: colors.text }}
-                  className="font-bold text-lg"
+          ) : trending && trending.length > 0 ? (
+            <View className="flex-row flex-wrap gap-4">
+              <View
+                style={{
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                }}
+                className="w-full h-64 overflow-hidden border"
+              >
+                <ImageBackground
+                  source={{ uri: trending[0]?.image || "https://picsum.photos/800/600" }}
+                  className="w-full h-full justify-end p-5"
                 >
-                  Bali
-                </Text>
-              </View>
-            </Card>
-
-            <Card className="flex-1 justify-between min-h-[120px]">
-              <Wind size={24} color="#60a5fa" />
-              <View>
-                <Text style={{ color: colors.textMuted }} className="text-xs">
-                  Adventure
-                </Text>
-                <Text
-                  style={{ color: colors.text }}
-                  className="font-bold text-lg"
-                >
-                  Iceland
-                </Text>
-              </View>
-            </Card>
-
-            <Card
-              style={{
-                backgroundColor: `${colors.secondary ?? "#0070f3"}20`,
-                borderColor: `${colors.secondary ?? "#0070f3"}40`,
-              }}
-              className="w-full flex-row items-center justify-between"
-            >
-              <View>
-                <Text
-                  style={{ color: colors.secondary }}
-                  className="text-xs font-bold uppercase"
-                >
-                  Pro Tip
-                </Text>
-                <Text
-                  style={{ color: colors.textSecondary }}
-                  className="font-medium"
-                >
-                  Use {"Local Gems"} in prompt.
-                </Text>
+                  <View className="absolute inset-0 bg-black/40" />
+                  <Text style={{ color: colors.primary }} className="font-bold text-xs uppercase mb-1 tracking-wider z-10">
+                    {trending[0]?.theme || "Explore"}
+                  </Text>
+                  <Text className="text-3xl font-bold text-white z-10">
+                    {trending[0]?.location}
+                  </Text>
+                </ImageBackground>
               </View>
 
-              <Globe
-                size={32}
-                color={colors.secondary}
-                style={{ opacity: 0.5 }}
-              />
-            </Card>
-          </View>
+              {trending.slice(1, 3).map((item: any, idx: number) => (
+                <Card key={idx} className="flex-1 justify-between min-h-[120px]">
+                  {idx === 0 ? <Sun size={24} color="#eab308" /> : <Wind size={24} color="#60a5fa" />}
+                  <View>
+                    <Text style={{ color: colors.textMuted }} className="text-xs">
+                      {item.theme}
+                    </Text>
+                    <Text
+                      style={{ color: colors.text }}
+                      className="font-bold text-lg"
+                    >
+                      {item.location.split(',')[0]}
+                    </Text>
+                  </View>
+                </Card>
+              ))}
+
+              <Card
+                style={{
+                  backgroundColor: `${colors.secondary ?? "#0070f3"}20`,
+                  borderColor: `${colors.secondary ?? "#0070f3"}40`,
+                }}
+                className="w-full flex-row items-center justify-between mt-2"
+              >
+                <View>
+                  <Text
+                    style={{ color: colors.secondary }}
+                    className="text-xs font-bold uppercase"
+                  >
+                    Pro Tip
+                  </Text>
+                  <Text
+                    style={{ color: colors.textSecondary }}
+                    className="font-medium"
+                  >
+                    Use {"Local Gems"} in prompt.
+                  </Text>
+                </View>
+
+                <Globe
+                  size={32}
+                  color={colors.secondary}
+                  style={{ opacity: 0.5 }}
+                />
+              </Card>
+            </View>
+          ) : (
+            <Text style={{ color: colors.textMuted }}>No trending destinations available right now.</Text>
+          )}
         </View>
 
         <View className="mb-6 pb-8">
