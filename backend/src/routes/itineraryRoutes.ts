@@ -1,7 +1,7 @@
 import express from "express"
 import { rateLimiter } from "../middlewares/ratelimitMiddleware.js";
 import { validate } from "../middlewares/validateMiddleware.js";
-import { exploreLocation, generateItinerary } from "../controllers/aiController.js";
+import { exploreLocation, generateItinerary, getTrendingDestinations } from "../controllers/aiController.js";
 import { exploreSchema, generateItinerarySchema, modifyItinerarySchema, optimizeDayRouteSchema, saveItinerarySchema, updateTripDetailsSchema } from "../validators/itineraryValidator.js";
 import { protectRoute } from "../middlewares/authMiddleware.js";
 import { createItinerary, deleteTrip, getUserItineraries, modifyItinerary, updateItineraryDetails, updateStatus, optimizeDayRoute, uploadTripPhoto} from "../controllers/itineraryController.js";
@@ -29,6 +29,12 @@ router.get(
     protectRoute,
     getUserItineraries
 )
+
+router.get(
+    "/trending-destinations",
+    protectRoute,
+    getTrendingDestinations
+);
 
 router.post(
     "/explore",
