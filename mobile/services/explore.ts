@@ -30,3 +30,29 @@ export const exploreLocation = async(
         return null;
     }
 }
+
+export const getTrendingDestinations = async(token: string) => {
+    try {
+        console.log("Connecting to Backend");
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/trending-destinations`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if(!response.ok) {
+            throw new Error(data.message || "Failed to fetch trending destinations");
+        }
+
+        console.log("Data Received from Backend");
+
+        return data.data;
+    } catch (error) {
+        console.error("Trending API Error: ", error);
+        return null;
+    }
+}
