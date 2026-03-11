@@ -9,6 +9,7 @@ import { PlaceInput, optimizeItinerary, fetchDistanceMatrix } from "../services/
 import { getDurationFromTimeRange } from "../utils/timeUtils.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs"
+import { sendPushNotification } from "../utils/sendNotification.js";
 
 export const createItinerary = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
@@ -100,6 +101,14 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
   });
 
   const savedItinerary = await newItinerary.save();
+
+  if (user.pushToken) {
+        sendPushNotification(
+            user.pushToken, 
+            "Trip Planned! ✈️", 
+            `Your ${duration}-day trip to ${destination} has been saved successfully.`
+        );
+    }
 
   return res.status(201).json(
     new ApiResponse(201, savedItinerary, "Trip saved successfully!")
