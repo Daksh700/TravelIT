@@ -136,3 +136,24 @@ export const getBookmarks = asyncHandler(async (req: Request, res: Response) => 
         new ApiResponse(200, existingUser?.savedPlaces || [], "Bookmarks fetched successfully")
     );
 });
+
+export const savePushToken = asyncHandler(async (req: Request, res: Response) => {
+    const { pushToken } = req.body;
+    const user = req.user;
+
+    if (!user) throw new ApiError(401, "User not authenticated");
+
+    const updatedUser = await User.findByIdAndUpdate(
+        user._id,
+        { pushToken },
+        { new: true }
+    );
+
+    if (!updatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Push token saved successfully")
+    );
+});
