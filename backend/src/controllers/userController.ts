@@ -138,10 +138,14 @@ export const getBookmarks = asyncHandler(async (req: Request, res: Response) => 
 });
 
 export const savePushToken = asyncHandler(async (req: Request, res: Response) => {
-    const { pushToken } = req.body;
+    let { pushToken } = req.body;
     const user = req.user;
 
     if (!user) throw new ApiError(401, "User not authenticated");
+
+    if (pushToken === "") {
+        pushToken = null;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
         user._id,
