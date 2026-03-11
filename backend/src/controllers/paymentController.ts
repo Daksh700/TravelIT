@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/User.js";
+import { sendPushNotification } from "../utils/sendNotification.js";
 
 const cashfree = new Cashfree(
     CFEnvironment.SANDBOX, 
@@ -55,10 +56,18 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
         const response = await cashfree.PGFetchOrder(order_id);
 
         if (response.data.order_status === "PAID") {
-            await User.findByIdAndUpdate(user._id, {
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
                 isPro: true,
                 proActivatedAt: new Date()
-            });
+            }, { new: true });
+
+            if (updatedUser?.pushToken) {
+                await sendPushNotification(
+                    updatedUser.pushToken, 
+                    "Welcome to TravelIt Pro! 👑", 
+                    "Your payment was successful. Enjoy unlimited AI generation & premium features!"
+                );
+            }
 
             return res.status(200).json(
                 new ApiResponse(200, { isPro: true }, "Payment verified successfully. Welcome to Pro!")
