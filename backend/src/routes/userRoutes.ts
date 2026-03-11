@@ -1,7 +1,7 @@
 import express from "express";
 import { validate } from "../middlewares/validateMiddleware.js";
 import { updateUserSchema } from "../validators/userValidator.js";
-import { getBookmarks, getCurrentUser, syncUser, toggleBookmark, updateUserProfile } from "../controllers/userController.js";
+import { getBookmarks, getCurrentUser, savePushToken, syncUser, toggleBookmark, updateUserProfile } from "../controllers/userController.js";
 import { protectRoute } from "../middlewares/authMiddleware.js";
 import { upload } from "../middlewares/multerMiddleware.js";
 
@@ -16,5 +16,7 @@ router.patch('/update', protectRoute, upload.single('avatar'), validate(updateUs
 router.post('/bookmarks/toggle', protectRoute, toggleBookmark);
 
 router.get('/bookmarks', protectRoute, getBookmarks);
+
+router.post('/push-token', protectRoute, savePushToken);
 
 export default router;
