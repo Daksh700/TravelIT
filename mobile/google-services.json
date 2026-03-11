@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "114441958064",
+    "project_id": "travelit-c5a4a",
+    "storage_bucket": "travelit-c5a4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114441958064:android:9f48b0c018d30e23ce0175",
+        "android_client_info": {
+          "package_name": "com.daksh.travelit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADe_f846aNCTtXtE216YMcAvq5cI4TrqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
