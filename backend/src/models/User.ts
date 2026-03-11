@@ -18,6 +18,7 @@ export interface IUser extends Document {
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
     proActivatedAt?: Date;
+    pushToken?: string | null;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -70,6 +71,10 @@ const userSchema = new Schema<IUser>(
         proActivatedAt: { 
             type: Date 
         },
+        pushToken: {
+            type: String,
+            default: null
+        }
     },
     {timestamps: true}
 )
