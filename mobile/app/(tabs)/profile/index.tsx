@@ -138,7 +138,16 @@ export default function ProfileScreen() {
               <MenuItem icon={User} label="Edit Profile" />
             </Pressable>
 
-            <MenuItem icon={CreditCard} label="Subscription" value="Active" />
+            <Pressable onPress={() => {
+              handleImpact("soft");
+              router.push("/(tabs)/profile/subscription");
+            }}>
+              <MenuItem 
+                icon={CreditCard} 
+                label="Subscription" 
+                value={user?.isPro ? "Pro Active" : "Free Plan"} 
+              />
+            </Pressable>
             <Pressable onPress={() => {
               handleImpact("soft");
               router.push("/(tabs)/profile/savedPreferences")
