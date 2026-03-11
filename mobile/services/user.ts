@@ -159,3 +159,29 @@ export const toggleBookmark = async (token: string, place: any) => {
         return null;
     }
 }
+
+export const savePushToken = async (token: string, pushToken: string | null) => {
+    try {
+        console.log("Saving Push Token to Backend");
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/push-token`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                Authorization: `Bearer ${token}` 
+            },
+            body: JSON.stringify({ pushToken })
+        });
+
+        const data = await response.json();
+
+        if(!response.ok) {
+            throw new Error(data.message || "Failed to save push token");
+        }
+
+        return data.data; 
+    } catch (error: unknown) {
+        console.error("Push Token API Error: ", error);
+        return null;
+    }
+}
