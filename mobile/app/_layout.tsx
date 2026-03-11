@@ -12,6 +12,7 @@ import LottieView from 'lottie-react-native';
 
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useSystemThemeSync } from '@/hooks/useSystemThemeSync';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const queryClient = new QueryClient();
 
@@ -22,8 +23,10 @@ if (!publishableKey) {
 }
 
 function RootNavigation() {
-  const { isLoaded } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const { colors } = useThemeColors();
+
+  useNotifications(!!isSignedIn);
 
   const [splashRemoved, setSplashRemoved] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
