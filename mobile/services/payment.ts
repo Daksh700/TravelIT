@@ -20,6 +20,8 @@ export const createOrder = async (token: string) => {
 };
 
 export const verifyPayment = async (token: string, order_id: string) => {
+    console.log("Connecting to Backend");
+
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/payment/verify-payment`, {
         method: 'POST',
         headers: {
@@ -28,7 +30,14 @@ export const verifyPayment = async (token: string, order_id: string) => {
         },
         body: JSON.stringify({ order_id })
     });
+
     const data = await response.json();
-    if(!response.ok) throw new Error(data.message);
+
+    if(!response.ok) {
+        throw new Error(data.message || "Something went wrong");
+    }
+
+    console.log("Data Received from Backend");
+    
     return data;
 };
