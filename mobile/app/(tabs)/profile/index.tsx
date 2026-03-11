@@ -6,6 +6,7 @@ import {
   Switch,
   ActivityIndicator,
   Pressable,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -17,7 +18,7 @@ import {
   CreditCard,
   HelpCircle,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 
 import { Header } from "@/components/Header";
@@ -25,13 +26,52 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { SignOutButton } from "@/components/SignOutButton";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useAuth } from "@clerk/clerk-expo";
+import { registerForPushNotificationsAsync } from "@/utils/notifications";
+import { savePushToken } from "@/services/user";
 
 export default function ProfileScreen() {
   const {handleImpact} = useHaptics();
-  const [notifications, setNotifications] = useState(true);
   const { data: user, isLoading } = useUserProfile();
   const router = useRouter();
   const { colors } = useThemeColors();
+  const { getToken } = useAuth();
+
+  const [notifications, setNotifications] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setNotifications(!!user.pushToken);
+    }
+  }, [user]);
+
+  const handleNotificationToggle = async (newValue: boolean) => {
+    setNotifications(newValue);
+    handleImpact("light");
+
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      if (newValue) {
+        const pushToken = await registerForPushNotificationsAsync();
+        if (pushToken) {
+          await savePushToken(token, pushToken);
+        } else {
+          setNotifications(false);
+          Alert.alert(
+            "Permission Required", 
+            "Please enable notifications for TravelIt in your phone's settings."
+          );
+        }
+      } else {
+        await savePushToken(token, ""); 
+      }
+    } catch (error) {
+      console.error("Error toggling notifications:", error);
+      setNotifications(!newValue);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -71,7 +111,7 @@ export default function ProfileScreen() {
       {isSwitch ? (
         <Switch
           value={notifications}
-          onValueChange={setNotifications}
+          onValueChange={handleNotificationToggle}
           trackColor={{
             false: colors.switchOff,
             true: colors.switchOn,
