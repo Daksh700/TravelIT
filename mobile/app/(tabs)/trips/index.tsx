@@ -32,7 +32,7 @@ export default function TripsScreen() {
     if (typeof params.filter === 'string') {
       setFilter(params.filter);
     }
-  }, [params.filter]);
+  }, [params.filter, params._t]);
 
   const getStatusDetails = (status: string) => {
     switch (status) {
