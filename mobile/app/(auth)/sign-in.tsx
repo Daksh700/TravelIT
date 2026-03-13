@@ -151,13 +151,6 @@ export default function SignIn() {
           Create Account
         </Text>
       </Pressable>
-
-      <Text
-        style={{ color: colors.textMuted }}
-        className="text-[10px] font-bold uppercase tracking-[0.3em] text-center mt-12"
-      >
-        Securely Encrypted // TravelIt v2.5
-      </Text>
     </View>
   );
 }

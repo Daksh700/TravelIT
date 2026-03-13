@@ -140,13 +140,6 @@ export default function SignUp() {
             </Pressable>
           </View>
         </SafeAreaView>
-
-        <Text
-          style={{ color: colors.textMuted }}
-          className="text-[10px] font-bold uppercase tracking-[0.3em] text-center pb-8"
-        >
-          Securely Encrypted // TravelIt v2.5
-        </Text>
       </View>
     );
   }
