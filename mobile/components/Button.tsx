@@ -1,5 +1,6 @@
 import { ActivityIndicator, StyleProp, Text, TouchableOpacity, ViewStyle } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface ButtonProps {
   title?: string;
@@ -22,6 +23,7 @@ export const Button = ({
   style
 }: ButtonProps) => {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
 
   const isDisabled = disabled || isLoading;
 
@@ -46,9 +48,14 @@ export const Button = ({
     textColor = colors.textMuted;
   }
 
+  const handlePress = () => {
+    handleImpact("light");
+    onPress();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.8}
       disabled={isDisabled}
       style={[

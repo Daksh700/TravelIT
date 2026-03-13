@@ -8,7 +8,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { useHaptics } from "@/hooks/useHaptics";
 
 export const SignOutButton = () => {
-  const {handleImpact} = useHaptics()
+  const { handleImpact } = useHaptics()
   const { signOut } = useClerk();
   const router = useRouter();
   const { colors } = useThemeColors();
