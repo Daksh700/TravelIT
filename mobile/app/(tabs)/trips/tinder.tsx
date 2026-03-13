@@ -12,9 +12,11 @@ import { Button } from '@/components/Button';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Swiper from 'react-native-deck-swiper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
+import { useHaptics } from '@/hooks/useHaptics';
 
 export default function TripTinderScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const { userId } = useAuth(); 
   const router = useRouter();
   
@@ -233,8 +235,14 @@ export default function TripTinderScreen() {
                                   </View>
                               )
                           }}
-                          onSwipedLeft={() => isEveryoneJoined && swipe(currentActivity.id, "left")}
-                          onSwipedRight={() => isEveryoneJoined && swipe(currentActivity.id, "right")}
+                          onSwipedLeft={() => {
+                            handleImpact("light");
+                            isEveryoneJoined && swipe(currentActivity.id, "left")
+                          }}
+                          onSwipedRight={() => {
+                            handleImpact("medium");
+                            isEveryoneJoined && swipe(currentActivity.id, "right")
+                          }}
                           disableLeftSwipe={!isEveryoneJoined}
                           disableRightSwipe={!isEveryoneJoined}
                           disableTopSwipe
@@ -285,7 +293,10 @@ export default function TripTinderScreen() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaView className="flex-1" edges={["top"]}>
         <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
-          <Pressable onPress={() => router.back()}>
+          <Pressable onPress={() => {
+            handleImpact("soft");
+            router.back()
+          }}>
             <ArrowLeft size={22} color={colors.textMuted} />
           </Pressable>
           <View>

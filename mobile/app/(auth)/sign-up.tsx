@@ -14,11 +14,14 @@ import { useRouter } from "expo-router";
 import { getClerkError } from "@/utils/clerkError";
 import { AuthError } from "@/components/AuthError";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function SignUp() {
   const { colors } = useThemeColors();
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { handleImpact } = useHaptics();
   const router = useRouter();
+  
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -72,7 +75,10 @@ export default function SignUp() {
         <SafeAreaView className="flex-1 px-8">
           <View className="h-12 justify-center -ml-2">
             <Pressable
-              onPress={() => setPendingVerification(false)}
+              onPress={() => {
+                handleImpact("soft");
+                setPendingVerification(false)
+              }}
               className="w-10 h-10 items-center justify-center"
             >
               <Ionicons
@@ -123,7 +129,10 @@ export default function SignUp() {
             </View>
 
             <Pressable
-              onPress={onVerify}
+              onPress={() => {
+                handleImpact("medium");
+                onVerify()
+              }}
               disabled={loading}
               className="bg-primary py-4 w-full mt-6 items-center rounded-sm"
             >
@@ -149,7 +158,10 @@ export default function SignUp() {
       <SafeAreaView className="flex-1 px-8">
         <View className="h-12 justify-center -ml-2">
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => {
+              handleImpact("soft");
+              router.back()
+            }}
             className="w-10 h-10 items-center justify-center"
           >
             <Ionicons
@@ -225,7 +237,10 @@ export default function SignUp() {
                 />
 
                 <Pressable
-                  onPress={() => setShowPassword(!showPassword)}
+                  onPress={() => {
+                    handleImpact("soft");
+                    setShowPassword(!showPassword)
+                  }}
                   className="absolute right-0 h-14 w-12 items-center justify-center"
                 >
                   <Ionicons
@@ -238,7 +253,10 @@ export default function SignUp() {
             </View>
 
             <Pressable
-              onPress={onSignUp}
+              onPress={() => {
+                handleImpact("medium");
+                onSignUp()
+              }}
               disabled={loading}
               className="bg-primary py-4 items-center mt-4 rounded-sm"
             >
@@ -263,7 +281,10 @@ export default function SignUp() {
               Already have an account?
             </Text>
 
-            <Pressable onPress={() => router.back()}>
+            <Pressable onPress={() => {
+              handleImpact("light");
+              router.back()
+            }}>
               <Text
                 style={{ color: colors.primary }}
                 className="text-xs font-bold uppercase tracking-wider"

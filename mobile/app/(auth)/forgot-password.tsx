@@ -13,9 +13,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function ForgotPassword() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,7 +87,10 @@ export default function ForgotPassword() {
       <SafeAreaView className="flex-1 px-8">
         <View className="h-12 justify-center -ml-2">
           <Pressable
-            onPress={router.back}
+            onPress={() => {
+              handleImpact("soft");
+              router.back()
+            }}
             className="w-10 h-10 items-center justify-center"
           >
             <Ionicons
@@ -143,7 +148,10 @@ export default function ForgotPassword() {
                 </View>
 
                 <Pressable
-                  onPress={sendResetCode}
+                  onPress={() => {
+                    handleImpact("medium");
+                    sendResetCode()
+                  }}
                   disabled={loading}
                   className="bg-primary py-4 mt-4 rounded-sm items-center"
                 >
@@ -211,7 +219,10 @@ export default function ForgotPassword() {
                     />
 
                     <Pressable
-                      onPress={() => setShowPassword(!showPassword)}
+                      onPress={() => {
+                        handleImpact("soft");
+                        setShowPassword(!showPassword)
+                      }}
                       className="absolute right-0 h-14 w-12 items-center justify-center"
                     >
                       <Ionicons
@@ -228,7 +239,10 @@ export default function ForgotPassword() {
                 </View>
 
                 <Pressable
-                  onPress={resetPassword}
+                  onPress={() => {
+                    handleImpact("medium");
+                    resetPassword()
+                  }}
                   disabled={loading}
                   className="bg-primary py-4 mt-4 rounded-sm items-center"
                 >

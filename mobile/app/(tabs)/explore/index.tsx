@@ -9,9 +9,12 @@ import { useExploreLocation } from "@/hooks/useExploreLocation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useBookmarks, useToggleBookmark } from "@/hooks/useBookmarks"; 
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function ExploreScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
+  
   const [query, setQuery] = useState("");
   const [forceUpdate, setForceUpdate] = useState(0);
 
@@ -56,7 +59,10 @@ export default function ExploreScreen() {
                 className="pr-16 h-14"
             />
             <TouchableOpacity 
-                onPress={handleSearch}
+                onPress={() => {
+                    handleImpact("medium");
+                    handleSearch()
+                }}
                 disabled={isPending}
                 className="absolute right-0 top-0 h-14 w-14 items-center justify-center"
             >
@@ -90,7 +96,10 @@ export default function ExploreScreen() {
                                     className="border rounded-lg overflow-hidden relative"
                                 >
                                     <TouchableOpacity 
-                                        onPress={() => toggleBookmark(item)}
+                                        onPress={() => {
+                                            handleImpact("medium");
+                                            toggleBookmark(item)
+                                        }}
                                         activeOpacity={0.8}
                                         style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
                                         className="absolute top-3 right-3 z-10 w-10 h-10 rounded-full items-center justify-center backdrop-blur-md"
@@ -152,6 +161,7 @@ export default function ExploreScreen() {
                           <TouchableOpacity 
                               key={idx}
                               onPress={async () => {
+                                handleImpact("light");
                                 const supported = await Linking.canOpenURL(link.url);
                                 if(supported) {
                                   Linking.openURL(link.url);
@@ -202,6 +212,7 @@ export default function ExploreScreen() {
                       <TouchableOpacity
                           key={text}
                           onPress={() => {
+                            handleImpact("medium");
                             setQuery(text);
                             explore({ query: text });
                           }}

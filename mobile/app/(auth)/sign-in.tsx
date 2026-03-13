@@ -9,11 +9,13 @@ import {
 import { useSocialAuth } from "@/hooks/useSocialAuth";
 import { useRouter } from "expo-router";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function SignIn() {
   const { isLoading, handleSocialAuth } = useSocialAuth();
   const router = useRouter();
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
 
   return (
     <View
@@ -41,7 +43,10 @@ export default function SignIn() {
 
       <View className="gap-3">
         <Pressable
-          onPress={() => handleSocialAuth("oauth_google")}
+          onPress={() => {
+            handleImpact("medium");
+            handleSocialAuth("oauth_google")
+          }}
           disabled={isLoading}
           style={{
             borderColor: colors.border,
@@ -68,7 +73,10 @@ export default function SignIn() {
         </Pressable>
 
         <Pressable
-          onPress={() => handleSocialAuth("oauth_apple")}
+          onPress={() => {
+            handleImpact("medium");
+            handleSocialAuth("oauth_apple")
+          }}
           disabled={isLoading}
           style={{
             borderColor: colors.border,
@@ -115,7 +123,10 @@ export default function SignIn() {
       <Pressable
         style={{ backgroundColor: colors.primary }}
         className="py-4"
-        onPress={() => router.push("/(auth)/email-sign-in")}
+        onPress={() => {
+          handleImpact("medium");
+          router.push("/(auth)/email-sign-in")
+        }}
       >
         <Text
           style={{ color: colors.primaryText }}
@@ -131,7 +142,10 @@ export default function SignIn() {
           backgroundColor: colors.surface,
         }}
         className="mt-3 py-4 border"
-        onPress={() => router.push("/(auth)/sign-up")}
+        onPress={() => {
+          handleImpact("light");
+          router.push("/(auth)/sign-up")
+        }}
       >
         <Text
           style={{ color: colors.text }}

@@ -54,7 +54,7 @@ export default function TabsLayout() {
         }}
         listeners={{
           tabPress: () => {
-            handleImpact("soft")
+            handleImpact("light")
           }
         }}
       />
@@ -64,6 +64,11 @@ export default function TabsLayout() {
         options={{
           title: "Explore",
           tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            handleImpact("light")
+          }
         }}
       />
 
@@ -85,6 +90,11 @@ export default function TabsLayout() {
             </View>
           ),
         }}
+        listeners={{
+          tabPress: () => {
+            handleImpact("medium")
+          }
+        }}
       />
 
       <Tabs.Screen
@@ -92,6 +102,11 @@ export default function TabsLayout() {
         options={{
           title: "Trips",
           tabBarIcon: ({ color }) => <Map size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            handleImpact("light")
+          }
         }}
       />
 
@@ -103,7 +118,7 @@ export default function TabsLayout() {
         }}
         listeners={{
           tabPress: () => {
-            handleImpact("soft")
+            handleImpact("light")
           }
         }}
       />

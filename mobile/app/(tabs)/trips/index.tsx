@@ -10,9 +10,11 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { ChevronDown, X, Trash2, ImagePlus, Users } from "lucide-react-native"; 
 import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker"
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function TripsScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const { data: trips, isLoading, refetch } = useUserItineraries();
   const { mutate: updateStatus } = useUpdateTripStatus();
   const { mutate: deleteTrip } = useDeleteTrip();
@@ -123,7 +125,10 @@ export default function TripsScreen() {
           </View>
 
             <TouchableOpacity 
-                onPress={() => router.push("/(tabs)/trips/tinder")}
+                onPress={() => {
+                  handleImpact("light");
+                  router.push("/(tabs)/trips/tinder")
+                }}
                 style={{ backgroundColor: colors.surface, borderColor: colors.primary }}
                 className="px-3 py-2 rounded-lg border border-dashed flex-row items-center gap-2"
             >
@@ -139,7 +144,10 @@ export default function TripsScreen() {
               return (
                 <TouchableOpacity
                   key={f}
-                  onPress={() => setFilter(f)}
+                  onPress={() => {
+                    handleImpact("soft");
+                    setFilter(f)
+                  }}
                   style={{
                     backgroundColor: isSelected ? colors.primary : colors.card,
                     borderColor: isSelected ? colors.primary : colors.border,
@@ -181,6 +189,7 @@ export default function TripsScreen() {
 
                   <TouchableOpacity
                     onPress={() => {
+                      handleImpact("medium");
                       setActiveTrip(trip);
                       setModalVisible(true);
                     }}
@@ -195,7 +204,10 @@ export default function TripsScreen() {
 
                   <View className="flex-row items-center gap-4">
                     <TouchableOpacity 
-                      onPress={() => handleAddPhoto(trip._id)} 
+                      onPress={() => {
+                        handleImpact("medium");
+                        handleAddPhoto(trip._id)
+                      }} 
                       disabled={uploadingTripId === trip._id}
                     >
                       {uploadingTripId === trip._id ? (
@@ -207,6 +219,7 @@ export default function TripsScreen() {
 
                     <TouchableOpacity
                       onPress={() => {
+                        handleImpact("medium");
                         setActiveTrip(trip);
                         setShowDelete(true);
                       }}
@@ -218,7 +231,10 @@ export default function TripsScreen() {
 
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() => router.push({ pathname: "/(tabs)/trips/view", params: { id: trip._id } })}
+                  onPress={() => {
+                    handleImpact("light");
+                    router.push({ pathname: "/(tabs)/trips/view", params: { id: trip._id } })
+                  }}
                 >
                   <Text style={{ color: colors.text }} className="text-2xl font-bold mb-1 leading-tight">
                     {trip.tripTitle}
@@ -250,7 +266,10 @@ export default function TripsScreen() {
                         {trip.userPhotos.map((photoUrl: string, index: number) => (
                           <TouchableOpacity 
                             key={index} 
-                            onPress={() => setSelectedPhoto(photoUrl)} 
+                            onPress={() => {
+                              handleImpact("medium");
+                              setSelectedPhoto(photoUrl)
+                            }} 
                             style={{ borderColor: colors.border, backgroundColor: colors.card }} 
                             className="w-16 h-16 rounded-lg overflow-hidden border mr-3"
                           >
@@ -275,7 +294,10 @@ export default function TripsScreen() {
           <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="w-full p-6 rounded-2xl border">
             <View className="flex-row justify-between items-center mb-6">
               <Text style={{ color: colors.text }} className="text-xl font-bold">Update Status</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <TouchableOpacity onPress={() => {
+                handleImpact("soft");
+                setModalVisible(false)
+              }}>
                 <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
@@ -288,6 +310,7 @@ export default function TripsScreen() {
                 <TouchableOpacity
                   key={statusKey}
                   onPress={() => {
+                    handleImpact("medium");
                     if (activeTrip) {
                       updateStatus({ id: activeTrip._id, status: statusKey });
                       setModalVisible(false);
@@ -325,7 +348,10 @@ export default function TripsScreen() {
 
             <View className="flex-row gap-4">
               <TouchableOpacity
-                onPress={() => setShowDelete(false)}
+                onPress={() => {
+                  handleImpact("soft");
+                  setShowDelete(false)
+                }}
                 style={{ backgroundColor: colors.card, borderColor: colors.border }}
                 className="flex-1 py-3 border rounded-lg"
               >
@@ -334,6 +360,7 @@ export default function TripsScreen() {
 
               <TouchableOpacity
                 onPress={() => {
+                  handleImpact("medium");
                   if (activeTrip) {
                     deleteTrip({ id: activeTrip._id });
                     setShowDelete(false);
@@ -360,7 +387,10 @@ export default function TripsScreen() {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
           
           <TouchableOpacity 
-            onPress={() => setSelectedPhoto(null)} 
+            onPress={() => {
+              handleImpact("soft");
+              setSelectedPhoto(null)
+            }} 
             style={{ position: 'absolute', top: 50, right: 20, zIndex: 50, padding: 10 }}
           >
             <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: 6 }}>

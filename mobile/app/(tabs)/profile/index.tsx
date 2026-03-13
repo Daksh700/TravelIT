@@ -31,7 +31,7 @@ import { registerForPushNotificationsAsync } from "@/utils/notifications";
 import { savePushToken } from "@/services/user";
 
 export default function ProfileScreen() {
-  const {handleImpact} = useHaptics();
+  const { handleImpact } = useHaptics();
   const { data: user, isLoading } = useUserProfile();
   const router = useRouter();
   const { colors } = useThemeColors();
@@ -172,14 +172,14 @@ export default function ProfileScreen() {
             className="rounded-lg overflow-hidden border mb-8"
           >
             <Pressable onPress={() => {
-              handleImpact("soft")
+              handleImpact("light")
               router.push("/profile/editProfile");
             }}>
               <MenuItem icon={User} label="Edit Profile" />
             </Pressable>
 
             <Pressable onPress={() => {
-              handleImpact("soft");
+              handleImpact("light");
               router.push("/(tabs)/profile/subscription");
             }}>
               <MenuItem 
@@ -189,7 +189,7 @@ export default function ProfileScreen() {
               />
             </Pressable>
             <Pressable onPress={() => {
-              handleImpact("soft");
+              handleImpact("light");
               router.push("/(tabs)/profile/savedPreferences")
             }}>
               <MenuItem icon={Heart} label="Saved Preferences" />
@@ -210,14 +210,14 @@ export default function ProfileScreen() {
             <MenuItem icon={Bell} label="Notifications" isSwitch />
 
             <Pressable onPress={() => {
-              handleImpact("soft");
+              handleImpact("light");
               router.push("/(tabs)/profile/appSettings")
             }}>
               <MenuItem icon={Settings} label="App Settings" />
             </Pressable>
 
             <Pressable onPress={() => {
-              handleImpact("soft");
+              handleImpact("light");
               router.push("/(tabs)/profile/help")
             }}>
               <MenuItem icon={HelpCircle} label="Help & Support" />

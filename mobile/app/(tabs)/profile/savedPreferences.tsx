@@ -5,9 +5,11 @@ import { useRouter } from "expo-router";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useBookmarks, useToggleBookmark } from "@/hooks/useBookmarks";
 import { Button } from "@/components/Button";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function SavedPreferencesScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const router = useRouter();
   
   const { data: savedPlaces, isLoading } = useBookmarks();
@@ -24,7 +26,10 @@ export default function SavedPreferencesScreen() {
   return (
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={['top']}>
       <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => {
+          handleImpact("soft");
+          router.back()
+        }}>
           <ArrowLeft size={22} color={colors.textMuted} />
         </TouchableOpacity>
         <View>
@@ -84,7 +89,10 @@ export default function SavedPreferencesScreen() {
 
                   <View className="flex-row gap-3 border-t pt-4" style={{ borderTopColor: colors.border }}>
                     <TouchableOpacity 
-                      onPress={() => toggleBookmark(item)}
+                      onPress={() => {
+                        handleImpact("medium");
+                        toggleBookmark(item)
+                      }}
                       className="flex-1 flex-row items-center justify-center gap-2 py-2 rounded-lg"
                       style={{ backgroundColor: colors.surface }}
                     >
@@ -96,7 +104,8 @@ export default function SavedPreferencesScreen() {
                       className="flex-1 flex-row items-center justify-center gap-2 py-2 rounded-lg"
                       style={{ backgroundColor: colors.primary }}
                       onPress={() => {
-                        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + " " + (item.address || ""))}`;
+                        handleImpact("medium");
+                        const url = `https://maps.google.com/?q=${encodeURIComponent(item.name + " " + (item.address || ""))}`;
                         Linking.openURL(url);
                       }}
                     >

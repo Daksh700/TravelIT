@@ -9,9 +9,11 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { Button } from "@/components/Button";
 import { usePayment } from "@/hooks/usePayment";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function SubscriptionScreen() {
     const { colors } = useThemeColors();
+    const { handleImpact } = useHaptics();
     const router = useRouter();
     const { data: dbUser } = useUserProfile();
     const { createOrder, verifyPayment, isProcessing } = usePayment();
@@ -24,6 +26,7 @@ export default function SubscriptionScreen() {
                 try {
                     await verifyPayment(orderID);
                     Alert.alert("Success! 🎉", "Welcome to TravelIt Pro!");
+                    handleImpact("medium");
                     router.back();
                 } catch (error: any) {
                     Alert.alert("Verification Failed", error.message || "Please contact support.");
@@ -41,6 +44,7 @@ export default function SubscriptionScreen() {
 
     const handleUpgrade = async () => {
         try {
+            handleImpact("medium");
             const orderData = await createOrder();
 
             const session = new CFSession(
@@ -77,7 +81,10 @@ export default function SubscriptionScreen() {
     return (
         <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
             <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={() => {
+                    handleImpact("soft");
+                    router.back()
+                }}>
                     <ArrowLeft size={22} color={colors.textMuted} />
                 </TouchableOpacity>
                 <View>

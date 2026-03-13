@@ -12,7 +12,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { useHaptics } from "@/hooks/useHaptics";
 
 export default function EditProfileScreen() {
-  const {handleImpact} = useHaptics()
+  const { handleImpact } = useHaptics()
   const router = useRouter();
   const { mutate: updateProfile, isPending } = useUpdateUserProfile();
   const { colors } = useThemeColors();
@@ -90,7 +90,10 @@ export default function EditProfileScreen() {
             </View>
 
             <Pressable
-              onPress={pickAvatar}
+              onPress={() => {
+                handleImpact("medium");
+                pickAvatar()
+              }}
               style={{
                 backgroundColor: colors.primary,
                 borderColor: colors.background,
@@ -143,7 +146,6 @@ export default function EditProfileScreen() {
           <Button
             disabled={isPending}
             onPress={() => {
-              handleImpact("soft")
               const payload: any = {};
 
               if (updatedUser.firstName.trim())
@@ -168,7 +170,6 @@ export default function EditProfileScreen() {
           </Button>
 
           <Button variant="ghost" onPress={() => {
-            handleImpact("medium")
             router.back()
           }}>
             <Text

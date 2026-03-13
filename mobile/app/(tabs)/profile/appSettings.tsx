@@ -16,10 +16,16 @@ const SettingToggle = ({
   disabled
 }: any) => {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
+
+  const handlePress = () => {
+    handleImpact("light"); 
+    onToggle();
+  };
 
   return (
     <Pressable
-      onPress={onToggle}
+      onPress={handlePress}
       disabled={disabled}
       style={{
         backgroundColor: colors.surface,
@@ -66,7 +72,7 @@ const SettingToggle = ({
 export default function AppSettingsScreen() {
   const router = useRouter();
   const { colors } = useThemeColors();
-  const {handleImpact} = useHaptics();
+  const { handleImpact } = useHaptics();
 
   const {
     darkMode,
@@ -88,7 +94,7 @@ export default function AppSettingsScreen() {
         className="flex-row items-center gap-4 px-6 py-4 border-b"
       >
         <Pressable onPress={() => {
-            handleImpact("light");
+            handleImpact("soft");
             router.back()
           }}>
           <ArrowLeft size={22} color={colors.textMuted} />
@@ -127,10 +133,7 @@ export default function AppSettingsScreen() {
             label="Dark Mode"
             description={darkMode ? "Eyes protected" : "Daylight mode active"}
             value={darkMode}
-            onToggle={() => {
-              handleImpact("light");
-              toggleDarkMode();
-            }}
+            onToggle={toggleDarkMode}
             disabled={systemTheme}
           />
 
@@ -139,10 +142,7 @@ export default function AppSettingsScreen() {
             label="System Theme"
             description="Sync with device OS"
             value={systemTheme}
-            onToggle={() => {
-              handleImpact("light");
-              toggleSystemTheme();
-            }}
+            onToggle={toggleSystemTheme}
           />
         </View>
 
@@ -162,10 +162,7 @@ export default function AppSettingsScreen() {
             label="Haptic Feedback"
             description="Tactile interface response"
             value={haptics}
-            onToggle={() => {
-              handleImpact("light");
-              toggleHaptics();
-            }}
+            onToggle={toggleHaptics}
           />
         </View>
       </ScrollView>

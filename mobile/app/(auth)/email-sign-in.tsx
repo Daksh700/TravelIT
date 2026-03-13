@@ -14,11 +14,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getClerkError } from "@/utils/clerkError";
 import { AuthError } from "@/components/AuthError";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function EmailSignIn() {
   const { colors } = useThemeColors();
   const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
+  const { handleImpact } = useHaptics();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -54,7 +56,10 @@ export default function EmailSignIn() {
         <View className="h-12 justify-center -ml-2">
           <Pressable
             className="w-10 h-10 items-center justify-center"
-            onPress={router.back}
+            onPress={() => {
+            handleImpact("soft");
+            router.back()
+          }}
           >
             <Ionicons name="arrow-back" size={24} color={colors.textMuted} />
           </Pressable>
@@ -126,7 +131,10 @@ export default function EmailSignIn() {
 
                 <Pressable
                   className="absolute right-0 h-14 w-12 items-center justify-center"
-                  onPress={() => setShowPassword(!showPassword)}
+                  onPress={() => {
+                    handleImpact("soft");
+                    setShowPassword(!showPassword)
+                  }}
                 >
                   <Ionicons
                     name={showPassword ? "eye-outline" : "eye-off-outline"}
@@ -139,9 +147,10 @@ export default function EmailSignIn() {
 
             <View className="items-end -mt-1">
               <Pressable
-                onPress={() =>
+                onPress={() => {
+                  handleImpact("light");
                   router.replace("/(auth)/forgot-password")
-                }
+                }}
               >
                 <Text
                   style={{ color: colors.primary }}
@@ -153,7 +162,10 @@ export default function EmailSignIn() {
             </View>
 
             <Pressable
-              onPress={onSignIn}
+              onPress={() => {
+                handleImpact("medium");
+                onSignIn()
+              }}
               disabled={loading}
               className="bg-primary py-4 items-center justify-center mt-4 rounded-sm"
             >

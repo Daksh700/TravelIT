@@ -17,9 +17,11 @@ import { useState, useEffect } from "react";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useQueryClient } from "@tanstack/react-query";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function ViewTripScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const queryClient = useQueryClient();
@@ -218,7 +220,10 @@ export default function ViewTripScreen() {
                         Est. Cost: {currencySymbol}{item.estimatedCost}
                     </Text>
                 </View>
-                <TouchableOpacity onPress={() => handleDeleteActivity(item.uniqueId)} className="p-2">
+                <TouchableOpacity onPress={() => {
+                    handleImpact("medium");
+                    handleDeleteActivity(item.uniqueId)
+                }} className="p-2">
                     <Trash2 size={18} color="#ef4444" />
                 </TouchableOpacity>
             </TouchableOpacity>
@@ -231,7 +236,10 @@ export default function ViewTripScreen() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
     <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
       <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => {
+            handleImpact("soft");
+            router.back()
+        }}>
           <ArrowLeft size={22} color={colors.textMuted} />
         </Pressable>
         <View>
@@ -295,7 +303,10 @@ export default function ViewTripScreen() {
 
             <View className="flex-row gap-3 mb-6">
                 <TouchableOpacity 
-                    onPress={() => setIsEditMode(true)}
+                    onPress={() => {
+                        handleImpact("medium");
+                        setIsEditMode(true)
+                    }}
                     disabled={optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: colors.border }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-2"
@@ -305,7 +316,10 @@ export default function ViewTripScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                    onPress={() => setChatVisible(true)}
+                    onPress={() => {
+                        handleImpact("medium");
+                        setChatVisible(true)
+                    }}
                     disabled={optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: "#22c55e" }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-2"
@@ -315,7 +329,10 @@ export default function ViewTripScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                    onPress={handleExportPDF}
+                    onPress={() => {
+                        handleImpact("medium");
+                        handleExportPDF()
+                    }}
                     disabled={isExporting || optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: colors.border }}
                     className="flex-1 py-3 rounded-lg border items-center justify-center flex-row gap-1.5"
@@ -339,14 +356,20 @@ export default function ViewTripScreen() {
                     {isModifying && <ActivityIndicator size="small" color={colors.text} />}
                 </View>
                 <View className="gap-3">
-                    <TouchableOpacity onPress={() => openModificationModal("weather")} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                    <TouchableOpacity onPress={() => {
+                        handleImpact("medium");
+                        openModificationModal("weather")
+                    }} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <CloudRain size={24} color="#3b82f6" />
                     <View className="ml-4 flex-1">
                         <Text style={{ color: colors.text }} className="font-bold text-sm">Adapt for Rain</Text>
                         <Text style={{ color: colors.textMuted }} className="text-xs">Switch outdoor plans to indoor venues.</Text>
                     </View>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openModificationModal("delay")} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+                    <TouchableOpacity onPress={() => {
+                        handleImpact("medium");
+                        openModificationModal("delay")
+                    }} disabled={isModifying || optimizingDay !== null} className="flex-row items-center p-4 rounded-lg border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                     <Clock size={24} color="#22c55e" />
                     <View className="ml-4 flex-1">
                         <Text style={{ color: colors.text }} className="font-bold text-sm">Handle Delay</Text>
@@ -396,7 +419,10 @@ export default function ViewTripScreen() {
             )}
 
             {hotel && (
-            <TouchableOpacity onPress={() => setHotelModalVisible(true)} className="mb-10 rounded-lg overflow-hidden relative border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+            <TouchableOpacity onPress={() => {
+                handleImpact("medium");
+                setHotelModalVisible(true)
+            }} className="mb-10 rounded-lg overflow-hidden relative border" style={{ backgroundColor: colors.card, borderColor: colors.border }}>
                 <View className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600 z-10" />
                 <View className="p-5 pl-7">
                 <View className="flex-row items-center gap-2 mb-3">
@@ -428,7 +454,10 @@ export default function ViewTripScreen() {
             {trip.travelers > 1 && isDraft && (
                 <TouchableOpacity 
                     activeOpacity={0.9}
-                    onPress={() => router.push({ pathname: "/(tabs)/trips/tinder", params: { itineraryId: trip._id } })}
+                    onPress={() => {
+                        handleImpact("medium");
+                        router.push({ pathname: "/(tabs)/trips/tinder", params: { itineraryId: trip._id } })
+                    }}
                     className="mb-8 rounded-2xl overflow-hidden border border-[#3b82f6]/30 relative"
                 >
                     <View style={{ backgroundColor: "#1e3a8a" }} className="absolute inset-0 opacity-20" />
@@ -465,7 +494,10 @@ export default function ViewTripScreen() {
                             </Text>
                             
                             <TouchableOpacity
-                                onPress={() => handleOptimizeDay(dayIndex, day.activities)}
+                                onPress={() => {
+                                    handleImpact("medium");
+                                    handleOptimizeDay(dayIndex, day.activities)
+                                }}
                                 disabled={optimizingDay !== null}
                                 style={{ backgroundColor: colors.surface, borderColor: isOptimizingThisDay ? colors.border : colors.primary }}
                                 className="flex-row items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border"
@@ -540,7 +572,10 @@ export default function ViewTripScreen() {
             <View style={{ backgroundColor: colors.surface, borderColor: colors.border, width: "85%", borderRadius: 16, borderWidth: 1 }} className="p-6">
                 <View className="flex-row justify-between items-center mb-6">
                     <Text style={{ color: colors.text }} className="text-lg font-bold italic uppercase">Chat Assistant</Text>
-                    <TouchableOpacity onPress={() => !isChatLoading && setChatVisible(false)} disabled={isChatLoading}>
+                    <TouchableOpacity onPress={() => {
+                        handleImpact("soft");
+                        !isChatLoading && setChatVisible(false)
+                    }} disabled={isChatLoading}>
                         <X size={24} color={isChatLoading ? colors.textMuted : colors.text} />
                     </TouchableOpacity>
                 </View>
@@ -564,7 +599,10 @@ export default function ViewTripScreen() {
                         }}
                     />
                     <TouchableOpacity 
-                        onPress={handleAiEdit}
+                        onPress={() => {
+                            handleImpact("medium");
+                            handleAiEdit()
+                        }}
                         disabled={isChatLoading || !chatQuery.trim()}
                         style={{ backgroundColor: isChatLoading || !chatQuery.trim() ? colors.border : "#22c55e" }} 
                         className="h-[50px] w-[50px] rounded-lg items-center justify-center"
@@ -585,7 +623,10 @@ export default function ViewTripScreen() {
             <View style={{ backgroundColor: colors.surface, borderColor: colors.border, width: "85%", borderRadius: 16, borderWidth: 1 }} className="p-6">
                 <View className="flex-row justify-between items-center mb-2">
                     <Text style={{ color: colors.text }} className="text-xl font-bold">{modifyType === "weather" ? "Adapt for Weather" : "Handle Delay"}</Text>
-                    <TouchableOpacity onPress={() => setModifyModalVisible(false)}>
+                    <TouchableOpacity onPress={() => {
+                        handleImpact("soft");
+                        setModifyModalVisible(false)
+                    }}>
                         <X size={24} color={colors.textMuted} />
                     </TouchableOpacity>
                 </View>
@@ -613,7 +654,10 @@ export default function ViewTripScreen() {
             <View style={{ flex: 1, backgroundColor: colors.background }}>
                 <View style={{ borderColor: colors.border }} className="px-6 py-4 flex-row justify-between items-center border-b">
                 <Text style={{ color: colors.text }} className="text-lg font-bold italic">ACCOMMODATION DETAILS</Text>
-                <TouchableOpacity onPress={() => setHotelModalVisible(false)}>
+                <TouchableOpacity onPress={() => {
+                    handleImpact("soft");
+                    setHotelModalVisible(false)
+                }}>
                     <X size={24} color={colors.text} />
                 </TouchableOpacity>
                 </View>

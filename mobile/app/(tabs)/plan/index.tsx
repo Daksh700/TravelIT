@@ -15,9 +15,11 @@ import Animated, {
   withTiming,
   FadeIn,
 } from "react-native-reanimated";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function CreateTripScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const { mutate: generate, isPending } = useGenerateItinerary();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -236,7 +238,10 @@ export default function CreateTripScreen() {
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Currency</Text>
               <View className="flex-row gap-2">
                 {["USD", "EUR", "INR", "GBP"].map((c) => (
-                  <TouchableOpacity key={c} onPress={() => setForm({ ...form, currency: c })} style={{ backgroundColor: form.currency === c ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-14 items-center justify-center">
+                  <TouchableOpacity key={c} onPress={() => {
+                    handleImpact("soft");
+                    setForm({ ...form, currency: c })
+                  }} style={{ backgroundColor: form.currency === c ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-14 items-center justify-center">
                     <Text style={{ color: form.currency === c ? colors.primaryText : colors.textMuted }} className="font-bold uppercase text-xs">{c}</Text>
                   </TouchableOpacity>
                 ))}
@@ -247,7 +252,10 @@ export default function CreateTripScreen() {
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Budget Tier</Text>
               <View className="flex-row gap-2">
                 {["low", "medium", "high"].map((opt) => (
-                  <TouchableOpacity key={opt} onPress={() => setForm({ ...form, budgetTier: opt })} style={{ backgroundColor: form.budgetTier === opt ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-14 items-center justify-center">
+                  <TouchableOpacity key={opt} onPress={() => {
+                    handleImpact("soft");
+                    setForm({ ...form, budgetTier: opt })
+                  }} style={{ backgroundColor: form.budgetTier === opt ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-14 items-center justify-center">
                     <Text style={{ color: form.budgetTier === opt ? colors.primaryText : colors.textMuted }} className="font-bold uppercase text-xs">{opt}</Text>
                   </TouchableOpacity>
                 ))}
@@ -260,7 +268,10 @@ export default function CreateTripScreen() {
 
         {step === 2 && (
           <Animated.View entering={FadeIn}>
-            <TouchableOpacity onPress={() => openDatePicker("tripStartDate")} className="mb-4">
+            <TouchableOpacity onPress={() => {
+              handleImpact("medium");
+              openDatePicker("tripStartDate")
+            }} className="mb-4">
               <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Trip Start Date</Text>
               <View className="h-14 border px-4 flex-row items-center justify-between" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
                 <Text style={{ color: colors.text }}>{form.tripStartDate || "Select Start Date"}</Text>
@@ -277,7 +288,10 @@ export default function CreateTripScreen() {
             </View>
 
             <View className="flex-row gap-4 mb-6">
-              <TouchableOpacity onPress={() => openDatePicker("checkInDate")} className="flex-1">
+              <TouchableOpacity onPress={() => {
+                handleImpact("medium");
+                openDatePicker("checkInDate")
+              }} className="flex-1">
                 <Text style={{ color: colors.textMuted }} className="uppercase text-[11px] font-bold mb-2">Hotel Check-in</Text>
                 <View className="h-14 border justify-center px-3" style={{ borderColor: colors.border, backgroundColor: colors.card }}>
                   <Text style={{ color: colors.text, fontSize: 13 }}>{form.checkInDate || "Select"}</Text>
@@ -305,7 +319,10 @@ export default function CreateTripScreen() {
                     ["adults", "Adults (25-45)"],
                     ["family", "Family"],
                     ["seniors", "Seniors"]  ].map(([key, label]) => (
-                  <TouchableOpacity key={key} onPress={() => setForm({ ...form, ageGroup: key })} style={{ backgroundColor: form.ageGroup === key ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-12 items-center justify-center px-1">
+                  <TouchableOpacity key={key} onPress={() => {
+                    handleImpact("soft");
+                    setForm({ ...form, ageGroup: key })
+                  }} style={{ backgroundColor: form.ageGroup === key ? colors.primary : colors.card, borderColor: colors.border }} className="flex-1 border h-12 items-center justify-center px-1">
                     <Text style={{ color: form.ageGroup === key ? colors.primaryText : colors.textMuted }} className="font-bold text-[10px] uppercase text-center">{label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -331,7 +348,10 @@ export default function CreateTripScreen() {
                   <Text style={{ color: colors.textSecondary }} className="text-xs">Safer picks for cautious / solo travelers</Text>
                 </View>
               </View>
-              <Switch value={form.safeMode} onValueChange={(v) => setForm({ ...form, safeMode: v })} trackColor={{ false: colors.switchOff, true: colors.switchOn }} thumbColor={colors.switchThumb} />
+              <Switch value={form.safeMode} onValueChange={(v) => {
+                handleImpact("light");
+                setForm({ ...form, safeMode: v })
+              }} trackColor={{ false: colors.switchOff, true: colors.switchOn }} thumbColor={colors.switchThumb} />
             </View>
 
             <View className="mb-8">
@@ -359,7 +379,10 @@ export default function CreateTripScreen() {
                 maximumDate={pickerConfig.maxDate}
                 onChange={handleDateConfirm}
               />
-              <TouchableOpacity onPress={() => setPickerConfig(null)} style={{ padding: 12, alignItems: "center" }}>
+              <TouchableOpacity onPress={() => {
+                handleImpact("soft");
+                setPickerConfig(null)
+              }} style={{ padding: 12, alignItems: "center" }}>
                 <Text style={{ color: colors.primary, fontWeight: "bold" }}>Cancel</Text>
               </TouchableOpacity>
             </View>

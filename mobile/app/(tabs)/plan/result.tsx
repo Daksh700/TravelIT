@@ -36,9 +36,11 @@ import { useRouter } from "expo-router";
 import { useSaveItinerary } from "@/hooks/useSaveItinerary";
 import { useState } from "react";
 import { useOptimizeRoute } from "@/hooks/useModifyItinerary";
+import { useHaptics } from "@/hooks/useHaptics";
 
 export default function ResultScreen() {
   const { colors } = useThemeColors();
+  const { handleImpact } = useHaptics();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -170,7 +172,10 @@ export default function ResultScreen() {
           </View>
           <TouchableOpacity
             disabled={isBusy}
-            onPress={handleSave}
+            onPress={() => {
+              handleImpact("medium");
+              handleSave()
+            }}
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.border,
@@ -303,7 +308,10 @@ export default function ResultScreen() {
 
         {hotel && (
           <TouchableOpacity
-            onPress={() => setHotelModalVisible(true)}
+            onPress={() => {
+              handleImpact("medium");
+              setHotelModalVisible(true)
+            }}
             className="mb-10 rounded-lg overflow-hidden relative border"
             style={{ backgroundColor: colors.card, borderColor: colors.border }}
           >
@@ -416,7 +424,10 @@ export default function ResultScreen() {
                   </Text>
 
                   <TouchableOpacity
-                    onPress={() => handleOptimizeDay(dayIndex, day.activities)}
+                    onPress={() => {
+                      handleImpact("medium");
+                      handleOptimizeDay(dayIndex, day.activities)
+                    }}
                     disabled={isBusy}
                     style={{
                       backgroundColor: colors.surface,
@@ -553,7 +564,10 @@ export default function ResultScreen() {
               >
                 ACCOMMODATION DETAILS
               </Text>
-              <TouchableOpacity onPress={() => setHotelModalVisible(false)}>
+              <TouchableOpacity onPress={() => {
+                handleImpact("soft");
+                setHotelModalVisible(false)
+              }}>
                 <X size={24} color={colors.text} />
               </TouchableOpacity>
             </View>

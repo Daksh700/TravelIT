@@ -16,7 +16,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { useHaptics } from "@/hooks/useHaptics";
 
 export default function HelpScreen() {
-  const {handleImpact} = useHaptics();
+  const { handleImpact } = useHaptics();
   const router = useRouter();
   const { colors } = useThemeColors();
 
@@ -150,26 +150,17 @@ export default function HelpScreen() {
           <ResourceItem
             icon={FileText}
             label="Terms of Service"
-            onPress={() => {
-                handleImpact("soft");
-                Linking.openURL("https://travelit.ai/terms")
-            }}
+            onPress={() => Linking.openURL("https://travelit.ai/terms")}
           />
           <ResourceItem
             icon={Shield}
             label="Privacy Policy"
-            onPress={() => {
-                handleImpact("soft");
-                Linking.openURL("https://travelit.ai/privacy")
-            }}
+            onPress={() => Linking.openURL("https://travelit.ai/privacy")}
           />
           <ResourceItem
             icon={Info}
             label="Community Guidelines"
-            onPress={() => {
-                handleImpact("soft");
-                Linking.openURL("https://travelit.ai/guidelines")
-            }}
+            onPress={() => Linking.openURL("https://travelit.ai/guidelines")}
             isLast
           />
         </View>
@@ -198,10 +189,14 @@ const ResourceItem = ({
   isLast,
 }: any) => {
   const { colors } = useThemeColors();
-
+  const { handleImpact } = useHaptics();
+ 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        handleImpact("light");
+        onPress()
+      }}
       style={{
         borderBottomColor: isLast ? "transparent" : colors.border,
       }}
