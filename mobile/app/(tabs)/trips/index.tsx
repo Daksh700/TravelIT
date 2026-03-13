@@ -6,9 +6,9 @@ import { useUserItineraries } from "@/hooks/useUserItineraries";
 import { useUpdateTripStatus } from "@/hooks/useUpdateTripStatus";
 import { useDeleteTrip } from "@/hooks/useDeleteTrip";
 import { useUploadTripPhoto } from "@/hooks/useModifyItinerary";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ChevronDown, X, Trash2, ImagePlus, Users } from "lucide-react-native"; 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as ImagePicker from "expo-image-picker"
 
 export default function TripsScreen() {
@@ -18,6 +18,7 @@ export default function TripsScreen() {
   const { mutate: deleteTrip } = useDeleteTrip();
   const { mutate: uploadPhoto } = useUploadTripPhoto();
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTrip, setActiveTrip] = useState<any>(null);
@@ -25,7 +26,13 @@ export default function TripsScreen() {
   const [uploadingTripId, setUploadingTripId] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(typeof params.filter === 'string' ? params.filter : "all");
+
+  useEffect(() => {
+    if (typeof params.filter === 'string') {
+      setFilter(params.filter);
+    }
+  }, [params.filter]);
 
   const getStatusDetails = (status: string) => {
     switch (status) {
