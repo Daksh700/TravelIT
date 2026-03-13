@@ -217,8 +217,8 @@ export default function ForgotPassword() {
                       <Ionicons
                         name={
                           showPassword
-                            ? "eye-off-outline"
-                            : "eye-outline"
+                            ? "eye-outline"
+                            : "eye-off-outline"
                         }
                         size={18}
                         color={colors.textMuted}
