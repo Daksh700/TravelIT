@@ -229,7 +229,7 @@ export default function SignUp() {
                   className="absolute right-0 h-14 w-12 items-center justify-center"
                 >
                   <Ionicons
-                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    name={showPassword ? "eye-outline" : "eye-off-outline"}
                     size={18}
                     color={colors.textMuted}
                   />
