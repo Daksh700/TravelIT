@@ -25,6 +25,7 @@ export default function TripsScreen() {
   const [uploadingTripId, setUploadingTripId] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState("all");
 
   const getStatusDetails = (status: string) => {
     switch (status) {
@@ -72,6 +73,11 @@ export default function TripsScreen() {
     setRefreshing(false);
   };
 
+  const filteredTrips = trips?.filter((trip: any) => {
+    if (filter === "all") return true;
+    return trip.status === filter;
+  }) || [];
+
   if (isLoading && !refreshing) {
     return (
       <SafeAreaView
@@ -99,7 +105,7 @@ export default function TripsScreen() {
               colors={[colors.primary]}
             />
         }>
-        <View className="flex-row justify-between items-start mb-4">
+        <View className="flex-row justify-between items-start mb-2">
           <View>
             <Text style={{ color: colors.text }} className="text-3xl font-bold tracking-tight mb-1">
               My Vault
@@ -119,13 +125,45 @@ export default function TripsScreen() {
             </TouchableOpacity>
         </View>
 
-        {(!trips || trips.length === 0) ? (
+        <View className="mb-6">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+            {["all", "active", "draft", "completed"].map((f) => {
+              const isSelected = filter === f;
+              return (
+                <TouchableOpacity
+                  key={f}
+                  onPress={() => setFilter(f)}
+                  style={{
+                    backgroundColor: isSelected ? colors.primary : colors.card,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                  }}
+                  className="px-4 py-2 rounded-full border mr-2"
+                >
+                  <Text
+                    style={{
+                      color: isSelected ? "#fff" : colors.text,
+                      textTransform: "capitalize",
+                      fontWeight: isSelected ? "bold" : "600",
+                      fontSize: 13
+                    }}
+                  >
+                    {f}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {(!filteredTrips || filteredTrips.length === 0) ? (
           <View className="items-center justify-center py-20">
-            <Text style={{ color: colors.textMuted }}>Your vault is empty.</Text>
+            <Text style={{ color: colors.textMuted }}>
+              {filter === "all" ? "Your vault is empty." : `No ${filter} trips found.`}
+            </Text>
           </View>
         ) : (
           <View className="flex flex-col gap-6 pb-20">
-            {trips.map((trip: any) => (
+            {filteredTrips.map((trip: any) => (
               <View
                 key={trip._id}
                 style={{ backgroundColor: colors.surface, borderColor: colors.border }}
