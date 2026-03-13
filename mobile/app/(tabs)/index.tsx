@@ -154,7 +154,7 @@ export default function HomeScreen() {
           <View className="flex-row gap-4">
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "all" } })}
+              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "all", _t: Date.now() } })}
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"
             >
@@ -174,7 +174,7 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "completed" } })}
+              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "completed", _t: Date.now() } })}
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"
             >
