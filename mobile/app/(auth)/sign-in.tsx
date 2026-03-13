@@ -24,17 +24,6 @@ export default function SignIn() {
         justifyContent: "center",
       }}
     >
-      <View
-        style={{ backgroundColor: colors.primary }}
-        className="w-12 h-12 self-center mb-6 items-center justify-center"
-      >
-        <Text
-          style={{ color: colors.primaryText }}
-          className="font-bold text-xl"
-        >
-          ✓
-        </Text>
-      </View>
 
       <Text
         style={{ color: colors.text }}
