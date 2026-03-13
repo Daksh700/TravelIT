@@ -13,6 +13,8 @@ import { useBookmarks, useToggleBookmark } from "@/hooks/useBookmarks";
 export default function ExploreScreen() {
   const { colors } = useThemeColors();
   const [query, setQuery] = useState("");
+  const [forceUpdate, setForceUpdate] = useState(0);
+
   const queryClient = useQueryClient();
   
   const { mutate: explore, isPending } = useExploreLocation();
@@ -175,7 +177,9 @@ export default function ExploreScreen() {
                       variant="outline"
                       onPress={() => {
                         queryClient.removeQueries({ queryKey: ["exploreResult"] });
+                        queryClient.setQueryData(["exploreResult"], null);
                         setQuery("");
+                        setForceUpdate(prev => prev + 1); 
                       }}
                       className="h-12"
                     >
