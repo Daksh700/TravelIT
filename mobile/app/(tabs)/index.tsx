@@ -1,4 +1,4 @@
-import { ActivityIndicator, ImageBackground, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ImageBackground, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowRight, Globe, Sun, Wind } from "lucide-react-native";
@@ -152,7 +152,9 @@ export default function HomeScreen() {
           </Text>
 
           <View className="flex-row gap-4">
-            <View
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "all" } })}
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"
             >
@@ -168,9 +170,11 @@ export default function HomeScreen() {
               >
                 Trips Planned
               </Text>
-            </View>
+            </TouchableOpacity>
 
-            <View
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push({ pathname: "/(tabs)/trips", params: { filter: "completed" } })}
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="flex-1 p-4 border"
             >
@@ -186,7 +190,7 @@ export default function HomeScreen() {
               >
                 Trips Completed
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
