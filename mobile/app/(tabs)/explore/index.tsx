@@ -59,7 +59,7 @@ export default function ExploreScreen() {
                 className="absolute right-0 top-0 h-14 w-14 items-center justify-center"
             >
                 {isPending ? (
-                    <ActivityIndicator size="small" color={colors.primaryText} />
+                    <ActivityIndicator size="small" color={colors.primary} />
                 ) : (
                     <Search size={22} color={colors.text} />
                 )}
