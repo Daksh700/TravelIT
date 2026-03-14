@@ -18,6 +18,7 @@ import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-nativ
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function ViewTripScreen() {
   const { colors } = useThemeColors();
@@ -25,6 +26,9 @@ export default function ViewTripScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const queryClient = useQueryClient();
+
+  const { data: dbUser } = useUserProfile(); 
+  const isPro = dbUser?.isPro; 
   
   const { data: trips, refetch } = useUserItineraries();
   const trip = trips?.find((t: any) => t._id === id);
@@ -73,6 +77,22 @@ export default function ViewTripScreen() {
     setRefreshing(true);
     await refetch(); 
     setRefreshing(false);
+  };
+
+  const handleProAction = (action: () => void) => {
+    if (isPro) {
+        action();
+    } else {
+        handleImpact("medium");
+        Alert.alert(
+            "Pro Feature 👑",
+            "This feature is locked on the Free Plan. Upgrade to TravelIt Pro to unlock AI Chat, PDF Exports, Route Optimization, and Real-Time Logic edits!",
+            [
+                { text: "Maybe Later", style: "cancel" },
+                { text: "View Pro Plan", onPress: () => router.push("/(tabs)/profile/subscription") }
+            ]
+        );
+    }
   };
 
   if (!trip) return null;
@@ -318,7 +338,7 @@ export default function ViewTripScreen() {
                 <TouchableOpacity 
                     onPress={() => {
                         handleImpact("medium");
-                        setChatVisible(true)
+                        handleProAction(() => setChatVisible(true));
                     }}
                     disabled={optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: "#22c55e" }}
@@ -331,7 +351,7 @@ export default function ViewTripScreen() {
                 <TouchableOpacity 
                     onPress={() => {
                         handleImpact("medium");
-                        handleExportPDF()
+                        handleProAction(handleExportPDF);
                     }}
                     disabled={isExporting || optimizingDay !== null}
                     style={{ backgroundColor: "transparent", borderColor: colors.border }}
