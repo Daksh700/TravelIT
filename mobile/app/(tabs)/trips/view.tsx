@@ -101,9 +101,10 @@ export default function ViewTripScreen() {
   const flight = trip.flight; 
   const currencySymbol = symbols[trip.currency] ?? "";
   const isDraft = trip.status === 'draft';
+  const travelersCount = trip.travelers || 1;
 
   const accommodationCost = trip?.estimatedCosts?.accommodation ?? (hotel ? Math.round(hotel.totalPrice) : 0);
-  const travelCost = trip?.estimatedCosts?.flight ?? (flight ? Math.round(flight.price) : 0);
+  const travelCost = trip?.estimatedCosts?.flight ?? (flight ? Math.round(flight.price * 2 * travelersCount) : 0);
   
   let calcActivitiesCost = 0;
   if (trip?.tripDetails && Array.isArray(trip.tripDetails)) {
@@ -113,7 +114,7 @@ export default function ViewTripScreen() {
                   const costStr = String(act.estimatedCost || '0').replace(/[^0-9.]/g, '');
                   const parsed = parseInt(costStr, 10);
                   if(!isNaN(parsed)) {
-                      calcActivitiesCost += parsed;
+                      calcActivitiesCost += (parsed * travelersCount);
                   }
               });
           }
