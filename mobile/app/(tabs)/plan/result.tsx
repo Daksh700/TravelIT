@@ -70,9 +70,10 @@ export default function ResultScreen() {
   const hotel = itinerary.hotel;
   const flight = itinerary.flight;
   const currencySymbol = symbols[itinerary.currency] ?? itinerary.currency;
+  const travelersCount = itinerary.travelers || 1;
 
   const accommodationCost = hotel ? Math.round(hotel.totalPrice) : 0;
-  const travelCost = flight ? Math.round(flight.price) : 0;
+  const travelCost = flight ? Math.round(flight.price * 2 * travelersCount) : 0;
 
   let activitiesCost = 0;
   if (itinerary.tripDetails && Array.isArray(itinerary.tripDetails)) {
@@ -82,7 +83,7 @@ export default function ResultScreen() {
            const costStr = String(act.estimatedCost || '0').replace(/[^0-9.]/g, '');
            const parsed = parseInt(costStr, 10);
            if(!isNaN(parsed)) {
-             activitiesCost += parsed;
+             activitiesCost += (parsed * travelersCount);
            }
         });
       }
