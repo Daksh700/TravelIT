@@ -22,7 +22,13 @@ type SaveItineraryParams = {
   safeMode: boolean,
   hotel?: object | null,
   flight?: object | null,
-  interests?: string[]
+  interests?: string[],
+  estimatedCosts?: {
+    accommodation: number;
+    flight: number;
+    activities: number;
+    total: number;
+  }
 }
 
 export const useSaveItinerary = () => {
@@ -55,6 +61,7 @@ export const useSaveItinerary = () => {
         data.flight ?? null,
         "draft",
         data.interests,
+        data.estimatedCosts
       );
     },
 
