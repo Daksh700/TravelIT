@@ -14,7 +14,7 @@ import { useHaptics } from "@/hooks/useHaptics";
 export default function SignIn() {
   const { isLoading, handleSocialAuth } = useSocialAuth();
   const router = useRouter();
-  const { colors } = useThemeColors();
+  const { colors, isDark } = useThemeColors();
   const { handleImpact } = useHaptics();
 
   return (
@@ -89,8 +89,9 @@ export default function SignIn() {
           ) : (
             <>
               <Image
-                source={require("../../assets/images/apple.png")}
-                className="w-5 h-5"
+                source={isDark ? require("../../assets/images/apple.png") : require("../../assets/images/apple-black.png")}
+                className={ isDark ? 'w-5 h-5' : 'w-5 h-6'}
+                resizeMode="contain"
               />
               <Text
                 style={{ color: colors.text }}
