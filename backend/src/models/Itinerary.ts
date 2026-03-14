@@ -73,6 +73,13 @@ export interface IItinerary extends Document {
     hotel?: IHotelSnapshot | null;
     flight?: IFlightSnapshot | null;
 
+    estimatedCosts?: {
+        accommodation: number;
+        flight: number;
+        activities: number;
+        total: number;
+    };
+
     userPhotos: string[];
 
     status: "draft" | "active" | "completed";
@@ -208,6 +215,13 @@ const ItinerarySchema = new Schema<IItinerary>(
             arrivalTime: { type: String },
             duration: { type: String },
             stops: { type: Number },
+        },
+
+        estimatedCosts: {
+            accommodation: { type: Number, default: 0 },
+            flight: { type: Number, default: 0 },
+            activities: { type: Number, default: 0 },
+            total: { type: Number, default: 0 }
         },
 
         userPhotos: {
