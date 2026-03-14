@@ -74,7 +74,8 @@ export const saveItinerary = async(
     hotel: object | null,
     flight: object | null,
     status?: string,
-    interests?: string[]
+    interests?: string[],
+    estimatedCosts?: object
 ) => {
     try {
         console.log("Connecting to Backend");
@@ -125,6 +126,7 @@ export const saveItinerary = async(
                 flight,
                 status,
                 interests,
+                estimatedCosts
             })
         });
         const data = await response.json();
