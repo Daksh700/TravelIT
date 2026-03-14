@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   Plane,
   Sparkles,
+  Wallet
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -70,6 +71,26 @@ export default function ResultScreen() {
   const flight = itinerary.flight;
   const currencySymbol = symbols[itinerary.currency] ?? itinerary.currency;
 
+  const accommodationCost = hotel ? Math.round(hotel.totalPrice) : 0;
+  const travelCost = flight ? Math.round(flight.price) : 0;
+
+  let activitiesCost = 0;
+  if (itinerary.tripDetails && Array.isArray(itinerary.tripDetails)) {
+    itinerary.tripDetails.forEach((day: any) => {
+      if (day.activities && Array.isArray(day.activities)) {
+        day.activities.forEach((act: any) => {
+           const costStr = String(act.estimatedCost || '0').replace(/[^0-9.]/g, '');
+           const parsed = parseInt(costStr, 10);
+           if(!isNaN(parsed)) {
+             activitiesCost += parsed;
+           }
+        });
+      }
+    });
+  }
+
+  const totalCost = accommodationCost + travelCost + activitiesCost;
+
   const handleSave = () => {
     save({
       source: itinerary.source,
@@ -91,6 +112,12 @@ export default function ResultScreen() {
       travelers: itinerary.travelers,
       ageGroup: itinerary.ageGroup,
       safeMode: itinerary.safeMode,
+      estimatedCosts: {
+          accommodation: accommodationCost,
+          flight: travelCost,
+          activities: activitiesCost,
+          total: totalCost
+      }
     });
   };
 
@@ -232,6 +259,37 @@ export default function ResultScreen() {
           >
             {itinerary.tripDescription}
           </Text>
+        </View>
+
+        <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border mb-10 shadow-sm">
+            <View className="flex-row items-center gap-2 mb-5">
+                <Wallet size={20} color={colors.text} />
+                <Text style={{ color: colors.text }} className="text-lg font-bold">Estimated Cost Breakdown</Text>
+            </View>
+            
+            <View className="gap-4">
+                <View className="flex-row justify-between items-center">
+                    <Text style={{ color: colors.textMuted }} className="font-bold text-[10px] uppercase tracking-widest">Total Cost</Text>
+                    <Text style={{ color: colors.primary }} className="font-black text-2xl">{currencySymbol}{totalCost.toLocaleString()}</Text>
+                </View>
+                
+                <View style={{ backgroundColor: colors.border }} className="h-[1px] w-full my-1" />
+                
+                <View className="flex-row justify-between items-center">
+                    <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Accommodation</Text>
+                    <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{accommodationCost.toLocaleString()}</Text>
+                </View>
+                
+                <View className="flex-row justify-between items-center">
+                    <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Travel Cost</Text>
+                    <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{travelCost.toLocaleString()}</Text>
+                </View>
+
+                <View className="flex-row justify-between items-center">
+                    <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Activities</Text>
+                    <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{activitiesCost.toLocaleString()}</Text>
+                </View>
+            </View>
         </View>
 
         {flight && (
