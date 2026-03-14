@@ -102,6 +102,9 @@ export const createItinerary = asyncHandler(async (req: Request, res: Response) 
 
   const savedItinerary = await newItinerary.save();
 
+  user.generationsCount = (user.generationsCount || 0) + 1;
+  await user.save();
+
   if (user.pushToken) {
         sendPushNotification(
             user.pushToken, 
@@ -185,6 +188,10 @@ export const modifyItinerary = asyncHandler(async (req: Request, res: Response) 
   const { itineraryId, modificationType, delayHours, dayNumber, userPrompt } = req.body;
 
   if (!user) throw new ApiError(401, "User not authenticated");
+
+  if (!user.isPro) {
+      throw new ApiError(403, "Real-Time Logic and AI Edits are Pro features. Upgrade to unlock.");
+  }
 
   const itinerary = await Itinerary.findOne({ _id: itineraryId, userId: user._id });
 
@@ -376,6 +383,12 @@ export const updateItineraryDetails = asyncHandler(async (req: Request, res: Res
 });
 
 export const optimizeDayRoute = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+
+    if (!user || !user.isPro) {
+        throw new ApiError(403, "Smart Route Optimization is a Pro feature. Upgrade to unlock.");
+    }
+    
     const { activities, dayStartTime = "09:00 AM" } = req.body;
 
     if (!activities || !Array.isArray(activities) || activities.length === 0) {
