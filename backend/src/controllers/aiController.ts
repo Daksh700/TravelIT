@@ -68,7 +68,7 @@ export const generateItinerary = asyncHandler(async (req: Request, res: Response
 - Prefer daytime activities.
 - Recommend well-lit public places.
 - Prefer guided group tours or busy tourist spots.
-- Add a daily safety note if relevant.`
+- You can mention safety tips inside the "description" field of an activity, BUT DO NOT create a separate activity just for a "Safety Note".`
     : "Safety: standard assumptions.";
 
   const prompt = `
@@ -94,7 +94,10 @@ CRITICAL COST RULES (READ CAREFULLY):
 2. **NO HOTEL COSTS**: The user has already booked a hotel separately. DO NOT include accommodation costs in the "estimatedCost" field for any activity.
 3. **NO FLIGHT COSTS**: Flights are handled separately. DO NOT include flight costs or flight activities in the itinerary. Start Day 1 assuming the traveler has arrived.
 
-Rules:
+CRITICAL STRUCTURAL RULES (MUST FOLLOW):
+- The "activities" array MUST ONLY contain actual places to visit, things to do, or places to eat.
+- ABSOLUTELY DO NOT add any objects in the "activities" array that are just "Safety Notes", "AI Notes", "Disclaimer", or general advice.
+- If you need to give a safety tip, put it inside the "description" string of an actual location-based activity.
 - Stay within the budget (excluding hotel and flight costs).
 - Include daily meals: breakfast, lunch, snack, dinner (with realistic prices).
 - DO NOT create separate activities for "Traveling", "Commuting", or "Local Transportation". The cost and time of travel should be assumed.
@@ -102,10 +105,10 @@ Rules:
 - Avoid duplicated activities.
 - ${agePrompt}
 - ${safeModePrompt}
-- Return ONLY valid JSON.
+- Return ONLY valid JSON. Do not include Markdown like \`\`\`json.
 - Make NO MISTAKES !!!
 
-JSON FORMAT (MUST MATCH, NO markdown):
+JSON FORMAT (MUST EXACTLY MATCH THIS STRUCTURE):
 {
   "tripTitle": "string",
   "tripDescription": "string",
@@ -144,21 +147,40 @@ ${interestPrompt}
   try {
     const itineraryData = JSON.parse(cleanText || "{}");
 
+    if (itineraryData.tripDetails && Array.isArray(itineraryData.tripDetails)) {
+        itineraryData.tripDetails = itineraryData.tripDetails.map((day: any) => {
+            if (day.activities && Array.isArray(day.activities)) {
+                day.activities = day.activities.filter((act: any) => {
+                    const actName = (act.activity || "").toLowerCase();
+                    return !actName.includes("safety note") && 
+                           !actName.includes("ai note") && 
+                           !actName.includes("disclaimer") &&
+                           !actName.includes("important rule");
+                });
+            }
+            return day;
+        });
+    }
+
     const verifiedDays = [];
 
-    for(const day of itineraryData.tripDetails) {
-      const verifiedActs = [];
-
-      for(const act of day.activities) {
-        const verified = await verifyPlace(act.activity, `${act.location} ${destination}`);
-        const {location, ...verifiedData} = verified; 
-
-        const coordinates = location ? { lat: location.lat, lng: location.lng } : null;
-
-        verifiedActs.push({...act, coordinates, ...verifiedData}); 
-      }
-
-      verifiedDays.push({...day, activities: verifiedActs});
+    if(itineraryData.tripDetails) {
+        for(const day of itineraryData.tripDetails) {
+          const verifiedActs = [];
+    
+          if(day.activities) {
+              for(const act of day.activities) {
+                const verified = await verifyPlace(act.activity, `${act.location} ${destination}`);
+                const {location, ...verifiedData} = verified; 
+        
+                const coordinates = location ? { lat: location.lat, lng: location.lng } : null;
+        
+                verifiedActs.push({...act, coordinates, ...verifiedData}); 
+              }
+          }
+    
+          verifiedDays.push({...day, activities: verifiedActs});
+        }
     }
 
     itineraryData.tripDetails = verifiedDays;
@@ -222,6 +244,7 @@ ${interestPrompt}
       new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null, flight: flightSnapshot || null, tripStartDate, tripEndDate}, "Itinerary generated successfully")
     );
   } catch (error) {
+    console.error("Itinerary generation error:", error);
     throw new ApiError(
       500,
       "AI generated invalid JSON. Please retry itinerary generation."
