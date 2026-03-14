@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Pressable } from 'react-native'; 
+import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity, Pressable, Alert } from 'react-native'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useTripTinder } from '@/hooks/useTripTinder';
@@ -13,12 +13,16 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import Swiper from 'react-native-deck-swiper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler'; 
 import { useHaptics } from '@/hooks/useHaptics';
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export default function TripTinderScreen() {
   const { colors } = useThemeColors();
   const { handleImpact } = useHaptics();
   const { userId } = useAuth(); 
   const router = useRouter();
+
+  const { data: dbUser } = useUserProfile(); 
+  const isPro = dbUser?.isPro; 
   
   const { itineraryId } = useLocalSearchParams(); 
   
@@ -53,6 +57,18 @@ export default function TripTinderScreen() {
   }, [currentActivity]);
 
   const handleCreateRoom = () => {
+    if (!isPro) {
+        Alert.alert(
+            "Pro Feature 👑",
+            "Hosting a Group Sync session is a premium feature. Upgrade to Pro to plan together with your friends!",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Upgrade Now", onPress: () => router.push("/(tabs)/profile/subscription") }
+            ]
+        );
+        return;
+    }
+
     const count = parseInt(participantCount);
     if (isNaN(count) || count < 2) return setError("At least 2 people required.");
     if (!activeTrip) return;
