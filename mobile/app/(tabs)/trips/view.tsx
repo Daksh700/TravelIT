@@ -1,4 +1,4 @@
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, View, Pressable, TouchableOpacity, Modal, Image, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, RefreshControl, Alert } from "react-native";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { Card } from "@/components/Card";
@@ -26,6 +26,7 @@ export default function ViewTripScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const { data: dbUser } = useUserProfile(); 
   const isPro = dbUser?.isPro; 
@@ -723,7 +724,7 @@ export default function ViewTripScreen() {
 
       <Modal visible={hotelModalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setHotelModalVisible(false)}>
         {hotel && (
-            <View style={{ flex: 1, backgroundColor: colors.background }}>
+            <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: insets.top }}>
                 <View style={{ borderColor: colors.border }} className="px-6 py-4 flex-row justify-between items-center border-b">
                 <Text style={{ color: colors.text }} className="text-lg font-bold italic">ACCOMMODATION DETAILS</Text>
                 <TouchableOpacity onPress={() => {
