@@ -8,7 +8,7 @@ import { exportTripToPDF } from "@/utils/pdfExport";
 import { 
   MapPin, Clock, ArrowLeft, Building2, Star, X, 
   Wifi, Wind, Tv, Coffee, Briefcase, Users, User, ShieldCheck, Plane,
-  CloudRain, Sparkles, Trash2, GripVertical, Send, Edit3, Download
+  CloudRain, Sparkles, Trash2, GripVertical, Send, Edit3, Download, Wallet
 } from "lucide-react-native";
 import { useUserItineraries } from "@/hooks/useUserItineraries";
 import { useModifyItinerary, useUpdateItineraryDetails, useOptimizeRoute } from "@/hooks/useModifyItinerary"; 
@@ -101,6 +101,26 @@ export default function ViewTripScreen() {
   const flight = trip.flight; 
   const currencySymbol = symbols[trip.currency] ?? "";
   const isDraft = trip.status === 'draft';
+
+  const accommodationCost = trip?.estimatedCosts?.accommodation ?? (hotel ? Math.round(hotel.totalPrice) : 0);
+  const travelCost = trip?.estimatedCosts?.flight ?? (flight ? Math.round(flight.price) : 0);
+  
+  let calcActivitiesCost = 0;
+  if (trip?.tripDetails && Array.isArray(trip.tripDetails)) {
+      trip.tripDetails.forEach((day: any) => {
+          if (day.activities && Array.isArray(day.activities)) {
+              day.activities.forEach((act: any) => {
+                  const costStr = String(act.estimatedCost || '0').replace(/[^0-9.]/g, '');
+                  const parsed = parseInt(costStr, 10);
+                  if(!isNaN(parsed)) {
+                      calcActivitiesCost += parsed;
+                  }
+              });
+          }
+      });
+  }
+  const activitiesCost = trip?.estimatedCosts?.activities ?? calcActivitiesCost;
+  const totalCost = trip?.estimatedCosts?.total ?? (accommodationCost + travelCost + activitiesCost);
 
   const updateBackendOrder = (newData: any[]) => {
     setLocalData(newData); 
@@ -368,6 +388,37 @@ export default function ViewTripScreen() {
 
             <View style={{ borderLeftColor: colors.primary }} className="pl-4 border-l mb-10">
                 <Text style={{ color: colors.textMuted }} className="text-sm leading-relaxed">{trip.tripDescription}</Text>
+            </View>
+
+            <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-6 rounded-2xl border mb-10 shadow-sm">
+                <View className="flex-row items-center gap-2 mb-5">
+                    <Wallet size={20} color={colors.text} />
+                    <Text style={{ color: colors.text }} className="text-lg font-bold">Estimated Cost Breakdown</Text>
+                </View>
+                
+                <View className="gap-4">
+                    <View className="flex-row justify-between items-center">
+                        <Text style={{ color: colors.textMuted }} className="font-bold text-[10px] uppercase tracking-widest">Total Cost</Text>
+                        <Text style={{ color: colors.primary }} className="font-black text-2xl">{currencySymbol}{totalCost.toLocaleString()}</Text>
+                    </View>
+                    
+                    <View style={{ backgroundColor: colors.border }} className="h-[1px] w-full my-1" />
+                    
+                    <View className="flex-row justify-between items-center">
+                        <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Accommodation</Text>
+                        <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{accommodationCost.toLocaleString()}</Text>
+                    </View>
+                    
+                    <View className="flex-row justify-between items-center">
+                        <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Travel Cost</Text>
+                        <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{travelCost.toLocaleString()}</Text>
+                    </View>
+
+                    <View className="flex-row justify-between items-center">
+                        <Text style={{ color: colors.textMuted }} className="text-sm font-medium">Activities</Text>
+                        <Text style={{ color: colors.text }} className="font-bold text-sm">{currencySymbol}{activitiesCost.toLocaleString()}</Text>
+                    </View>
+                </View>
             </View>
 
             <View className="mb-10 rounded-lg overflow-hidden border p-5" style={{ backgroundColor: colors.surface, borderColor: colors.border }}>
