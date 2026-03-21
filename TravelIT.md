@@ -9,6 +9,31 @@
 
 ---
 
+## List of Figures
+
+| Sr. No. | Name of the Figure | Page No. |
+|---------|--------------------|----------|
+| 2.1 | Gantt Chart (Timeline) | |
+| 3.1 | Use Case Diagram | |
+| 3.2 | Entity-Relationship Diagram | |
+| 3.3 | Flow Diagram — Main Application Flow | |
+| 3.4 | Flow Diagram — AI Itinerary Generation Flow | |
+| 3.5 | Class Diagram | |
+| 3.6 | Sequence Diagram — Itinerary Generation Sequence | |
+| 3.7 | Sequence Diagram — Trip Tinder Sequence | |
+| 3.8 | State Diagram — Itinerary Status State Diagram | |
+| 3.9 | State Diagram — User Subscription State Diagram | |
+| 3.10 | Menu Tree | |
+| 4.1 | Screen Layout — Home Screen | |
+| 4.2 | Screen Layout — Plan Screen (3-Step Wizard) | |
+| 4.3 | Screen Layout — Result Screen | |
+| 4.4 | Screen Layout — Trips Vault | |
+| 4.5 | Screen Layout — Trip Tinder | |
+| 4.6 | Screen Layout — Profile Screen | |
+| 4.7 | Report Layout — PDF Export | |
+
+<div style="page-break-after: always;"></div>
+
 # Chapter 1: Introduction
 
 ## 1.1 Introduction
@@ -892,50 +917,77 @@ The main server file initializes Express, Socket.io, connects to MongoDB, and mo
 
 ```typescript
 // backend/src/index.ts
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import express, {Request, Response} from "express";
+import dotenv from "dotenv"
+import cors from "cors"
 import { createServer } from "http";
-import { Server } from "socket.io";
-import { connectDB } from "./config/db.js";
-import { clerkMiddleware } from "@clerk/express";
-import userRoutes from "./routes/userRoutes.js";
-import itineraryRoutes from "./routes/itineraryRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
+import { Server } from "socket.io"
+import connectDB from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js"
+import itineraryRoutes from "./routes/itineraryRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js"
 import { errorHandler } from "./middlewares/errorMiddleware.js";
-import { setupTripTinderSocket } from "./sockets/tripTinderSocket.js";
+import { clerkMiddleware } from "@clerk/express";
+import { initializeTripTinderSocket } from "./sockets/tripTinderSocket.js";
 
 dotenv.config();
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
-});
+const PORT = process.env.PORT || 5000;
 
-// Middleware
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    }
+})
+
+app.set('trust proxy', 1);
+
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({limit: '5mb'}));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+app.all('/', (req: Request, res: Response) => {
+    res.status(200).json({
+        message: "TravelIt Backend is Live With DB!",
+        status: "Active",
+        style: "Cyber-Brutalist",
+    })
+})
+
 app.use(clerkMiddleware());
 
-// Routes
-app.use("/api/user", userRoutes);
-app.use("/api/itinerary", itineraryRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/itinerary", itineraryRoutes);
+app.use("/api/v1/payment", paymentRoutes);
 
-// Socket.io Setup
-setupTripTinderSocket(io);
-
-// Error handling
 app.use(errorHandler);
 
-// Start server
-connectDB().then(() => {
-    server.listen(process.env.PORT || 3000, () => {
-        console.log(`Server running on port ${process.env.PORT || 3000}`);
-    });
-});
+initializeTripTinderSocket(io);
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        if(process.env.NODE_ENV !== "production") {
+            httpServer.listen(PORT, () => {
+                console.log(`Server running on http://localhost:${PORT}`);
+                console.log(`Socket.io Engine is Ready 🚀`);
+            })
+        }
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error("Failed to start server:", error.message);
+        }
+        process.exit(1);
+    }
+}
+
+startServer();
+
+export default app;
 ```
 
 ### 4.2.2 User Model (User.ts)
@@ -944,31 +996,93 @@ The User model stores authentication data synced from Clerk, user profiles, book
 
 ```typescript
 // backend/src/models/User.ts
-import mongoose from "mongoose";
+import mongoose, {Schema, Document} from "mongoose";
 
-const userSchema = new mongoose.Schema({
-    clerkId: { type: String, required: true, unique: true, index: true },
-    email:   { type: String, required: true, unique: true },
-    firstName: { type: String, default: "" },
-    lastName:  { type: String, default: "" },
-    username:  { type: String, default: "" },
-    avatar:    { type: String, default: "" },
-    savedPlaces: [{
-        name: String,
-        address: String,
-        description: String,
-        image: String,
-        rating: Number,
-    }],
-    isPro: { type: Boolean, default: false },
-    razorpayOrderId: String,
-    razorpayPaymentId: String,
-    proActivatedAt: Date,
-    pushToken: String,
-    generationsCount: { type: Number, default: 0 },
-}, { timestamps: true });
+export interface IUser extends Document {
+    clerkId: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    avatar?: string;
+    savedPlaces: {
+        name: string;
+        address?: string;
+        description?: string;
+        image?: string;
+        rating?: number;
+    }[];
+    isPro: boolean;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+    proActivatedAt?: Date;
+    pushToken?: string | null;
+    generationsCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
 
-export const User = mongoose.model("User", userSchema);
+const userSchema = new Schema<IUser>(
+    {
+        clerkId: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        firstName: {
+            type: String,
+        },
+        lastName: {
+            type: String
+        },
+        username: {
+            type: String,
+        },
+        avatar: {
+            type: String,
+            default: "https:ui-avatars.com/api/?name=User&background=random"
+        },
+        savedPlaces: [
+            {
+                name: { type: String, required: true },
+                address: { type: String },
+                description: { type: String },
+                image: { type: String },
+                rating: { type: Number }
+            }
+        ],
+        isPro: {
+            type: Boolean,
+            default: false
+        },
+        razorpayOrderId: { 
+            type: String 
+        },
+        razorpayPaymentId: { 
+            type: String 
+        },
+        proActivatedAt: { 
+            type: Date 
+        },
+        pushToken: {
+            type: String,
+            default: null
+        },
+        generationsCount: { 
+            type: Number,
+            default: 0
+        }
+    },
+    {timestamps: true}
+)
+
+export const User = mongoose.model<IUser>("User", userSchema);
 ```
 
 ### 4.2.3 Itinerary Model (Itinerary.ts)
@@ -976,59 +1090,248 @@ export const User = mongoose.model("User", userSchema);
 The Itinerary model stores the complete trip data with deeply nested structures for day plans, activities, hotel snapshots, and flight snapshots:
 
 ```typescript
-// backend/src/models/Itinerary.ts (Key excerpts)
-const activitySchema = new mongoose.Schema({
-    time: { type: String, required: true },
-    activity: { type: String, required: true },
-    location: { type: String, required: true },
-    description: { type: String, required: true },
-    estimatedCost: { type: Number, required: true },
-    coordinates: {
-        lat: { type: Number },
-        lng: { type: Number },
-    },
-    verified: Boolean,
-    reason: String,
-    openingHours: String,
-    closedToday: Boolean,
-    seasonalWarning: String,
-    rating: Number,
-    priceLevel: Number,
-    website: String,
-    formattedAddress: String,
-}, { _id: false });
+// backend/src/models/Itinerary.ts
+import mongoose, { Schema, Document } from "mongoose";
 
-const dayPlanSchema = new mongoose.Schema({
-    day: { type: Number, required: true },
-    theme: { type: String },
-    activities: [activitySchema],
-}, { _id: false });
+interface IActivity {
+    time: string;
+    activity: string;
+    location: string;
+    description: string;
+    estimatedCost: number;
+    coordinates?: {
+        lat: number;
+        lng: number;
+    };
+}
 
-const itinerarySchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    source: { type: String, required: true },
-    destination: { type: String, required: true },
-    duration: { type: Number, required: true },
-    tripStartDate: { type: Date, required: true },
-    tripEndDate: { type: Date, required: true },
-    budgetTier: { type: String, enum: ["low", "medium", "high"], required: true },
-    budget: { type: Number, required: true },
-    currency: { type: String, default: "USD" },
-    travelers: { type: Number, required: true },
-    ageGroup: { type: String, enum: ["family", "young", "adults", "seniors"] },
-    safeMode: { type: Boolean, default: false },
-    tripTitle: { type: String, required: true },
-    tripDescription: { type: String, required: true },
-    tripDetails: [dayPlanSchema],
-    hotel: { type: mongoose.Schema.Types.Mixed },
-    flight: { type: mongoose.Schema.Types.Mixed },
-    estimatedCosts: {
-        accommodation: Number, flight: Number,
-        activities: Number, total: Number,
+interface IDayPlan {
+    day: number;
+    theme: string;
+    activities: IActivity[];
+}
+
+interface IHotelSnapshot {
+    hotelId: number;
+    name: string;
+    city: string;
+    address: string;
+
+    arrivalDate: Date;
+    departureDate: Date;
+
+    pricePerNight: number | null;
+    totalPrice: number | null;
+    currency: string;
+
+    rating: number | null;
+    reviewCount: number;
+
+    photos: string[];
+}
+
+interface IFlightSnapshot {
+    airline: string;
+    logo: string | null;
+    price: number;
+    currency: string;
+    departureTime: string;
+    arrivalTime: string;
+    duration: string;
+    stops: number;
+}
+
+export interface IItinerary extends Document {
+    userId: mongoose.Types.ObjectId;
+    source: string;
+    destination: string;
+    sourceMeta: {
+        city: string;
+        autoDetected: boolean;
+    };
+    duration: number;
+    tripStartDate: Date;
+    tripEndDate: Date;
+    budgetTier: "low" | "medium" | "high";
+    budget: number;
+    currency: string;
+    interests?: string[];
+    travelers: number;
+    ageGroup: "family" | "young" | "adults" | "seniors";
+    safeMode: boolean;
+    tripTitle: string;
+    tripDescription: string;
+    tripDetails: IDayPlan[];
+
+    hotel?: IHotelSnapshot | null;
+    flight?: IFlightSnapshot | null;
+
+    estimatedCosts?: {
+        accommodation: number;
+        flight: number;
+        activities: number;
+        total: number;
+    };
+
+    userPhotos: string[];
+
+    status: "draft" | "active" | "completed";
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const ItinerarySchema = new Schema<IItinerary>(
+    {
+        userId: {
+            type: mongoose.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        source: {
+            type: String,
+            required: true,
+        },
+        destination: {
+            type: String,
+            required: true,
+        },
+        sourceMeta: {
+            city: { type: String },
+            autoDetected: { type: Boolean, default: false },
+        },
+        duration: {
+            type: Number,
+            required: true,
+        },
+        tripStartDate: { 
+            type: Date,
+            required: true, 
+        },
+        tripEndDate: { 
+            type: Date,
+            required: true 
+        },
+        budgetTier: {
+            type: String,
+            enum: ["low", "medium", "high"],
+            required: true,
+        },
+        budget: {
+            type: Number,
+            required: true,
+        },
+        currency: {
+            type: String,
+            default: "USD",
+        },
+        interests: {
+            type: [String],
+            default: [],
+        },
+        travelers: {
+            type: Number,
+            default: 1,
+            min: 1,
+        },
+        ageGroup: {
+            type: String,
+            enum: ["family", "young", "adults", "seniors"],
+            default: "adults",
+        },
+        safeMode: {
+            type: Boolean,
+            default: false,
+        },
+        tripTitle: {
+            type: String,
+            required: true,
+        },
+        tripDescription: {
+            type: String,
+            required: true,
+        },
+        tripDetails: [
+            {
+                day: { type: Number, required: true },
+                theme: { type: String },
+                activities: [
+                    {
+                        time: { type: String },
+                        activity: { type: String },
+                        location: { type: String },
+                        description: { type: String },
+                        estimatedCost: { type: Number },
+                        coordinates: {
+                            lat: { type: Number, default: null },
+                            lng: { type: Number, default: null },
+                        },
+
+                        verified: { type: Boolean, default: false },
+                        reason: { type: String, default: null },
+                        openingHours: { type: String, default: null },
+                        closedToday: { type: Boolean, default: false },
+                        seasonalWarning: { type: String, default: null },
+                        rating: { type: Number, default: null },
+                        priceLevel: { type: Number, default: null },
+                        website: { type: String, default: null },
+                        formattedAddress: { type: String, default: null },
+                    },
+                ],
+            },
+        ],
+
+        hotel: {
+            hotelId: { type: Number },
+            name: { type: String },
+            city: { type: String },
+            address: { type: String },
+
+            arrivalDate: { type: Date },
+            departureDate: { type: Date },
+
+            pricePerNight: { type: Number },
+            totalPrice: { type: Number },
+            currency: { type: String },
+
+            rating: { type: Number },
+            reviewCount: { type: Number },
+
+            photos: { type: [String], default: [] },
+        },
+
+        flight: {
+            airline: { type: String },
+            logo: { type: String },
+            price: { type: Number },
+            currency: { type: String },
+            departureTime: { type: String },
+            arrivalTime: { type: String },
+            duration: { type: String },
+            stops: { type: Number },
+        },
+
+        estimatedCosts: {
+            accommodation: { type: Number, default: 0 },
+            flight: { type: Number, default: 0 },
+            activities: { type: Number, default: 0 },
+            total: { type: Number, default: 0 }
+        },
+
+        userPhotos: {
+            type: [String],
+            default: []
+        },
+        
+        status: {
+            type: String,
+            enum: ["draft", "active", "completed"],
+            default: "draft",
+        },
     },
-    userPhotos: [{ type: String }],
-    status: { type: String, enum: ["draft", "active", "completed"], default: "draft" },
-}, { timestamps: true });
+    { timestamps: true }
+);
+
+export const Itinerary = mongoose.model<IItinerary>("Itinerary", ItinerarySchema);
 ```
 
 ### 4.2.4 AI Itinerary Generation Controller (aiController.ts)
@@ -1036,70 +1339,380 @@ const itinerarySchema = new mongoose.Schema({
 The core AI logic that constructs prompts with budget rules, safety guidelines, and age-group preferences, then calls Gemini 2.5 Flash:
 
 ```typescript
-// backend/src/controllers/aiController.ts (Core generation logic)
+// backend/src/controllers/aiController.ts
+import { Request, Response } from "express";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 import { GoogleGenAI } from "@google/genai";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { verifyPlace } from "../services/placeVerifier.js";
+import { getHotels } from "../services/hotelService.js";
+import { getFlights } from "../services/flightService.js";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+export const generateItinerary = asyncHandler(async (req: Request, res: Response) => {
+  const {
+    source,
+    destination,
+    duration,
+    budget,
+    budgetTier,
+    currency = "USD",
+    interests = [],
+    travelers = 1,
+    ageGroup = "adults",
+    safeMode = false,   
+    tripStartDate,
+    tripEndDate,
+    checkInDate,     
+    checkOutDate  
+  } = req.body;
 
-export const generateItinerary = asyncHandler(async (req, res) => {
-    const { source, destination, budgetTier, budget, currency, duration,
-            interests, travelers, ageGroup, safeMode, tripStartDate,
-            tripEndDate, checkInDate, checkOutDate } = req.body;
+  if (!source || !destination || !duration || !budget || !budgetTier || !checkInDate ||!checkOutDate) {
+    throw new ApiError(400, "All required fields must be provided");
+  }
 
-    // Construct the detailed AI prompt with strict rules
-    const prompt = `You are an expert travel planner AI. Generate a trip from
-    ${source} to ${destination} for ${duration} days.
-    Budget: ${currency} ${budget} (${budgetTier} tier) for ${travelers} travelers.
-    Age group: ${ageGroup}. Safety mode: ${safeMode ? "ON" : "OFF"}.
-    ${interests?.length ? `Interests: ${interests.join(", ")}` : ""}
+  if (checkInDate && checkOutDate) {
+    const inDate = new Date(checkInDate);
+    const outDate = new Date(checkOutDate);
 
-    RULES:
-    - estimatedCost must be a NUMBER (not string)
-    - All costs in ${currency}
-    - ${budgetTier === "low" ? "Focus on free/cheap activities, street food"
-        : budgetTier === "high" ? "Include premium restaurants, VIP experiences"
-        : "Mix of paid and free activities"}
-    ${safeMode ? "- SAFETY: Only well-lit, guided, popular tourist areas" : ""}
-    ${ageGroup === "family" ? "- Include family-friendly, kid-safe activities" : ""}
+    if (isNaN(inDate.getTime()) || isNaN(outDate.getTime())) {
+      throw new ApiError(400, "Invalid hotel dates");
+    }
 
-    Return JSON: { tripTitle, tripDescription, tripDetails: [{ day, theme,
-    activities: [{ time, activity, location, description, estimatedCost }] }] }`;
+    if (outDate <= inDate) {
+      throw new ApiError(400, "Check-out must be after check-in");
+    }
+  }
 
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
-    });
+  const genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY as string});
 
-    const itinerary = JSON.parse(response.text!);
+  const interestPrompt =
+    interests.length > 0
+      ? `User interests: ${interests.join(
+          ", "
+        )}. Prioritize activities related to these interests.`
+      : "Cover the most popular and top-rated tourist attractions.";
 
-    // Verify all AI-generated places via Google Places API
-    for (const day of itinerary.tripDetails) {
-        for (const activity of day.activities) {
-            const placeData = await verifyPlace(
-                `${activity.location}, ${destination}`
-            );
-            if (placeData) {
-                activity.coordinates = placeData.coordinates;
-                activity.verified = true;
-                activity.rating = placeData.rating;
-                activity.formattedAddress = placeData.formattedAddress;
-                activity.openingHours = placeData.openingHours;
-            } else {
-                activity.verified = false;
+  const peoplePrompt = `Group size: ${travelers} traveler(s).`;
+
+  const agePromptMap = {
+    young: "Target 18-25—nightlife, local youth hotspots, unique modern experiences.",
+    adults: "Target 25-45—balanced activities, food, culture, exploration.",
+    family: "Family friendly—no risky locations, kid-safe attractions, theme parks, zoos.",
+    seniors: "Senior-friendly—no steep climbs, minimize long walks, quieter places."
+  } as const;
+
+  const agePrompt = agePromptMap[ageGroup as keyof typeof agePromptMap] ?? agePromptMap.adults;
+
+  const safeModePrompt = safeMode
+    ? `SAFETY MODE ON:
+- Avoid unsafe neighborhoods entirely.
+- Prefer daytime activities.
+- Recommend well-lit public places.
+- Prefer guided group tours or busy tourist spots.
+- You can mention safety tips inside the "description" field of an activity, BUT DO NOT create a separate activity just for a "Safety Note".`
+    : "Safety: standard assumptions.";
+
+  const prompt = `
+You are a professional travel planner.
+
+Create a realistic ${duration}-day itinerary:
+- Source city: ${source}
+- Destination: ${destination}
+- Budget tier: ${budgetTier}
+- Maximum total budget: ${budget} ${currency}
+- ${peoplePrompt}
+- Age group: ${ageGroup}
+- Safety consideration: ${safeMode ? "HIGH" : "normal"}
+
+IMPORTANT TIME RULE:
+- Use exact times like "7:00 AM - 10:00 AM" or "2:45 PM - 4:00 PM".
+- Also Always start the Day from "9:00 AM" onwards.
+
+CRITICAL COST RULES (READ CAREFULLY):
+1. **REALISTIC PRICING**: You MUST provide realistic market rates for ${destination}. 
+   - Example: A cheap lunch in New York is $15-$20 (approx 1200-1600 INR). DO NOT output 20 INR or 0 INR unless it is truly free (like a park).
+   - Convert realistic local prices to ${currency} accurately.
+2. **NO HOTEL COSTS**: The user has already booked a hotel separately. DO NOT include accommodation costs in the "estimatedCost" field for any activity.
+3. **NO FLIGHT COSTS**: Flights are handled separately. DO NOT include flight costs or flight activities in the itinerary. Start Day 1 assuming the traveler has arrived.
+
+CRITICAL STRUCTURAL RULES (MUST FOLLOW):
+- The "activities" array MUST ONLY contain actual places to visit, things to do, or places to eat.
+- ABSOLUTELY DO NOT add any objects in the "activities" array that are just "Safety Notes", "AI Notes", "Disclaimer", or general advice.
+- If you need to give a safety tip, put it inside the "description" string of an actual location-based activity.
+- Stay within the budget (excluding hotel and flight costs).
+- Include daily meals: breakfast, lunch, snack, dinner (with realistic prices).
+- DO NOT create separate activities for "Traveling", "Commuting", or "Local Transportation". The cost and time of travel should be assumed.
+- If major city has a metro/travel pass (e.g., JR Pass, Oyster Card), include it ONLY ONCE as a "Purchase Travel Pass" activity on Day 1.
+- Avoid duplicated activities.
+- ${agePrompt}
+- ${safeModePrompt}
+- Return ONLY valid JSON. Do not include Markdown like \`\`\`json.
+- Make NO MISTAKES !!!
+
+JSON FORMAT (MUST EXACTLY MATCH THIS STRUCTURE):
+{
+  "tripTitle": "string",
+  "tripDescription": "string",
+  "tripDetails": [
+    {
+      "day": number,
+      "theme": "string",
+      "activities": [
+        {
+          "time": "string",
+          "activity": "string",
+          "location": "string",
+          "description": "string",
+          "estimatedCost": number
+        }
+      ]
+    }
+  ]
+}
+
+${interestPrompt}
+`;
+
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  const response = await result.text;
+
+  const cleanText = response?.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  try {
+    const itineraryData = JSON.parse(cleanText || "{}");
+
+    if (itineraryData.tripDetails && Array.isArray(itineraryData.tripDetails)) {
+        itineraryData.tripDetails = itineraryData.tripDetails.map((day: any) => {
+            if (day.activities && Array.isArray(day.activities)) {
+                day.activities = day.activities.filter((act: any) => {
+                    const actName = (act.activity || "").toLowerCase();
+                    return !actName.includes("safety note") && 
+                           !actName.includes("ai note") && 
+                           !actName.includes("disclaimer") &&
+                           !actName.includes("important rule");
+                });
             }
+            return day;
+        });
+    }
+
+    const verifiedDays = [];
+
+    if(itineraryData.tripDetails) {
+        for(const day of itineraryData.tripDetails) {
+          const verifiedActs = [];
+    
+          if(day.activities) {
+              for(const act of day.activities) {
+                const verified = await verifyPlace(act.activity, `${act.location} ${destination}`);
+                const {location, ...verifiedData} = verified; 
+        
+                const coordinates = location ? { lat: location.lat, lng: location.lng } : null;
+        
+                verifiedActs.push({...act, coordinates, ...verifiedData}); 
+              }
+          }
+    
+          verifiedDays.push({...day, activities: verifiedActs});
         }
     }
 
-    // Fetch hotel and flight recommendations in parallel
-    const [hotels, flights] = await Promise.all([
-        getHotels(destination, checkInDate, checkOutDate, travelers, budget, currency),
-        getFlights(source, destination, tripStartDate, tripEndDate),
-    ]);
+    itineraryData.tripDetails = verifiedDays;
 
-    res.status(200).json(new ApiResponse(200, "Itinerary generated", {
-        ...itinerary, hotel: hotels, flight: flights
-    }));
+    let hotelSnapshot = null;
+
+    if (checkInDate && checkOutDate) {
+      const hotelResult = await getHotels(
+        destination,
+        checkInDate,
+        checkOutDate,
+        budget,
+        travelers,
+        currency
+      );
+
+      const best = hotelResult.bestHotel;
+
+      if (best) {
+        hotelSnapshot = {
+          hotelId: best.property.id,
+          name: best.property.name,
+          city: best.property.city,
+          address: best.property.address,
+          arrivalDate: new Date(checkInDate),
+          departureDate: new Date(checkOutDate),
+          pricePerNight: best.property.priceBreakdown?.grossPrice?.value ?? null,
+          totalPrice: best.property.priceBreakdown?.grossPrice?.value
+            ? best.property.priceBreakdown.grossPrice.value * hotelResult.nights
+            : null,
+          currency,
+          rating: best.property.reviewScore ?? null,
+          reviewCount: best.property.reviewCount ?? 0,
+          photos: best.property.photoUrls ?? []
+        };
+      }
+    }
+
+    let flightSnapshot = null;
+
+    if (tripStartDate && tripEndDate) {
+
+      const flightResult = await getFlights(source, destination, tripStartDate, tripEndDate, travelers, currency);
+
+      if (flightResult && flightResult.bestFlight) {
+        flightSnapshot = {
+          airline: flightResult.bestFlight.airline,
+          logo: flightResult.bestFlight.logo,
+          price: flightResult.bestFlight.price,
+          currency: flightResult.bestFlight.currency,
+          departureTime: flightResult.bestFlight.departureTime,
+          arrivalTime: flightResult.bestFlight.arrivalTime,
+          duration: flightResult.bestFlight.durationLabel,
+          stops: flightResult.bestFlight.stops
+        };
+      }
+      
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, {...itineraryData, hotel: hotelSnapshot || null, flight: flightSnapshot || null, tripStartDate, tripEndDate}, "Itinerary generated successfully")
+    );
+  } catch (error) {
+    console.error("Itinerary generation error:", error);
+    throw new ApiError(
+      500,
+      "AI generated invalid JSON. Please retry itinerary generation."
+    );
+  }
+});
+
+export const exploreLocation = asyncHandler(async (req: Request, res: Response) => {
+  const { query } = req.body;
+
+  if (!query) {
+    throw new ApiError(400, "Query is required");
+  }
+
+  const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+
+  const prompt = `
+  You are a travel assistant. The user is asking: "${query}".
+    
+  Return a valid JSON object with:
+   1. "summary": A concise answer (max 2 sentences).
+   2. "recommendations": An array of places/items mentioned (max 5).
+    Each recommendation must have: "name", "description" (short).
+
+    JSON FORMAT ONLY. NO MARKDOWN.
+  `;
+
+  const model = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    config: { 
+      tools: [{googleSearch: {}}] 
+    }
+  });
+
+  const responseText = model.text; 
+  const cleanText = responseText?.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+  let structuredData;
+  try {
+    structuredData = JSON.parse(cleanText || "{}");
+  } catch (e) {
+    return res.status(200).json(new ApiResponse(200, { text: responseText, items: [], links: [] }, "Raw text returned"));
+  }
+
+  const enrichedItems = [];
+    
+  if (structuredData.recommendations) {
+    for (const item of structuredData.recommendations) {
+      const details = await verifyPlace(item.name, query);
+            
+        enrichedItems.push({
+            ...item,
+            image: details.photos?.[0] || null, 
+            address: details.formattedAddress || null,
+            rating: details.rating || null,
+            verified: details.verified
+          });
+        }
+    }
+
+  const groundingMetadata = model.candidates?.[0]?.groundingMetadata;
+  const links = groundingMetadata?.groundingChunks?.map((chunk: any) => {
+    if (chunk.web) return { title: chunk.web.title, url: chunk.web.uri };
+      return null;
+  }).filter((link: any) => link !== null) || [];
+
+  return res.status(200).json(
+    new ApiResponse(200, { 
+      text: structuredData.summary, 
+      items: enrichedItems, 
+      links 
+    }, "Search results fetched")
+  );
+})
+
+let cachedDestinations: any[] = [];
+let lastDestFetchDate: string = "";
+
+export const getTrendingDestinations = asyncHandler(async (req: Request, res: Response) => {
+  const today = new Date().toISOString().split('T')[0];
+
+  if (cachedDestinations.length > 0 && lastDestFetchDate === today) {
+    return res.status(200).json(new ApiResponse(200, cachedDestinations, "Fetched from cache"));
+  }
+
+  const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+  const prompt = `Give me exactly 3 highly trending global travel destinations for today. 
+  Assign a one-word theme to each (e.g., "Culture", "Adventure", "Relax", "Nature").
+  Return ONLY a valid JSON array of objects. No markdown.
+  Format: [{"theme": "Culture", "location": "Kyoto, Japan", "description": "A short 1-line description"}]`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    const cleanText = result.text?.replace(/```json/g, "").replace(/```/g, "").trim();
+    const destinations = JSON.parse(cleanText || "[]");
+
+    const enrichedDestinations = [];
+    for (const dest of destinations) {
+      try {
+        const placeDetails = await verifyPlace(dest.location, dest.location);
+        enrichedDestinations.push({
+          ...dest,
+          image: placeDetails.photos?.[0] || null 
+        });
+      } catch (err) {
+        enrichedDestinations.push({ ...dest, image: null });
+      }
+    }
+
+    cachedDestinations = enrichedDestinations;
+    lastDestFetchDate = today;
+
+    return res.status(200).json(new ApiResponse(200, enrichedDestinations, "Fetched fresh from AI & Places API"));
+  } catch (error) {
+    const fallback = [
+      { theme: "Culture", location: "Kyoto, Japan", description: "Ancient temples and shrines", image: null },
+      { theme: "Relax", location: "Bali, Indonesia", description: "Tropical beaches and retreats", image: null },
+      { theme: "Adventure", location: "Reykjavik, Iceland", description: "Volcanoes and hot springs", image: null }
+    ];
+    return res.status(200).json(new ApiResponse(200, fallback, "Fallback data"));
+  }
 });
 ```
 
@@ -1109,48 +1722,102 @@ Verifies that AI-generated places actually exist by querying the Google Places A
 
 ```typescript
 // backend/src/services/placeVerifier.ts
-export const verifyPlace = async (placeName: string) => {
+
+export const verifyPlace = async(placeName: string, city?: string) => {
     try {
-        // Step 1: Text Search to find the place
-        const searchResponse = await fetch(
-            `https://places.googleapis.com/v1/places:searchText`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY!,
-                    "X-Goog-FieldMask": "places.id,places.displayName,..."
-                },
-                body: JSON.stringify({ textQuery: placeName })
-            }
-        );
-        const data = await searchResponse.json();
-        if (!data.places?.length) return null;
+        const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+        if(!apiKey) throw new Error("Google API is missing");
 
-        const place = data.places[0];
+        const searchQuery = encodeURIComponent(`${placeName} ${city ?? ""}`);
+        const textSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${searchQuery}&key=${apiKey}`;
 
-        // Step 2: Fetch detailed information
+        const searchRes = await fetch(textSearchUrl);
+        const searchData = await searchRes.json() as any;
+
+        if(!searchData.results || searchData.results.length === 0) {
+            return {
+                name: placeName,
+                verified: false,
+                reason: "Not found in Google Places",
+            };
+        }
+
+        const place = searchData.results[0];
+        const placeId = place.place_id;
+
+        const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,opening_hours,website,price_level,rating,photos,geometry&key=${apiKey}`;
+
+        const detailRes = await fetch(detailsUrl);
+        const detailData = await detailRes.json() as any;
+
+        const details = detailData.result || {};
+
+        const photos = details.photos?.map((p: any) => 
+            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${p.photo_reference}&key=${apiKey}`
+        ) || [];
+
+        let closedToday = false;
+        let openingHoursText: string | null = null;
+        
+        if(details.opening_hours?.weekday_text) {
+            const weekdayIndex = new Date().getDay();
+            openingHoursText = details.opening_hours.weekday_text[weekdayIndex];
+            closedToday = !!openingHoursText?.toLowerCase().includes("closed");
+        }
+
+        const month = new Date().getMonth();
+        const lower = placeName.toLowerCase();
+        let seasonalWarning: string | null = null;
+
+        const winterWords = ["snow", "ski", "slope", "ice"];
+        const summerWords = ["beach", "surf", "snorkel", "boat", "island"];
+        const rainWords   = ["waterfall", "river", "trek", "hike"];
+
+        const match = (arr: string[]) => arr.some(w => lower.includes(w));
+
+        if(match(winterWords) && (month >= 3 && month <=8)) {
+            seasonalWarning = "May be closed outside winter season";
+        }
+
+        if(match(summerWords) && (month <= 1 || month >= 10)) {
+            seasonalWarning = "Weather not be ideal in winter months";
+        }
+
+        if(match(rainWords) && (month >= 5 && month <= 8)) {
+            seasonalWarning = "Rain/monsoon conditions may affect access";
+        }
+
         return {
-            coordinates: {
-                lat: place.location.latitude,
-                lng: place.location.longitude,
-            },
-            formattedAddress: place.formattedAddress,
-            rating: place.rating,
-            openingHours: place.currentOpeningHours?.weekdayDescriptions?.join(", "),
-            closedToday: !place.currentOpeningHours?.openNow,
-            seasonalWarning: place.businessStatus !== "OPERATIONAL"
-                ? "Place may not be operational" : null,
-            website: place.websiteUri,
-            priceLevel: place.priceLevel,
-            photos: place.photos?.slice(0, 3).map((p: any) =>
-                `https://places.googleapis.com/v1/${p.name}/media?key=${key}&maxWidthPx=800`
-            ),
-        };
+            verified: true,
+            reason: null,
+            formattedAddress: details.formatted_address || null,
+            rating: details.rating ?? null,
+            priceLevel: details.price_level ?? null,
+            website: details.website ?? null,
+            openingHours: openingHoursText ?? null,
+            closedToday: closedToday ?? false,
+            seasonalWarning: seasonalWarning ?? null,
+            photos: photos,
+            location: details.geometry?.location || null
+        }
+        
     } catch (error) {
-        return null;
+        console.error("Google verify error", error);
+        return {
+            verified: false,
+            reason: "Not found in Google Places",
+            formattedAddress: null,
+            rating: null,
+            priceLevel: null,
+            website: null,
+            openingHours: null,
+            closedToday: false,
+            seasonalWarning: null,
+            photos: [],
+            location: null
+        }
     }
-};
+}
 ```
 
 ### 4.2.6 Route Optimization Service (routeOptimizerService.ts)
@@ -1158,54 +1825,219 @@ export const verifyPlace = async (placeName: string) => {
 Optimizes the order of activities within a day using permutation-based analysis and real travel times from Google Distance Matrix:
 
 ```typescript
-// backend/src/services/routeOptimizerService.ts (Core algorithm)
+// backend/src/services/routeOptimizerService.ts
+import { minutesToTimeStr, timeStringToMin } from "../utils/timeUtils.js";
 
-// Generates all permutations of activities to find optimal order
-function* generatePermutations<T>(arr: T[]): Generator<T[]> {
-    if (arr.length <= 1) { yield [...arr]; return; }
+export interface PlaceInput {
+    id: string,
+    name: string,
+    lat: number,
+    lng: number,
+    openTime: string,
+    closeTime: string,
+    durationMins: number 
+}
+
+export interface OptimizedPlace extends PlaceInput {
+    arrivalTime: string,
+    departureTime: string,
+    waitingTime: number,
+}
+
+export interface RouteResult {
+    optimizedPlaces: OptimizedPlace[],
+    totalTravelTimeMins: number,
+    totalWaitingTimeMins: number,
+    isValid: boolean
+}
+
+export type DistanceMatrix = Record<string, Record<string, number>>;
+
+
+export const getTravelTimeMins = (placeA: PlaceInput, placeB: PlaceInput, matrix: DistanceMatrix): number => {
+   if(placeA.id === placeB.id) {
+    return 0;
+   }
+
+   return matrix[placeA.id][placeB.id] || 30;
+}
+
+export const generatePerm = <T>(arr: T[]): T[][] => {
+    const result = [];
+
+    if(arr.length === 1) {
+        return [ arr ];
+    }
+
     for (let i = 0; i < arr.length; i++) {
-        const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
-        for (const perm of generatePermutations(rest)) {
-            yield [arr[i], ...perm];
+        const current = arr[i];
+
+        const remaining = arr.slice(0, i).concat(arr.slice(i + 1));
+
+        const remainingPerm = generatePerm(remaining);
+
+        for (let perm of remainingPerm) {
+            result.push([current].concat(perm))
         }
+    }
+
+    return result;
+}
+
+export const evaluateRoute = (route: PlaceInput[], dayStartTimeStr: string, matrix: DistanceMatrix): RouteResult => {
+    let currentTimeMins = timeStringToMin(dayStartTimeStr);
+    let totalTravelMins = 0;
+    let totalWaitMins = 0;
+    let isValid = true;
+
+    const optimizedRoute: OptimizedPlace[] = [];
+
+    const hasKeyword = (name: string, keywords: string[]) => {
+        const lowerName = name.toLowerCase();
+        return keywords.some(k => lowerName.includes(k));
+    };
+
+    for (let i = 0; i < route.length; i++) {
+        const place = route[i];
+
+        const isBreakfast = hasKeyword(place.name, ["breakfast", "morning"]);
+        const isLunch = hasKeyword(place.name, ["lunch"]);
+        const isDinner = hasKeyword(place.name, ["dinner", "supper"]);
+        const isReturn = hasKeyword(place.name, ["return", "accommodation", "hotel"]);
+
+        if (isBreakfast && currentTimeMins > 720) {
+            isValid = false;
+            break;
+        }
+
+        if (isLunch && (currentTimeMins < 660 || currentTimeMins > 960)) {
+           isValid = false;
+            break;
+        }
+
+        if (isDinner && currentTimeMins < 1020) {
+           isValid = false; 
+           break;
+        }
+
+        if (isReturn && i !== route.length - 1) {
+            isValid = false; 
+            break;
+        }
+
+        const openTimeMins = timeStringToMin(place.openTime);
+        const closeTimeMins = timeStringToMin(place.closeTime);
+
+        let travelMins = 0;
+
+        if (i > 0) {
+            const prevPlace = route[i - 1];
+            travelMins = getTravelTimeMins(prevPlace, place, matrix);
+        }
+
+        currentTimeMins += travelMins;
+        totalTravelMins += travelMins;
+
+        const arrivalTimeMins = currentTimeMins;
+
+        let waitMins = 0;
+
+        if (arrivalTimeMins < openTimeMins) {
+            waitMins = openTimeMins - arrivalTimeMins;
+            currentTimeMins = openTimeMins;
+        }
+
+        totalWaitMins += waitMins;
+
+        const departureTimeMins = currentTimeMins + place.durationMins;
+
+        if (departureTimeMins > closeTimeMins) {
+            isValid = false;
+            break;
+        }
+
+        optimizedRoute.push({
+            ...place,
+            arrivalTime: minutesToTimeStr(arrivalTimeMins),
+            departureTime: minutesToTimeStr(departureTimeMins),
+            waitingTime: waitMins
+        });
+
+        currentTimeMins = departureTimeMins;
+    }
+
+    return {
+        optimizedPlaces: optimizedRoute,
+        totalTravelTimeMins: totalTravelMins,
+        totalWaitingTimeMins: totalWaitMins,
+        isValid
     }
 }
 
-// Evaluates a specific route order considering travel time + waiting
-function evaluateRoute(order: Activity[], distMatrix: number[][]): RouteScore {
-    let totalTravelMinutes = 0;
-    let totalWaitingMinutes = 0;
-    let currentTime = parseTimeToMinutes(order[0].time.split(" - ")[0]);
+export const optimizeItinerary = (places: PlaceInput[], dayStartTimeStr: string, matrix: DistanceMatrix): RouteResult | null => {
+    const allPossibleRoutes = generatePerm(places);
 
-    for (let i = 0; i < order.length - 1; i++) {
-        const travelTime = distMatrix[indexOf(order[i])][indexOf(order[i+1])];
-        totalTravelMinutes += travelTime;
-        currentTime += activityDuration(order[i]) + travelTime;
+    let bestRoute: RouteResult | null = null;
+    let minCost = Infinity;
 
-        const nextStart = parseTimeToMinutes(order[i+1].time.split(" - ")[0]);
-        if (currentTime < nextStart) {
-            totalWaitingMinutes += (nextStart - currentTime);
+    for (const route of allPossibleRoutes) {
+        const result = evaluateRoute(route, dayStartTimeStr, matrix);
+
+        if(result.isValid) {
+            const currentCost = result.totalTravelTimeMins + result.totalWaitingTimeMins;
+
+            if(currentCost < minCost) {
+                minCost = currentCost;
+                bestRoute = result;
+            }
         }
     }
-    return { totalTravelMinutes, totalWaitingMinutes,
-             score: totalTravelMinutes + totalWaitingMinutes * 0.5 };
+
+    return bestRoute;
 }
 
-// Main optimization: tries all permutations, returns best route
-export async function optimizeItinerary(activities: Activity[]) {
-    const distMatrix = await fetchDistanceMatrix(activities);
+export const fetchDistanceMatrix = async (places: PlaceInput[]): Promise<DistanceMatrix> => {
+    const matrix: DistanceMatrix = {};
+    
+    const origins = places.map(p => `${p.lat},${p.lng}`).join('|');
+    const destinations = origins; 
 
-    let bestRoute = null;
-    let bestScore = Infinity;
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY; 
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origins}&destinations=${destinations}&key=${apiKey}`;
 
-    for (const perm of generatePermutations(activities)) {
-        const score = evaluateRoute(perm, distMatrix);
-        if (score.score < bestScore) {
-            bestScore = score.score;
-            bestRoute = perm;
+    try {
+        const response = await fetch(url);
+        const data = await response.json() as any;
+
+        places.forEach(p => { matrix[p.id] = {}; });
+
+        if (data.status === "OK") {
+            data.rows.forEach((row: any, i: number) => {
+                const originId = places[i].id;
+                
+                row.elements.forEach((element: any, j: number) => {
+                    const destId = places[j].id;
+                    
+                    if (element.status === "OK") {
+                        const mins = Math.round(element.duration.value / 60);
+                        matrix[originId][destId] = mins;
+                    } else {
+                        matrix[originId][destId] = 30; 
+                    }
+                });
+            });
         }
+        
+        return matrix;
+    } catch (error) {
+        console.error("Distance Matrix API Fetch Error:", error);
+        places.forEach(p1 => {
+            places.forEach(p2 => {
+                matrix[p1.id][p2.id] = 30;
+            });
+        });
+        return matrix;
     }
-    return recalculateTimings(bestRoute!, distMatrix);
 }
 ```
 
@@ -1215,75 +2047,181 @@ Real-time multiplayer activity voting system using Socket.io:
 
 ```typescript
 // backend/src/sockets/tripTinderSocket.ts
-export const setupTripTinderSocket = (io: Server) => {
-    const rooms = new Map<string, TinderRoom>();
+import { Server, Socket } from "socket.io";
+import { randomBytes } from "crypto";
 
-    io.on("connection", (socket) => {
-        // Host creates a new room with their trip's activities
-        socket.on("create_room", ({ userId, activities, targetUsers }) => {
-            const roomId = `TRIP-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-            rooms.set(roomId, {
-                users: [{ id: socket.id, clerkId: userId }],
-                activities: activities.map((a: any) => ({
-                    ...a, votes: {}
-                })),
-                currentIndex: 0,
-                targetUsers,
-                confirmed: [],
-                completed: false,
+interface SwipeActivity {
+    id: string;
+    day: number;
+    time: string;
+    name: string;
+    description: string;
+    location: string;
+    image?: string;
+    estimatedCost: number;
+    yesVotes: Set<string>;
+    noVotes: Set<string>;
+}
+
+interface RoomState {
+    roomId: string;
+    hostId: string;
+    users: Set<string>;
+    targetUsersCount: number; 
+    currency: string;
+    pendingActivities: SwipeActivity[];
+    confirmedItinerary: SwipeActivity[];
+    discarded: SwipeActivity[];
+    status: "active" | "completed"
+}
+
+const activeRooms = new Map<string, RoomState>();
+
+export const initializeTripTinderSocket = (io: Server) => {
+    io.on("connection", (socket: Socket) => {
+        console.log(`⚡ Client connected: ${socket.id}`);
+
+        socket.on("create_room", ({ userId, activities, targetUsersCount, currency }) => {
+            const roomId = `TRIP-${randomBytes(2).toString("hex").toUpperCase()}`;
+
+            const formattedActivities: SwipeActivity[] = activities.map((act: any, index: number) => ({
+                id: `act_${index}_${Date.now()}`,
+                day: act.day,
+                time: act.time || "TBD",
+                name: act.activity || act.name,
+                description: act.description,
+                location: act.location,
+                estimatedCost: act.estimatedCost,
+                yesVotes: new Set<string>(),
+                noVotes: new Set<string>(),
+            }));
+
+            const newRoom: RoomState = {
+                roomId,
+                hostId: userId,
+                users: new Set([userId]),
+                targetUsersCount: targetUsersCount || 2,
+                currency: currency || "USD",
+                pendingActivities: formattedActivities,
+                confirmedItinerary: [],
+                discarded: [],
+                status: "active"
+            };
+
+            activeRooms.set(roomId, newRoom);
+            socket.join(roomId);
+
+            console.log(`🏠 Room Created: ${roomId} by User: ${userId} for ${newRoom.targetUsersCount} users`);
+
+            socket.emit("room_created", {
+                roomId,
+                users: Array.from(newRoom.users),
+                targetUsersCount: newRoom.targetUsersCount, 
+                currency: newRoom.currency,
+                totalActivities: formattedActivities.length,
+                currentActivity: formattedActivities[0] ? serializeActivity(formattedActivities[0]) : null,
             });
-            socket.join(roomId);
-            socket.emit("room_created", { roomId });
         });
 
-        // Guest joins an existing room by Room ID
         socket.on("join_room", ({ roomId, userId }) => {
-            const room = rooms.get(roomId);
-            if (!room) return socket.emit("error_msg", "Room not found");
-            if (room.completed) return socket.emit("error_msg", "Room completed");
+            const room = activeRooms.get(roomId);
 
-            room.users.push({ id: socket.id, clerkId: userId });
+            if(!room) {
+                return socket.emit("error", { message: "Room not found or expired." });
+            }
+
+            if(room.status === "completed") {
+                return socket.emit("error", { message: "Swiping is already finished for this trip."});
+            }
+
+            if(room.users.size >= room.targetUsersCount && !room.users.has(userId)) {
+                return socket.emit("error", { message: "Room is already full!"});
+            }
+
+            room.users.add(userId);
             socket.join(roomId);
 
-            io.to(roomId).emit("user_joined",
-                { userId, userCount: room.users.length });
-            socket.emit("room_joined", { roomId,
-                currentActivity: room.activities[room.currentIndex] });
-        });
+            socket.to(roomId).emit("user_joined", {
+                userId,
+                totalUsers: room.users.size
+            })
 
-        // User swipes right (approve) or left (reject) on current activity
-        socket.on("swipe", ({ roomId, activityIndex, direction }) => {
-            const room = rooms.get(roomId);
-            if (!room) return;
+            socket.emit("room_joined", {
+                roomId,
+                users: Array.from(room.users),
+                targetUsersCount: room.targetUsersCount, 
+                currency: room.currency,
+                pendingActivitiesCount: room.pendingActivities.length,
+                currentActivity: room.pendingActivities[0] ? serializeActivity(room.pendingActivities[0]) : null,
+            })
+        })
 
-            const activity = room.activities[activityIndex];
-            activity.votes[socket.id] = direction;
+        socket.on("swipe", ({ roomId, userId, activityId, direction }) => {
+            const room = activeRooms.get(roomId);
 
-            // Check if all users have voted
-            if (Object.keys(activity.votes).length === room.users.length) {
-                const approvals = Object.values(activity.votes)
-                    .filter(v => v === "right").length;
+            if(!room) return;
 
-                if (approvals > room.users.length / 2) {
-                    room.confirmed.push(activity);
-                    io.to(roomId).emit("activity_matched", { activity });
+            const activityIndex = room.pendingActivities.findIndex((a) => a.id === activityId);
+            if(activityIndex === -1) return;
+
+            const activity = room.pendingActivities[activityIndex];
+
+            if(direction === "right") {
+                activity.yesVotes.add(userId);
+                activity.noVotes.delete(userId);
+            } else if(direction === "left") { 
+                activity.noVotes.add(userId);
+                activity.yesVotes.delete(userId);
+            }
+
+            const totalVotes = activity.yesVotes.size + activity.noVotes.size;
+            
+            if(totalVotes === room.targetUsersCount) {
+                room.pendingActivities.splice(activityIndex, 1);
+
+                if(activity.yesVotes.size > activity.noVotes.size) {
+                    room.confirmedItinerary.push(activity);
+                    io.to(roomId).emit("activity_matched", {
+                        activity: serializeActivity(activity),
+                        yesCount: activity.yesVotes.size,
+                        noCount: activity.noVotes.size,
+                    });
                 } else {
-                    io.to(roomId).emit("activity_discarded", { activity });
+                    room.discarded.push(activity);
+                    io.to(roomId).emit("activity_discarded", {
+                        activityId: activity.id,
+                        reason: activity.yesVotes.size === activity.noVotes.size ? "tie" : "majority_no",
+                    });
                 }
+                
+                if(room.pendingActivities.length === 0) {
+                    room.status = "completed";
+                    io.to(roomId).emit("swiping_completed", {
+                        confirmedItinerary: room.confirmedItinerary.map(serializeActivity),
+                    });
 
-                room.currentIndex++;
-                if (room.currentIndex < room.activities.length) {
-                    io.to(roomId).emit("next_activity",
-                        { activity: room.activities[room.currentIndex] });
+                    setTimeout(() => activeRooms.delete(roomId), 1000 * 60 * 60);
                 } else {
-                    room.completed = true;
-                    io.to(roomId).emit("swiping_completed",
-                        { confirmedItinerary: room.confirmed });
+                    io.to(roomId).emit("next_activity", {
+                        activity: serializeActivity(room.pendingActivities[0])
+                    });
                 }
             }
         });
-    });
-};
+
+        socket.on("disconnect", () => {
+            console.log(`❌ Client disconnected: ${socket.id}`);
+        })
+    })
+}
+
+const serializeActivity = (activity: SwipeActivity) => {
+    return {
+        ...activity,
+        yesVotes: Array.from(activity.yesVotes),
+        noVotes: Array.from(activity.noVotes)
+    }
+}
 ```
 
 ### 4.2.8 Payment Controller (paymentController.ts)
@@ -1292,60 +2230,91 @@ Integrates with Cashfree for one-time lifetime Pro subscription payments:
 
 ```typescript
 // backend/src/controllers/paymentController.ts
-import { Cashfree } from "cashfree-pg";
+import { Request, Response } from "express";
+import { Cashfree, CFEnvironment } from "cashfree-pg";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { User } from "../models/User.js";
+import { sendPushNotification } from "../utils/sendNotification.js";
 
-Cashfree.XClientId = process.env.CASHFREE_APP_ID!;
-Cashfree.XClientSecret = process.env.CASHFREE_SECRET_KEY!;
-Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+const cashfree = new Cashfree(
+    CFEnvironment.SANDBOX, 
+    process.env.CASHFREE_APP_ID as string,
+    process.env.CASHFREE_SECRET_KEY as string
+);
 
-export const createOrder = asyncHandler(async (req, res) => {
+export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user;
-    const orderId = `order_${Date.now()}_${user._id}`;
+    if (!user) throw new ApiError(401, "Unauthorized");
 
-    const orderRequest = {
-        order_amount: 499,
-        order_currency: "INR",
-        order_id: orderId,
-        customer_details: {
-            customer_id: user._id.toString(),
-            customer_email: user.email,
-            customer_phone: "9999999999",
-        },
-    };
+    const amount = 499; 
 
-    const response = await Cashfree.PGCreateOrder("2023-08-01", orderRequest);
-    user.razorpayOrderId = orderId;
-    await user.save();
+    try {
+        const request = {
+            order_amount: amount,
+            order_currency: "INR",
+            customer_details: {
+                customer_id: user._id.toString(),
+                customer_name: user.firstName ? `${user.firstName} ${user.lastName}` : "TravelIt User",
+                customer_email: user.email,
+                customer_phone: "9999999999", 
+            },
+            order_meta: {
+                return_url: "travelit://payment-success?order_id={order_id}" 
+            }
+        };
 
-    res.status(200).json(new ApiResponse(200, "Order created", {
-        order_id: orderId,
-        payment_session_id: response.data.payment_session_id,
-    }));
+        const response = await cashfree.PGCreateOrder(request);
+
+        return res.status(200).json(
+            new ApiResponse(200, response.data, "Cashfree Order created successfully")
+        );
+
+    } catch (error: any) {
+        console.error("Cashfree Create Order Error:", error.response?.data || error.message);
+        throw new ApiError(500, "Error creating Cashfree order");
+    }
 });
 
-export const verifyPayment = asyncHandler(async (req, res) => {
-    const { orderId } = req.body;
-    const response = await Cashfree.PGFetchOrder("2023-08-01", orderId);
+export const verifyPayment = asyncHandler(async (req: Request, res: Response) => {
+    const { order_id } = req.body;
+    const user = req.user;
 
-    if (response.data.order_status === "PAID") {
-        const user = req.user;
-        user.isPro = true;
-        user.razorpayPaymentId = response.data.cf_order_id;
-        user.proActivatedAt = new Date();
-        await user.save();
+    if (!user) throw new ApiError(401, "Unauthorized");
+    if (!order_id) throw new ApiError(400, "Order ID is required");
 
-        // Send congratulatory push notification
-        if (user.pushToken) {
-            await sendNotification(user.pushToken,
-                "Welcome to Pro! 🎉",
-                "You now have unlimited AI generations and all premium features.");
+    try {
+        const response = await cashfree.PGFetchOrder(order_id);
+
+        if (response.data.order_status === "PAID") {
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
+                isPro: true,
+                proActivatedAt: new Date()
+            }, { new: true });
+
+            if (updatedUser?.pushToken) {
+                await sendPushNotification(
+                    updatedUser.pushToken, 
+                    "Welcome to TravelIt Pro! 👑", 
+                    "Your payment was successful. Enjoy unlimited AI generation & premium features!"
+                );
+            }
+
+            return res.status(200).json(
+                new ApiResponse(200, { isPro: true }, "Payment verified successfully. Welcome to Pro!")
+            );
+        } else {
+            throw new ApiError(400, `Payment status is ${response.data.order_status}`);
         }
-        res.status(200).json(new ApiResponse(200, "Payment verified; Pro activated"));
-    } else {
-        throw new ApiError(400, "Payment not completed");
+
+    } catch (error: any) {
+        console.error("Cashfree Verify Error:", error.response?.data || error.message);
+        throw new ApiError(500, "Error verifying payment");
     }
 });
 ```
+
 
 ### 4.2.9 Authentication Middleware (authMiddleware.ts)
 
@@ -1353,16 +2322,25 @@ Protects all API routes using Clerk JWT verification and auto-creates users in M
 
 ```typescript
 // backend/src/middlewares/authMiddleware.ts
-export const protectRoute = asyncHandler(async (req, res, next) => {
-    const { userId } = getAuth(req);
-    if (!userId) throw new ApiError(401, "Unauthorized: No token provided");
+import { Request, Response, NextFunction } from "express";
+import { clerkClient, getAuth } from "@clerk/express";
+import { User } from "../models/User.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-    const user = await User.findOne({ clerkId: userId });
+export const protectRoute = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const {userId} = getAuth(req);
+
+    if(!userId) {
+        throw new ApiError(401, "Unauthorized request: No token provided");
+    }
+
+    const user = await User.findOne({clerkId: userId});
+
     const clerkUser = await clerkClient.users.getUser(userId);
     const email = clerkUser.emailAddresses[0]?.emailAddress;
 
-    if (!user) {
-        // Auto-create user in MongoDB on first API call
+    if(!user) {
         const newUser = await User.create({
             clerkId: userId,
             email: email,
@@ -1375,8 +2353,9 @@ export const protectRoute = asyncHandler(async (req, res, next) => {
     } else {
         req.user = user;
     }
+
     next();
-});
+})
 ```
 
 ### 4.2.10 Rate Limiting Middleware (ratelimitMiddleware.ts)
@@ -1385,29 +2364,39 @@ Protects API endpoints from abuse using Arcjet's intelligent rate limiting and b
 
 ```typescript
 // backend/src/middlewares/ratelimitMiddleware.ts
-export const rateLimiter = async (req, res, next) => {
-    try {
-        const decision = await aj.protect(req, { requested: 1 });
+import { Request, Response, NextFunction } from "express";
+import { ApiError } from "../utils/ApiError.js";
+import { aj } from "../config/arcjet.js";
 
-        if (decision.isDenied()) {
-            if (decision.reason.isRateLimit()) {
+
+export const rateLimiter = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const decision = await aj.protect(req, {
+            requested: 1,
+        })
+
+        if(decision.isDenied()) {
+            if(decision.reason.isRateLimit()) {
                 return next(new ApiError(429, "Too many requests! Calm down, traveler."));
-            } else if (decision.reason.isBot()) {
+            }
+            else if(decision.reason.isBot()) {
                 return next(new ApiError(403, "Automated requests are not allowed"));
-            } else {
+            }
+            else {
                 return next(new ApiError(403, "Access denied by security policy"));
             }
         }
 
-        if (decision.results.some((r) => r.reason.isBot() && r.reason.isSpoofed())) {
+        if(decision.results.some((result) => result.reason.isBot() && result.reason.isSpoofed())) {
             return next(new ApiError(403, "Malicious bot activity detected"));
         }
+
         next();
     } catch (error) {
-        console.error("Arcjet Middleware Error:", error);
-        next(); // Fail open to avoid blocking legitimate requests
+        console.error("Arcjet Middleware Error: ", error);
+        next();
     }
-};
+}
 ```
 
 ### 4.2.11 Mobile App — Itinerary Service (itinerary.ts)
@@ -1415,93 +2404,605 @@ export const rateLimiter = async (req, res, next) => {
 The frontend service layer that communicates with the backend API:
 
 ```typescript
-// mobile/services/itinerary.ts (Key functions)
-export const generateItinerary = async (
-    token: string, source: string, destination: string,
-    budgetTier: string, budget: number, currency: string,
-    duration: number, travelers: number, ageGroup: string,
-    safeMode: boolean, tripStartDate: string, tripEndDate: string,
-    checkInDate: string, checkOutDate: string, interests?: string[]
+// mobile/services/itinerary.ts
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export const generateItinerary = async(
+    token: string,
+    source: string,
+    destination: string,
+    budgetTier: string,
+    budget: number,
+    currency: string,
+    duration: number,
+    travelers: number,
+    ageGroup: string,
+    safeMode: boolean,
+    tripStartDate: string,
+    tripEndDate: string,
+    checkInDate: string,
+    checkOutDate: string,
+    interests?: string[]
 ) => {
-    const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/itinerary/generate`,
-        {
+    try {
+        console.log("Connecting to Backend");
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/generate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             },
             body: JSON.stringify({
-                source, destination, budgetTier, budget, currency,
-                duration, travelers, ageGroup, safeMode,
-                tripStartDate, tripEndDate, checkInDate, checkOutDate, interests
+                source,
+                destination,
+                budgetTier,
+                budget,
+                currency,
+                duration,
+                travelers,
+                ageGroup,
+                safeMode,
+                tripStartDate,
+                tripEndDate,
+                checkInDate,
+                checkOutDate,
+                interests
             })
-        }
-    );
-    const data = await response.json();
-    return data.data;
-};
+        });
 
-// Offline support: caches trips to AsyncStorage
-export const getUserItineraries = async (token: string) => {
-    try {
-        const response = await fetch(
-            `${process.env.EXPO_PUBLIC_API_URL}/itinerary/history`,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
         const data = await response.json();
-        // Cache for offline access
-        await AsyncStorage.setItem("@offline_trips", JSON.stringify(data.data));
+        
+        console.log("Data Received from Backend", data.data);
         return data.data;
     } catch (error) {
-        // Fallback to offline cache
-        const offlineData = await AsyncStorage.getItem("@offline_trips");
-        if (offlineData) return JSON.parse(offlineData);
+        console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const saveItinerary = async(
+    token: string,
+    source: string,
+    destination: string,
+    sourceMeta: object,
+    duration: number,
+    tripStartDate: string,
+    tripEndDate: string,
+    budgetTier: string,
+    budget: number,
+    currency: string,
+    tripTitle: string,
+    tripDescription: string,
+    tripDetails: object[],
+    travelers: number,
+    ageGroup: string,
+    safeMode: boolean,
+    hotel: object | null,
+    flight: object | null,
+    status?: string,
+    interests?: string[],
+    estimatedCosts?: object
+) => {
+    try {
+        console.log("Connecting to Backend");
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                source,
+                destination,
+                sourceMeta,
+                duration,
+                tripStartDate,
+                tripEndDate,
+                budgetTier,
+                budget,
+                currency,
+                tripTitle,
+                tripDescription,
+                travelers,
+                ageGroup,
+                safeMode,
+                tripDetails: tripDetails.map((day: any) => ({
+                    ...day,
+                    activities: day.activities.map((act: any) => {
+                        let locationStr = '';
+                        if (typeof act.location === 'string') {
+                            locationStr = act.location;
+                        } else if (act.location && typeof act.location === 'object') {
+                            locationStr = act.location.formattedAddress || act.location.name || act.location.address || `${act.activity} Location`;
+                        } else {
+                            locationStr = `${act.activity} Location`;
+                        }
+                        return {
+                            time: act.time,
+                            activity: act.activity,
+                            location: locationStr,
+                            description: act.description,
+                            estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : parseFloat(act.estimatedCost) || 0,
+                            coordinates: act.coordinates || null,
+                        };
+                    })
+                })),
+                hotel,
+                flight,
+                status,
+                interests,
+                estimatedCosts
+            })
+        });
+        const data = await response.json();
+        if(!response.ok) {
+            console.error("Full error response:", data);
+            const errorMsg = Array.isArray(data.errors) 
+                ? data.errors.join(", ") 
+                : data.message || "Something went wrong";
+            throw new Error(errorMsg);
+        }
+        console.log("Data Received from Backend");
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const modifyItinerary = async (
+    token: string,
+    itineraryId: string,
+    modificationType: "weather" | "delay" | "ai_edit",
+    delayHours?: number,
+    dayNumber?: number,
+    userPrompt?: string
+) => {
+    try {
+        console.log("Connecting to Backend");
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/modify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                itineraryId,
+                modificationType,
+                delayHours,
+                dayNumber,
+                userPrompt
+            })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+        console.log("Data Received from Backend");
+        return data.data; 
+    } catch (error) {
+        console.error("API Error: ", error);
         return null;
     }
 };
+
+export const updateItineraryDetails = async(
+    token: string,
+    itineraryId: string,
+    tripDetails: any[]
+) => {
+    try {
+        console.log("Connecting to Backend");
+        
+        const cleanTripDetails = tripDetails.map((day: any) => ({
+            day: day.day,
+            theme: day.theme || '',
+            activities: day.activities.map((act: any) => {
+                let locationStr = '';
+                if (typeof act.location === 'string') {
+                    locationStr = act.location;
+                } else if (act.location && typeof act.location === 'object') {
+                    locationStr = act.location.formattedAddress || act.location.name || act.location.address || '';
+                } else {
+                    locationStr = act.location || '';
+                }
+                
+                const activity: any = {
+                    time: act.time || '',
+                    activity: act.activity || '',
+                    location: locationStr,
+                    description: act.description || '',
+                    estimatedCost: typeof act.estimatedCost === 'number' ? act.estimatedCost : 0,
+                    coordinates: act.coordinates || null,
+                };
+                
+                if (act.verified !== null && act.verified !== undefined) {
+                    activity.verified = act.verified;
+                }
+                if (act.closedToday !== null && act.closedToday !== undefined) {
+                    activity.closedToday = act.closedToday;
+                }
+                if (act.seasonalWarning !== null && act.seasonalWarning !== undefined) {
+                    activity.seasonalWarning = act.seasonalWarning;
+                }
+                
+                return activity;
+            })
+        }));
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/details`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                itineraryId,
+                tripDetails: cleanTripDetails
+            })
+        })
+        
+        if(!response.ok) {
+            const data = await response.json();
+            console.error("Error response:", data);
+            throw new Error(data.message || "Something went wrong");
+        }
+        
+        const data = await response.json();
+        console.log("Data Received from Backend");
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const getUserItineraries = async(token: string) => {
+    try {
+        console.log("Connecting to Backend");
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/history`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        const data = await response.json();
+        if(!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+        console.log("Data Received from Backend");
+
+        await AsyncStorage.setItem("@offline_trips", JSON.stringify(data.data));
+
+        return data.data;
+    } catch (error) {
+        console.error("API Error, trying offline storage: ", error);
+
+        const offlineData = await AsyncStorage.getItem("@offline_trips");
+
+        if(offlineData) {
+            console.log("Loaded trips from Offline Storage");
+            return JSON.parse(offlineData);
+        }
+        return null;
+    }
+}
+
+export const updateTripStatus = async(
+    token: string,
+    id: string,
+    status: string
+) => {
+    try {
+        console.log("Connecting to Backend");
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/status/${id}`, {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status
+            })
+        })
+        const data = await response.json();
+        if(!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+        console.log("Data Received from Backend");
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const optimizeRoute = async (
+    token: string,
+    activities: any[],
+    dayStartTime?: string
+) => {
+    try {
+        console.log("Connecting to Backend for Route Optimization");
+        
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/optimize-route`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                activities,
+                dayStartTime
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Error response from optimizer:", data);
+            throw new Error(data.message || "Failed to optimize route");
+        }
+        
+        console.log("Optimization Data Received from Backend", data.data);
+        return data.data;
+    } catch (error) {
+        console.error("API Error during optimization: ", error);
+        throw error;
+    }
+}
+
+export const deleteTrip = async(
+    token: string,
+    id: string
+) => {
+    try {
+        console.log("Connecting to Backend");
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        })
+        const data = await response.json();
+        if(!response.ok) {
+            throw new Error(data.message || "Something went wrong");
+        }
+        console.log("Data Received from Backend");
+        return data.data;
+    } catch (error) {
+        console.error("API Error: ", error);
+        return null;
+    }
+}
+
+export const uploadTripPhoto = async (
+    token: string,
+    tripId: string,
+    asset: any 
+) => {
+    try {
+        console.log("Uploading photo to Backend");
+
+        const formData = new FormData();
+        formData.append('photo', {
+            uri: asset.uri,
+            type: asset.mimeType || 'image/jpeg',
+            name: asset.fileName || `photo_${Date.now()}.jpg`
+        } as any);
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/itinerary/${tripId}/photo`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,                
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Upload error response:", data);
+            throw new Error(data.message || "Failed to upload photo");
+        }
+
+        console.log("Photo Uploaded Successfully");
+        return data.data;
+    } catch (error) {
+        console.error("API Error during photo upload: ", error);
+        return null;
+    }
+}
 ```
 
 ### 4.2.12 Mobile App — Subscription Screen (subscription.tsx)
 
 The Pro upgrade screen with Cashfree payment integration:
 
-```typescript
-// mobile/app/(tabs)/profile/subscription.tsx (Payment flow)
-const handleUpgrade = async () => {
-    handleImpact("medium"); // Haptic feedback
-    const orderData = await createOrder();
+```tsx
+// mobile/app/(tabs)/profile/subscription.tsx
+import { View, Text, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { CheckCircle2, Crown, Sparkles, ArrowLeft } from "lucide-react-native";
+import { useEffect } from "react";
+import { CFPaymentGatewayService } from 'react-native-cashfree-pg-sdk';
+import { CFDropCheckoutPayment, CFEnvironment, CFSession, CFThemeBuilder } from 'cashfree-pg-api-contract';
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { Button } from "@/components/Button";
+import { usePayment } from "@/hooks/usePayment";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useHaptics } from "@/hooks/useHaptics";
 
-    const session = new CFSession(
-        orderData.payment_session_id,
-        orderData.order_id,
-        CFEnvironment.SANDBOX
+export default function SubscriptionScreen() {
+    const { colors } = useThemeColors();
+    const { handleImpact } = useHaptics();
+    const router = useRouter();
+    const { data: dbUser } = useUserProfile();
+    const { createOrder, verifyPayment, isProcessing } = usePayment();
+
+    const isPro = dbUser?.isPro;
+
+    useEffect(() => {
+        CFPaymentGatewayService.setCallback({
+            onVerify: async (orderID: string) => {
+                try {
+                    await verifyPayment(orderID);
+                    Alert.alert("Success! 🎉", "Welcome to TravelIt Pro!");
+                    handleImpact("medium");
+                    router.back();
+                } catch (error: any) {
+                    Alert.alert("Verification Failed", error.message || "Please contact support.");
+                }
+            },
+            onError: (error: any, orderID: string) => {
+                Alert.alert("Payment Cancelled", error?.message || "Transaction was not completed.");
+            }
+        });
+
+        return () => {
+            CFPaymentGatewayService.removeCallback();
+        };
+    }, []);
+
+    const handleUpgrade = async () => {
+        try {
+            handleImpact("medium");
+            const orderData = await createOrder();
+
+            const session = new CFSession(
+                orderData.payment_session_id, 
+                orderData.order_id, 
+                CFEnvironment.SANDBOX 
+            );
+
+            const theme = new CFThemeBuilder()
+                .setNavigationBarBackgroundColor(colors.background)
+                .setNavigationBarTextColor(colors.text)
+                .setButtonBackgroundColor(colors.primary)
+                .setButtonTextColor("#FFFFFF")
+                .setPrimaryTextColor(colors.text)
+                .setSecondaryTextColor(colors.textMuted)
+                .build();
+
+            const dropPayment = new CFDropCheckoutPayment(session, null, theme);
+
+            CFPaymentGatewayService.doPayment(dropPayment);
+
+        } catch (error: any) {
+            Alert.alert("Error", error.message || "Failed to initiate payment");
+        }
+    };
+
+    const Feature = ({ text, isProFeature = false }: { text: string, isProFeature?: boolean }) => (
+        <View className="flex-row items-center gap-3 mb-3">
+            <CheckCircle2 size={20} color={isProFeature ? colors.primary : colors.textMuted} opacity={isProFeature ? 1 : 0.6} />
+            <Text style={{ color: isProFeature ? colors.text : colors.textMuted }} className={`text-sm ${isProFeature ? 'font-medium' : ''}`}>
+                {text}
+            </Text>
+        </View>
     );
 
-    const theme = new CFThemeBuilder()
-        .setNavigationBarBackgroundColor(colors.background)
-        .setButtonBackgroundColor(colors.primary)
-        .setButtonTextColor("#FFFFFF")
-        .build();
+    return (
+        <SafeAreaView style={{ backgroundColor: colors.background }} className="flex-1" edges={["top"]}>
+            <View style={{ borderBottomColor: colors.border }} className="flex-row items-center gap-4 px-6 py-4 border-b">
+                <TouchableOpacity onPress={() => {
+                    handleImpact("soft");
+                    router.back()
+                }}>
+                    <ArrowLeft size={22} color={colors.textMuted} />
+                </TouchableOpacity>
+                <View>
+                    <Text style={{ color: colors.text }} className="text-lg font-bold">Subscription</Text>
+                    <Text style={{ color: colors.textMuted }} className="text-xs">Upgrade to TravelIt Pro.</Text>
+                </View>
+            </View>
+            <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+                {isPro ? (
+                    <View className="items-center mb-8">
+                        <Text style={{ color: colors.text }} className="text-3xl font-bold mb-2 text-center">
+                            Choose your <Text style={{ color: colors.primary }}>Journey</Text>
+                        </Text>
+                        <Text style={{ color: colors.textMuted }} className="text-center text-sm px-4">
+                            Unlock the full power of AI for your ultimate travel experiences.
+                        </Text>
+                    </View>
+                ) : (
+                    <>
+                        <View className="items-center mb-8">
+                            <Text style={{ color: colors.text }} className="text-3xl font-bold mb-2 text-center">
+                                Upgrade to <Text style={{ color: colors.primary }}>Pro</Text>
+                            </Text>
+                            <Text style={{ color: colors.textMuted }} className="text-center text-sm px-4">
+                                Unlock the full power of AI for your ultimate travel experiences.
+                            </Text>
+                        </View>
 
-    const dropPayment = new CFDropCheckoutPayment(session, null, theme);
-    CFPaymentGatewayService.doPayment(dropPayment);
-};
+                        <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="border rounded-2xl p-6 mb-6 relative">
+                            <View className="absolute top-4 right-4 bg-neutral-800 px-3 py-1 rounded-full">
+                                <Text className="text-neutral-400 font-bold text-[10px] uppercase tracking-widest">Current Plan</Text>
+                            </View>
 
-// Cashfree callback handling
-useEffect(() => {
-    CFPaymentGatewayService.setCallback({
-        onVerify: async (orderID: string) => {
-            await verifyPayment(orderID);
-            Alert.alert("Success! 🎉", "Welcome to TravelIt Pro!");
-            router.back();
-        },
-        onError: (error: any) => {
-            Alert.alert("Payment Cancelled", error?.message);
-        }
-    });
-}, []);
+                            <Text style={{ color: colors.textMuted }} className="text-xl font-bold mb-1">Free Tier</Text>
+                            
+                            <View className="flex-row items-baseline mb-6">
+                                <Text style={{ color: colors.text }} className="text-3xl font-bold opacity-80">₹0</Text>
+                                <Text style={{ color: colors.textMuted }} className="text-xs ml-1 font-bold uppercase">/ forever</Text>
+                            </View>
+
+                            <View className="border-t pt-5" style={{ borderColor: colors.border }}>
+                                <Feature text="Standard AI Trip Generation" />
+                                <Feature text="Save Trips to Vault" />
+                                <Feature text="Explore Destinations" />
+                                <Feature text="Basic Flight & Hotel Estimates" />
+                            </View>
+                        </View>
+
+                        <View style={{ backgroundColor: colors.card, borderColor: colors.primary }} className="border-2 rounded-2xl p-6 relative overflow-hidden mb-8 shadow-lg shadow-green-500/10">
+                            <View className="absolute top-0 right-0 bg-yellow-500/20 px-4 py-1.5 rounded-bl-xl z-10 flex-row items-center gap-1">
+                                <Crown size={12} color="#eab308" />
+                                <Text className="text-yellow-500 font-bold text-[10px] uppercase tracking-widest">Lifetime</Text>
+                            </View>
+
+                            <Text style={{ color: colors.primary }} className="text-xl font-bold mb-1">TravelIt Pro</Text>
+
+                            <View className="flex-row items-baseline mb-6">
+                                <Text style={{ color: colors.text }} className="text-4xl font-bold">₹499</Text>
+                                <Text style={{ color: colors.textMuted }} className="text-xs ml-2 font-bold uppercase">/ one-time</Text>
+                            </View>
+
+                            <View className="mb-6 border-t pt-5" style={{ borderColor: colors.border }}>
+                                <Text style={{ color: colors.text }} className="text-xs font-bold uppercase tracking-widest mb-4">Everything in Free, plus:</Text>
+                                <Feature text="Unlimited AI Generations" isProFeature />
+                                <Feature text="Export Trips to PDF" isProFeature />
+                                <Feature text="Group Sync (Trip Tinder)" isProFeature />
+                                <Feature text="Smart Route Optimization" isProFeature />
+                                <Feature text="AI Real-Time Edits (Weather/Delay)" isProFeature />
+                            </View>
+
+                            {isProcessing ? (
+                                <View className="py-4 items-center justify-center rounded-xl bg-neutral-800">
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            ) : (
+                                <Button title="Upgrade Now" onPress={handleUpgrade} className="w-full h-14 rounded-xl flex-row justify-center gap-2">
+                                    <Sparkles size={18} color="#000" fill="#000" />
+                                    <Text className="text-black font-bold text-base ml-2 uppercase tracking-wide">Pay ₹499</Text>
+                                </Button>
+                            )}
+                        </View>
+                    </>
+                )}
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
 ```
+
 
 ## 4.3 Screen layouts and Report layouts.
 
